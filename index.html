@@ -1,51 +1,71 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>TruckLog</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#eef2f6;
+background:#f2f4f8;
 margin:0;
-padding:10px;
+padding:15px;
 }
 
 h1{
 text-align:center;
 }
 
+.menu{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+flex-wrap:wrap;
+}
+
+.menu button{
+flex:1;
+padding:12px;
+border:none;
+background:#007aff;
+color:white;
+border-radius:10px;
+}
+
 .card{
 background:white;
 padding:15px;
-margin-bottom:12px;
 border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,0.15);
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+margin-bottom:15px;
 }
 
-input,button{
+input{
 width:100%;
 padding:10px;
 margin:5px 0;
-font-size:16px;
 }
 
-button{
-background:#007aff;
+button.save{
+background:#28a745;
 color:white;
+padding:10px;
 border:none;
 border-radius:8px;
+width:100%;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
+font-size:13px;
 }
 
-th,td{
+td,th{
 border:1px solid #ddd;
 padding:6px;
 text-align:center;
@@ -59,15 +79,24 @@ text-align:center;
 
 <h1>🚛 TruckLog</h1>
 
-<div class="card">
+<div class="menu">
+
+<button onclick="show('fuel')">⛽ Tankování</button>
+<button onclick="show('adblue')">🧴 AdBlue</button>
+<button onclick="show('cargo')">📦 Náklad</button>
+<button onclick="show('stats')">📊 Statistiky</button>
+
+</div>
+
+<div id="fuel" class="card">
 
 <h3>Tankování</h3>
 
-<input type="date" id="date">
-<input type="number" id="km" placeholder="Ujeté km">
-<input type="number" id="liters" placeholder="Litry">
+<input type="date" id="f_date">
+<input type="number" id="f_km" placeholder="Ujeté km">
+<input type="number" id="f_liters" placeholder="Litry">
 
-<button onclick="add()">Uložit</button>
+<button class="save" onclick="addFuel()">Uložit</button>
 
 <table>
 
@@ -80,29 +109,76 @@ text-align:center;
 </tr>
 </thead>
 
-<tbody id="table"></tbody>
+<tbody id="fuelTable"></tbody>
 
 </table>
+
+</div>
+
+<div id="adblue" class="card" style="display:none">
+
+<h3>AdBlue</h3>
+
+<input type="date" id="a_date">
+<input type="number" id="a_liters" placeholder="Litry">
+
+<button class="save" onclick="addAdblue()">Uložit</button>
+
+</div>
+
+<div id="cargo" class="card" style="display:none">
+
+<h3>Náklad</h3>
+
+<input type="date" id="c_date">
+<input type="text" id="c_material" placeholder="Materiál">
+<input type="number" id="c_weight" placeholder="Váha (t)">
+
+<button class="save" onclick="addCargo()">Uložit</button>
+
+</div>
+
+<div id="stats" class="card" style="display:none">
+
+<h3>Statistiky</h3>
+
+<p id="avg"></p>
 
 </div>
 
 <script>
 
 let fuel=JSON.parse(localStorage.getItem("fuel"))||[]
+let adblue=JSON.parse(localStorage.getItem("adblue"))||[]
+let cargo=JSON.parse(localStorage.getItem("cargo"))||[]
 
 function save(){
+
 localStorage.setItem("fuel",JSON.stringify(fuel))
+localStorage.setItem("adblue",JSON.stringify(adblue))
+localStorage.setItem("cargo",JSON.stringify(cargo))
+
 }
 
-function add(){
+function show(id){
 
-let km=parseFloat(document.getElementById("km").value)
-let liters=parseFloat(document.getElementById("liters").value)
+["fuel","adblue","cargo","stats"].forEach(x=>{
+document.getElementById(x).style.display="none"
+})
+
+document.getElementById(id).style.display="block"
+
+}
+
+function addFuel(){
+
+let km=parseFloat(f_km.value)
+let liters=parseFloat(f_liters.value)
 
 let cons=(liters/km)*100
 
 fuel.push({
-date:date.value,
+date:f_date.value,
 km,
 liters,
 cons
@@ -113,22 +189,57 @@ render()
 
 }
 
+function addAdblue(){
+
+adblue.push({
+date:a_date.value,
+liters:a_liters.value
+})
+
+save()
+
+}
+
+function addCargo(){
+
+cargo.push({
+date:c_date.value,
+material:c_material.value,
+weight:c_weight.value
+})
+
+save()
+
+}
+
 function render(){
 
-table.innerHTML=""
+fuelTable.innerHTML=""
+
+let total=0
 
 fuel.forEach(f=>{
 
-table.innerHTML+=`
+fuelTable.innerHTML+=`
+
 <tr>
 <td>${f.date}</td>
 <td>${f.km}</td>
 <td>${f.liters}</td>
 <td>${f.cons.toFixed(2)}</td>
 </tr>
+
 `
 
+total+=f.cons
+
 })
+
+if(fuel.length>0){
+
+avg.innerText="Průměrná spotřeba: "+(total/fuel.length).toFixed(2)+" l/100km"
+
+}
 
 }
 
