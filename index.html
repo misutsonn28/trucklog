@@ -11,52 +11,51 @@
 
 body{
 font-family:Arial;
-background:#f2f4f8;
 margin:0;
+background:#f2f4f7;
+padding-bottom:70px;
+}
+
+header{
+background:#007aff;
+color:white;
+padding:15px;
+text-align:center;
+font-size:20px;
+}
+
+.screen{
+display:none;
 padding:15px;
 }
 
-h1{
-text-align:center;
-}
-
-.menu{
-display:flex;
-gap:10px;
-margin-bottom:15px;
-flex-wrap:wrap;
-}
-
-.menu button{
-flex:1;
-padding:12px;
-border:none;
-background:#007aff;
-color:white;
-border-radius:10px;
+.screen.active{
+display:block;
 }
 
 .card{
 background:white;
 padding:15px;
 border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
 margin-bottom:15px;
 }
 
-input{
+input,select{
 width:100%;
 padding:10px;
-margin:5px 0;
+margin:6px 0;
+font-size:16px;
 }
 
-button.save{
-background:#28a745;
-color:white;
-padding:10px;
+button{
+width:100%;
+padding:12px;
 border:none;
 border-radius:8px;
-width:100%;
+background:#28a745;
+color:white;
+font-size:16px;
 }
 
 table{
@@ -65,10 +64,28 @@ border-collapse:collapse;
 font-size:13px;
 }
 
-td,th{
+th,td{
 border:1px solid #ddd;
 padding:6px;
 text-align:center;
+}
+
+nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:white;
+border-top:1px solid #ccc;
+display:flex;
+}
+
+nav button{
+flex:1;
+background:none;
+border:none;
+padding:10px;
+font-size:14px;
 }
 
 </style>
@@ -77,36 +94,107 @@ text-align:center;
 
 <body>
 
-<h1>🚛 TruckLog</h1>
+<header>
+🚛 TruckLog
+</header>
 
-<div class="menu">
+<div id="dashboard" class="screen active">
 
-<button onclick="show('fuel')">⛽ Tankování</button>
-<button onclick="show('adblue')">🧴 AdBlue</button>
-<button onclick="show('cargo')">📦 Náklad</button>
-<button onclick="show('stats')">📊 Statistiky</button>
+<div class="card">
+
+<h3>Souprava</h3>
+
+<p id="truckInfo">nenastaveno</p>
 
 </div>
 
-<div id="fuel" class="card">
+<div class="card">
 
-<h3>Tankování</h3>
+<h3>Rychlé akce</h3>
 
-<input type="date" id="f_date">
-<input type="number" id="f_km" placeholder="Ujeté km">
-<input type="number" id="f_liters" placeholder="Litry">
+<button onclick="show('drive')">Nová jízda</button>
+<button onclick="show('fuel')">Tankování</button>
 
-<button class="save" onclick="addFuel()">Uložit</button>
+</div>
+
+</div>
+
+<div id="drive" class="screen">
+
+<div class="card">
+
+<h3>Nová jízda</h3>
+
+<input type="date" id="d_date">
+
+<input type="text" id="d_from" placeholder="Nakládka">
+
+<input type="text" id="d_to" placeholder="Vykládka">
+
+<select id="d_material">
+
+<option>cement</option>
+<option>popílek</option>
+<option>vápno</option>
+<option>granulát</option>
+
+</select>
+
+<input type="number" id="d_weight" placeholder="Váha z CMR (t)">
+
+<input type="number" id="d_km" placeholder="Ujeté km">
+
+<button onclick="addDrive()">Uložit jízdu</button>
+
+</div>
 
 <table>
 
 <thead>
+
 <tr>
 <th>Datum</th>
-<th>Km</th>
-<th>Litry</th>
-<th>Spotřeba</th>
+<th>Trasa</th>
+<th>t</th>
+<th>km</th>
 </tr>
+
+</thead>
+
+<tbody id="driveTable"></tbody>
+
+</table>
+
+</div>
+
+<div id="fuel" class="screen">
+
+<div class="card">
+
+<h3>Tankování</h3>
+
+<input type="date" id="f_date">
+
+<input type="number" id="f_km" placeholder="km">
+
+<input type="number" id="f_liters" placeholder="litry">
+
+<input type="number" id="f_price" placeholder="cena / l">
+
+<button onclick="addFuel()">Uložit</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Datum</th>
+<th>km</th>
+<th>litry</th>
+</tr>
+
 </thead>
 
 <tbody id="fuelTable"></tbody>
@@ -115,73 +203,122 @@ text-align:center;
 
 </div>
 
-<div id="adblue" class="card" style="display:none">
+<div id="stats" class="screen">
 
-<h3>AdBlue</h3>
-
-<input type="date" id="a_date">
-<input type="number" id="a_liters" placeholder="Litry">
-
-<button class="save" onclick="addAdblue()">Uložit</button>
-
-</div>
-
-<div id="cargo" class="card" style="display:none">
-
-<h3>Náklad</h3>
-
-<input type="date" id="c_date">
-<input type="text" id="c_material" placeholder="Materiál">
-<input type="number" id="c_weight" placeholder="Váha (t)">
-
-<button class="save" onclick="addCargo()">Uložit</button>
-
-</div>
-
-<div id="stats" class="card" style="display:none">
+<div class="card">
 
 <h3>Statistiky</h3>
 
-<p id="avg"></p>
+<p id="avgFuel"></p>
 
 </div>
 
+</div>
+
+<div id="settings" class="screen">
+
+<div class="card">
+
+<h3>Nastavení soupravy</h3>
+
+<input type="text" id="driver" placeholder="Jméno řidiče">
+
+<select id="truckBrand">
+
+<option>DAF</option>
+<option>Scania</option>
+<option>Volvo</option>
+<option>MAN</option>
+<option>Mercedes</option>
+<option>Iveco</option>
+
+</select>
+
+<input type="text" id="truckPlate" placeholder="SPZ tahače">
+
+<input type="text" id="trailerBrand" placeholder="Značka cisterny">
+
+<input type="text" id="trailerPlate" placeholder="SPZ cisterny">
+
+<button onclick="saveSetup()">Uložit nastavení</button>
+
+</div>
+
+</div>
+
+<nav>
+
+<button onclick="show('dashboard')">🏠</button>
+<button onclick="show('drive')">🚚</button>
+<button onclick="show('fuel')">⛽</button>
+<button onclick="show('stats')">📊</button>
+<button onclick="show('settings')">⚙️</button>
+
+</nav>
+
 <script>
 
+let drives=JSON.parse(localStorage.getItem("drives"))||[]
 let fuel=JSON.parse(localStorage.getItem("fuel"))||[]
-let adblue=JSON.parse(localStorage.getItem("adblue"))||[]
-let cargo=JSON.parse(localStorage.getItem("cargo"))||[]
+let setup=JSON.parse(localStorage.getItem("setup"))||{}
 
 function save(){
 
+localStorage.setItem("drives",JSON.stringify(drives))
 localStorage.setItem("fuel",JSON.stringify(fuel))
-localStorage.setItem("adblue",JSON.stringify(adblue))
-localStorage.setItem("cargo",JSON.stringify(cargo))
+localStorage.setItem("setup",JSON.stringify(setup))
 
 }
 
 function show(id){
 
-["fuel","adblue","cargo","stats"].forEach(x=>{
-document.getElementById(x).style.display="none"
-})
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"))
 
-document.getElementById(id).style.display="block"
+document.getElementById(id).classList.add("active")
 
 }
 
-function addFuel(){
+function saveSetup(){
 
-let km=parseFloat(f_km.value)
-let liters=parseFloat(f_liters.value)
+setup={
 
-let cons=(liters/km)*100
+driver:driver.value,
+truck:truckBrand.value,
+plate:truckPlate.value,
+trailer:trailerBrand.value,
+trailerPlate:trailerPlate.value
 
-fuel.push({
-date:f_date.value,
-km,
-liters,
-cons
+}
+
+save()
+
+updateHeader()
+
+}
+
+function updateHeader(){
+
+if(setup.truck){
+
+truckInfo.innerText=
+setup.driver+" | "+
+setup.truck+" "+setup.plate+
+" + "+setup.trailer+" "+setup.trailerPlate
+
+}
+
+}
+
+function addDrive(){
+
+drives.push({
+
+date:d_date.value,
+from:d_from.value,
+to:d_to.value,
+weight:d_weight.value,
+km:d_km.value
+
 })
 
 save()
@@ -189,34 +326,41 @@ render()
 
 }
 
-function addAdblue(){
+function addFuel(){
 
-adblue.push({
-date:a_date.value,
-liters:a_liters.value
+fuel.push({
+
+date:f_date.value,
+km:f_km.value,
+liters:f_liters.value
+
 })
 
 save()
-
-}
-
-function addCargo(){
-
-cargo.push({
-date:c_date.value,
-material:c_material.value,
-weight:c_weight.value
-})
-
-save()
+render()
 
 }
 
 function render(){
 
-fuelTable.innerHTML=""
+driveTable.innerHTML=""
 
-let total=0
+drives.forEach(d=>{
+
+driveTable.innerHTML+=`
+
+<tr>
+<td>${d.date}</td>
+<td>${d.from}-${d.to}</td>
+<td>${d.weight}</td>
+<td>${d.km}</td>
+</tr>
+
+`
+
+})
+
+fuelTable.innerHTML=""
 
 fuel.forEach(f=>{
 
@@ -226,24 +370,16 @@ fuelTable.innerHTML+=`
 <td>${f.date}</td>
 <td>${f.km}</td>
 <td>${f.liters}</td>
-<td>${f.cons.toFixed(2)}</td>
 </tr>
 
 `
 
-total+=f.cons
-
 })
-
-if(fuel.length>0){
-
-avg.innerText="Průměrná spotřeba: "+(total/fuel.length).toFixed(2)+" l/100km"
-
-}
 
 }
 
 render()
+updateHeader()
 
 </script>
 
