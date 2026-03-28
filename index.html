@@ -1,215 +1,193 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>TruckLog</title>
-
-<style>
-
-body{
-font-family:Arial;
-margin:0;
-background:#f2f4f7;
-padding-bottom:70px;
-}
-
-header{
-background:#007aff;
-color:white;
-padding:15px;
-text-align:center;
-font-size:20px;
-}
-
-.screen{
-display:none;
-padding:15px;
-}
-
-.screen.active{
-display:block;
-}
-
-.card{
-background:white;
-padding:15px;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,0.1);
-margin-bottom:15px;
-}
-
-input,select{
-width:100%;
-padding:10px;
-margin:6px 0;
-font-size:16px;
-}
-
-button{
-width:100%;
-padding:12px;
-border:none;
-border-radius:8px;
-background:#28a745;
-color:white;
-font-size:16px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-font-size:13px;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:6px;
-text-align:center;
-}
-
-nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:white;
-border-top:1px solid #ccc;
-display:flex;
-}
-
-nav button{
-flex:1;
-background:none;
-border:none;
-padding:10px;
-font-size:14px;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TruckLog Pro v2.1</title>
+    <style>
+        :root { --primary: #007aff; --secondary: #28a745; --danger: #dc3545; --dark: #1c1c1e; --bg: #f2f4f7; --card-bg: #ffffff; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); padding-bottom: 80px; }
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; font-weight: bold; }
+        .screen { display: none; padding: 15px; }
+        .screen.active { display: block; }
+        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-save { background: var(--secondary); color: white; }
+        .btn-action { background: var(--primary); color: white; }
+        .btn-export { background: var(--dark); color: white; }
+        .btn-danger { background: none; color: var(--danger); border: 1px solid var(--danger); margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        th, td { border-bottom: 1px solid #eee; padding: 10px; text-align: left; }
+        nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #ddd; display: flex; height: 65px; }
+        nav button { flex: 1; background: none; border: none; font-size: 24px; color: #888; cursor: pointer; }
+        nav button.active { color: var(--primary); }
+        .stat-val { font-size: 24px; font-weight: bold; color: var(--secondary); }
+    </style>
 </head>
-
 <body>
 
-<header>
-🚛 TruckLog
-</header>
+<header>🚛 TruckLog Pro</header>
 
 <div id="dashboard" class="screen active">
-
-<div class="card">
-
-<h3>Souprava</h3>
-
-<p id="truckInfo">nenastaveno</p>
-
-</div>
-
-<div class="card">
-
-<h3>Rychlé akce</h3>
-
-<button onclick="show('drive')">Nová jízda</button>
-<button onclick="show('fuel')">Tankování</button>
-
-</div>
-
+    <div class="card">
+        <h3>Moje Souprava</h3>
+        <p id="truckInfo">Načítání...</p>
+    </div>
+    <button class="btn btn-action" onclick="show('drive')">Nová jízda</button>
+    <button class="btn btn-action" onclick="show('fuel')" style="background:#6c757d">Tankování</button>
 </div>
 
 <div id="drive" class="screen">
-
-<div class="card">
-
-<h3>Nová jízda</h3>
-<h4>Čas jízdy</h4>
-
-<input type="time" id="drive_start" placeholder="Odjezd">
-
-<input type="time" id="drive_end" placeholder="Příjezd">
-
-
-<h4>Vykládka kompresorem</h4>
-
-<input type="time" id="unload_start" placeholder="Začátek vykládky">
-
-<input type="time" id="unload_end" placeholder="Konec vykládky">
-
-<input type="number" id="compressor_pressure" placeholder="Tlak kompresoru (bar)">
-
-
-<h4>Myčka cisterny</h4>
-
-<label>
-<input type="checkbox" id="wash_done">
- Myčka provedena
-</label>
-
-<input type="time" id="wash_start" placeholder="Myčka od">
-
-<input type="time" id="wash_end" placeholder="Myčka do">
-<input type="date" id="d_date">
-
-<input type="text" id="d_from" placeholder="Nakládka">
-
-<input type="text" id="d_to" placeholder="Vykládka">
-
-<select id="e_material">
-
-<option>cement</option>
-<option>popílek</option>
-<option>vápno</option>
-<option>granulát</option>
-<option>myčka</option>
-
-
-</select>
-
-<input type="number" id="d_weight" placeholder="Váha z CMR (t)">
-
-<input type="number" id="d_km" placeholder="Ujeté km">
-
-<button onclick="addDrive()">Uložit jízdu</button>
-function addDrive(){
-
-drives.push({
-
-date:d_date.value,
-from:d_from.value,
-to:d_to.value,
-material:d_material.value,
-weight:d_weight.value,
-km:d_km.value,
-
-driveStart:drive_start.value,
-driveEnd:drive_end.value,
-
-unloadStart:unload_start.value,
-unloadEnd:unload_end.value,
-pressure:compressor_pressure.value,
-
-wash:wash_done.checked,
-washStart:wash_start.value,
-washEnd:wash_end.value
-
-})
-
-save()
-render()
-
-}
+    <div class="card">
+        <h3>Záznam jízdy</h3>
+        <input type="date" id="d_date">
+        <input type="text" id="d_from" placeholder="Odkud">
+        <input type="text" id="d_to" placeholder="Kam">
+        <input type="number" id="d_weight" placeholder="Váha (t)">
+        <input type="number" id="d_km" placeholder="Km">
+        <button class="btn btn-save" onclick="addDrive()">ULOŽIT</button>
+    </div>
+    <table>
+        <thead><tr><th>Datum</th><th>Trasa</th><th>Km</th></tr></thead>
+        <tbody id="driveTable"></tbody>
+    </table>
 </div>
 
-<table>
+<div id="fuel" class="screen">
+    <div class="card">
+        <h3>Tankování</h3>
+        <input type="date" id="f_date">
+        <input type="number" id="f_km" placeholder="Tachometr (celkem)">
+        <input type="number" id="f_liters" placeholder="Litry">
+        <button class="btn btn-save" onclick="addFuel()">ULOŽIT</button>
+    </div>
+    <tbody id="fuelTable"></tbody>
+</div>
 
-<thead>
+<div id="stats" class="screen">
+    <div class="card">
+        <h3>Statistiky</h3>
+        <div id="avgFuel" class="stat-val">Zadejte 2 tankování</div>
+        <p id="totalStats"></p>
+    </div>
+    <div class="card">
+        <button class="btn btn-export" onclick="exportToCSV()">📊 EXPORTOVAT DO EXCELU</button>
+        <button class="btn btn-danger" onclick="clearAllData()">SMAZAT DATA</button>
+    </div>
+</div>
 
-<tr>
-<th>Datum</th>
-<th>Trasa</th>
-<th>t</th>
-<th>km</th>
-</tr>
+<div id="settings" class="screen">
+    <div class="card">
+        <h3>Nastavení</h3>
+        <input type="text" id="driver" placeholder="Jméno řidiče">
+        <input type="text" id="truckPlate" placeholder="SPZ tahače">
+        <button class="btn btn-save" onclick="saveSetup()">ULOŽIT</button>
+    </div>
+</div>
 
+<nav>
+    <button onclick="show('dashboard')" id="btn-dashboard">🏠</button>
+    <button onclick="show('drive')" id="btn-drive">🚚</button>
+    <button onclick="show('fuel')" id="btn-fuel">⛽</button>
+    <button onclick="show('stats')" id="btn-stats">📊</button>
+    <button onclick="show('settings')" id="btn-settings">⚙️</button>
+</nav>
+
+<script>
+    let drives = JSON.parse(localStorage.getItem("drives")) || [];
+    let fuel = JSON.parse(localStorage.getItem("fuel")) || [];
+    let setup = JSON.parse(localStorage.getItem("setup")) || {};
+
+    function show(id) {
+        // Skryje všechny obrazovky
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        // Deaktivuje všechna tlačítka v menu
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        
+        // Aktivuje vybranou obrazovku
+        const target = document.getElementById(id);
+        if(target) {
+            target.classList.add('active');
+            document.getElementById('btn-' + id).classList.add('active');
+        }
+        render(); // Při každém přepnutí překreslíme data
+    }
+
+    function save() {
+        localStorage.setItem("drives", JSON.stringify(drives));
+        localStorage.setItem("fuel", JSON.stringify(fuel));
+        localStorage.setItem("setup", JSON.stringify(setup));
+    }
+
+    function addDrive() {
+        drives.unshift({
+            date: document.getElementById('d_date').value,
+            from: document.getElementById('d_from').value,
+            to: document.getElementById('d_to').value,
+            km: document.getElementById('d_km').value,
+            weight: document.getElementById('d_weight').value
+        });
+        save();
+        alert("Uloženo");
+        show('dashboard');
+    }
+
+    function addFuel() {
+        fuel.push({
+            date: document.getElementById('f_date').value,
+            km: parseFloat(document.getElementById('f_km').value),
+            liters: parseFloat(document.getElementById('f_liters').value)
+        });
+        fuel.sort((a,b) => new Date(a.date) - new Date(b.date));
+        save();
+        alert("Tankování uloženo");
+        show('stats');
+    }
+
+    function render() {
+        // Update hlavičky
+        document.getElementById('truckInfo').innerText = setup.driver ? `${setup.driver} (${setup.truckPlate})` : "Nastavte v ⚙️";
+
+        // Tabulka jízd
+        const dTable = document.getElementById("driveTable");
+        if(dTable) {
+            dTable.innerHTML = drives.slice(0,5).map(d => `<tr><td>${d.date}</td><td>${d.from}-${d.to}</td><td>${d.km}</td></tr>`).join('');
+        }
+
+        // Výpočet spotřeby
+        if (fuel.length >= 2) {
+            const totalKm = fuel[fuel.length-1].km - fuel[0].km;
+            const totalLiters = fuel.slice(1).reduce((sum, f) => sum + f.liters, 0);
+            if (totalKm > 0) {
+                document.getElementById("avgFuel").innerText = ((totalLiters / totalKm) * 100).toFixed(2) + " l/100 km";
+                document.getElementById("totalStats").innerText = `Celkem ujeto: ${totalKm} km`;
+            }
+        }
+    }
+
+    function exportToCSV() {
+        let csv = "Datum;Odkud;Kam;KM;Vaha\n";
+        drives.forEach(d => { csv += `${d.date};${d.from};${d.to};${d.km};${d.weight}\n`; });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "trucklog.csv";
+        a.click();
+    }
+
+    function saveSetup() {
+        setup = { driver: document.getElementById('driver').value, truckPlate: document.getElementById('truckPlate').value };
+        save();
+        show('dashboard');
+    }
+
+    function clearAllData() {
+        if(confirm("Smazat vše?")) { localStorage.clear(); location.reload(); }
+    }
+
+    // Spuštění
+    show('dashboard');
+</script>
+</body>
+</html>
