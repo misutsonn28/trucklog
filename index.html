@@ -1,38 +1,54 @@
-
 <!DOCTYPE html>
 <html lang="cs">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>TruckLog PRO</title>
 
-<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 body{
-font-family:-apple-system,BlinkMacSystemFont;
+font-family:-apple-system;
 margin:0;
-background:#f2f2f7;
-padding-bottom:90px;
+background:#0f172a;
+color:white;
 }
 
 header{
-background:#007aff;
-color:white;
-padding:16px;
+background:#1e293b;
+padding:18px;
 font-size:22px;
 text-align:center;
-font-weight:600;
+}
+
+nav{
+position:fixed;
+bottom:0;
+width:100%;
+display:flex;
+background:#1e293b;
+}
+
+nav button{
+flex:1;
+border:none;
+background:none;
+color:white;
+font-size:22px;
+padding:16px;
 }
 
 .screen{
 display:none;
 padding:15px;
+padding-bottom:100px;
 }
 
 .active{
@@ -40,72 +56,66 @@ display:block;
 }
 
 .card{
-background:white;
-border-radius:14px;
-padding:16px;
-margin-bottom:14px;
-box-shadow:0 3px 10px rgba(0,0,0,0.08);
-}
-
-.stat{
-font-size:28px;
-font-weight:600;
+background:#1e293b;
+padding:18px;
+margin-bottom:15px;
+border-radius:16px;
 }
 
 input,select{
-width:100%;
-padding:12px;
-margin:6px 0;
-font-size:16px;
-border-radius:8px;
-border:1px solid #ccc;
-}
 
-button{
 width:100%;
 padding:14px;
 margin-top:8px;
-background:#007aff;
+margin-bottom:12px;
+
 border:none;
 border-radius:10px;
+
+background:#334155;
 color:white;
+
 font-size:16px;
-font-weight:600;
+
 }
 
-.bigButton{
-background:#28a745;
-font-size:18px;
-}
+button.action{
 
-table{
 width:100%;
-border-collapse:collapse;
-font-size:13px;
-}
-
-th,td{
-border-bottom:1px solid #eee;
-padding:8px;
-text-align:center;
-}
-
-nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:white;
-border-top:1px solid #ccc;
-display:flex;
-}
-
-nav button{
-flex:1;
+padding:16px;
 border:none;
-background:none;
-padding:10px;
-font-size:14px;
+
+background:#3b82f6;
+
+border-radius:14px;
+
+font-size:18px;
+color:white;
+
+}
+
+.statgrid{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+
+}
+
+.stat{
+
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+text-align:center;
+
+}
+
+.big{
+
+font-size:22px;
+font-weight:bold;
+
 }
 
 </style>
@@ -114,123 +124,106 @@ font-size:14px;
 
 <body>
 
-<header>🚛 TruckLog PRO</header>
+<header>
+
+🚛 TruckLog PRO
+
+</header>
 
 <!-- DASHBOARD -->
 
 <div id="dashboard" class="screen active">
 
-<div class="card">
+<div class="statgrid">
 
-<h3>Souprava</h3>
-
-<p id="truckInfo">nenastaveno</p>
-
+<div class="stat">
+<div>Jízdy</div>
+<div class="big" id="statDrives">0</div>
 </div>
 
-<div class="card">
-
-<h3>Průměrná spotřeba</h3>
-
-<div class="stat" id="fuelConsumption">0</div>
-
+<div class="stat">
+<div>Tankování</div>
+<div class="big" id="statFuel">0</div>
 </div>
 
-<div class="card">
+<div class="stat">
+<div>Myčky</div>
+<div class="big" id="statWash">0</div>
+</div>
 
-<button class="bigButton" onclick="show('drive')">
-
-➕ Nová jízda
-
-</button>
-
+<div class="stat">
+<div>Spotřeba</div>
+<div class="big" id="statCons">0</div>
 </div>
 
 </div>
 
-<!-- JÍZDY -->
+</div>
+
+<!-- JÍZDA -->
 
 <div id="drive" class="screen">
 
 <div class="card">
 
-<h3>Nová jízda</h3>
+<h3>Nakládka</h3>
 
-<input type="date" id="d_date">
+<input placeholder="Místo nakládky" id="loadPlace">
 
-<input type="text" id="d_from" placeholder="Nakládka">
+<input type="datetime-local" id="loadStart">
 
-<input type="text" id="d_to" placeholder="Vykládka">
+<input type="datetime-local" id="loadEnd">
 
-<select id="d_material">
+<select id="material">
 
-<option>cement</option>
-<option>popílek</option>
-<option>vápno</option>
-<option>granulát</option>
+<option>Cement</option>
+<option>Vápno</option>
+<option>Popílek</option>
 
 </select>
-
-<input type="number" id="d_weight" placeholder="Váha (t)">
-
-<input type="number" id="d_km" placeholder="Ujeté km">
-
-<h4>Vykládka</h4>
-
-<input type="time" id="unload_start">
-
-<input type="time" id="unload_end">
-
-<input type="number" id="compressor_pressure"
-placeholder="Tlak kompresoru"
-min="1" max="3" step="0.1">
-
-<h4>Myčka</h4>
-
-<label>
-
-<input type="checkbox" id="wash_done">
-
-Myčka cisterny
-
-</label>
-
-<input type="time" id="wash_start">
-
-<input type="time" id="wash_end">
-
-<button onclick="addDrive()">
-
-Uložit jízdu
-
-</button>
 
 </div>
 
 <div class="card">
 
-<h3>Historie jízd</h3>
+<h3>Myčka cisterny</h3>
 
-<table>
-
-<thead>
-
-<tr>
-
-<th>Datum</th>
-<th>Trasa</th>
-<th>t</th>
-<th>km</th>
-
-</tr>
-
-</thead>
-
-<tbody id="driveTable"></tbody>
-
-</table>
+<input type="datetime-local" id="washStart">
+<input type="datetime-local" id="washEnd">
 
 </div>
+
+<div class="card">
+
+<h3>Vykládka</h3>
+
+<input placeholder="Místo vykládky" id="unloadPlace">
+
+<input type="datetime-local" id="unloadStart">
+
+<input type="datetime-local" id="unloadEnd">
+
+<input placeholder="Váha nákladu (t)" id="weight">
+
+</div>
+
+<div class="card">
+
+<h3>Režim jízdy</h3>
+
+<select id="mode">
+
+<option>Dálnice</option>
+<option>Okresky</option>
+<option>Kombinace</option>
+
+</select>
+
+<input placeholder="Průměrný tlak bar" id="pressure">
+
+</div>
+
+<button class="action" onclick="saveDrive()">Uložit jízdu</button>
 
 </div>
 
@@ -242,47 +235,57 @@ Uložit jízdu
 
 <h3>Tankování</h3>
 
-<input type="date" id="f_date">
+<input placeholder="Km stav" id="fuelKm">
 
-<input type="number" id="f_km" placeholder="km">
+<input placeholder="Litry" id="fuelLiters">
 
-<input type="number" id="f_liters" placeholder="litry">
-
-<button onclick="addFuel()">
-
-Uložit
-
-</button>
+<button class="action" onclick="saveFuel()">Uložit</button>
 
 </div>
 
-<table>
+</div>
 
-<thead>
+<!-- SERVIS -->
 
-<tr>
+<div id="service" class="screen">
 
-<th>Datum</th>
-<th>km</th>
-<th>litry</th>
+<div class="card">
 
-</tr>
+<h3>Servis</h3>
 
-</thead>
+<input placeholder="Popis servisní práce" id="serviceText">
 
-<tbody id="fuelTable"></tbody>
+<input placeholder="Km" id="serviceKm">
 
-</table>
+<button class="action" onclick="saveService()">Uložit</button>
 
 </div>
 
-<!-- STATISTIKY -->
+</div>
+
+<!-- PNEU -->
+
+<div id="tires" class="screen">
+
+<div class="card">
+
+<h3>Pneumatiky</h3>
+
+<input placeholder="Pozice (např. Tahač přední)" id="tirePos">
+
+<input placeholder="Km montáže" id="tireKm">
+
+<button class="action" onclick="saveTire()">Uložit</button>
+
+</div>
+
+</div>
+
+<!-- STATISTIKA -->
 
 <div id="stats" class="screen">
 
 <div class="card">
-
-<h3>Graf spotřeby</h3>
 
 <canvas id="fuelChart"></canvas>
 
@@ -290,216 +293,136 @@ Uložit
 
 </div>
 
-<!-- NASTAVENÍ -->
-
-<div id="settings" class="screen">
-
-<div class="card">
-
-<h3>Nastavení soupravy</h3>
-
-<input type="text" id="driver" placeholder="Řidič">
-
-<input type="text" id="truckBrand" placeholder="Značka tahače">
-
-<input type="text" id="truckPlate" placeholder="SPZ tahače">
-
-<input type="text" id="trailerBrand" placeholder="Značka cisterny">
-
-<input type="text" id="trailerPlate" placeholder="SPZ cisterny">
-
-<button onclick="saveSetup()">
-
-Uložit
-
-</button>
-
-</div>
-
-<div class="card">
-
-<button onclick="exportCSV()">
-
-Export do Excelu
-
-</button>
-
-<button onclick="backupData()">
-
-Záloha dat
-
-</button>
-
-</div>
-
-</div>
-
-<!-- MENU -->
-
 <nav>
 
-<button onclick="show('dashboard')">🏠</button>
-
-<button onclick="show('drive')">🚚</button>
-
-<button onclick="show('fuel')">⛽</button>
-
-<button onclick="show('stats')">📊</button>
-
-<button onclick="show('settings')">⚙️</button>
+<button onclick="openScreen('dashboard')">🏠</button>
+<button onclick="openScreen('drive')">🚛</button>
+<button onclick="openScreen('fuel')">⛽</button>
+<button onclick="openScreen('service')">🔧</button>
+<button onclick="openScreen('stats')">📊</button>
 
 </nav>
 
 <script>
 
-let drives=JSON.parse(localStorage.getItem("drives"))||[]
-let fuel=JSON.parse(localStorage.getItem("fuel"))||[]
-let setup=JSON.parse(localStorage.getItem("setup"))||{}
+let drives=JSON.parse(localStorage.getItem("drives")||"[]")
+let fuel=JSON.parse(localStorage.getItem("fuel")||"[]")
+let service=JSON.parse(localStorage.getItem("service")||"[]")
+let tires=JSON.parse(localStorage.getItem("tires")||"[]")
 
-function save(){
-
-localStorage.setItem("drives",JSON.stringify(drives))
-localStorage.setItem("fuel",JSON.stringify(fuel))
-localStorage.setItem("setup",JSON.stringify(setup))
-
-}
-
-function show(id){
+function openScreen(id){
 
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"))
 
 document.getElementById(id).classList.add("active")
 
-}
-
-function saveSetup(){
-
-setup={
-
-driver:driver.value,
-truck:truckBrand.value,
-plate:truckPlate.value,
-trailer:trailerBrand.value,
-trailerPlate:trailerPlate.value
+render()
 
 }
 
-save()
+function saveDrive(){
 
-truckInfo.innerText=
+let d={
 
-setup.driver+" | "+setup.truck+" "+setup.plate+
-" + "+setup.trailer+" "+setup.trailerPlate
+load:loadPlace.value,
+unload:unloadPlace.value,
+weight:weight.value,
+washStart:washStart.value,
+washEnd:washEnd.value
 
 }
 
-function addDrive(){
+drives.push(d)
 
-drives.push({
+localStorage.setItem("drives",JSON.stringify(drives))
 
-date:d_date.value,
-from:d_from.value,
-to:d_to.value,
-weight:d_weight.value,
-km:d_km.value
-
-})
-
-save()
+alert("Jízda uložena")
 
 render()
 
 }
 
-function addFuel(){
+function saveFuel(){
 
-fuel.push({
+let f={
 
-date:f_date.value,
-km:f_km.value,
-liters:f_liters.value
+km:parseFloat(fuelKm.value),
+liters:parseFloat(fuelLiters.value)
+
+}
+
+fuel.push(f)
+
+localStorage.setItem("fuel",JSON.stringify(fuel))
+
+alert("Tankování uloženo")
+
+render()
+
+}
+
+function saveService(){
+
+service.push({
+
+text:serviceText.value,
+km:serviceKm.value
 
 })
 
-save()
+localStorage.setItem("service",JSON.stringify(service))
 
-render()
+alert("Servis uložen")
+
+}
+
+function saveTire(){
+
+tires.push({
+
+pos:tirePos.value,
+km:tireKm.value
+
+})
+
+localStorage.setItem("tires",JSON.stringify(tires))
+
+alert("Pneumatika uložena")
 
 }
 
 function render(){
 
-driveTable.innerHTML=""
+statDrives.innerText=drives.length
+statFuel.innerText=fuel.length
+
+let washCount=0
 
 drives.forEach(d=>{
-
-driveTable.innerHTML+=`
-
-<tr>
-
-<td>${d.date}</td>
-
-<td>${d.from}-${d.to}</td>
-
-<td>${d.weight}</td>
-
-<td>${d.km}</td>
-
-</tr>
-
-`
-
+if(d.washStart) washCount++
 })
 
-fuelTable.innerHTML=""
+statWash.innerText=washCount
 
-fuel.forEach(f=>{
+if(fuel.length>1){
 
-fuelTable.innerHTML+=`
-
-<tr>
-
-<td>${f.date}</td>
-
-<td>${f.km}</td>
-
-<td>${f.liters}</td>
-
-</tr>
-
-`
-
-})
-
-calculateConsumption()
-
-drawFuelChart()
-
-}
-
-function calculateConsumption(){
-
-if(fuel.length<2)return
+let km=fuel[fuel.length-1].km-fuel[0].km
 
 let liters=0
-let km=0
 
-for(let i=1;i<fuel.length;i++){
-
-liters+=parseFloat(fuel[i].liters)
-km+=fuel[i].km-fuel[i-1].km
-
-}
+fuel.forEach(f=>liters+=f.liters)
 
 let cons=(liters/km)*100
 
-fuelConsumption.innerText=cons.toFixed(1)+" l/100km"
+statCons.innerText=cons.toFixed(1)
+
+drawChart()
 
 }
 
-function drawFuelChart(){
+}
 
-if(fuel.length<2)return
+function drawChart(){
 
 let labels=[]
 let data=[]
@@ -507,9 +430,10 @@ let data=[]
 for(let i=1;i<fuel.length;i++){
 
 let km=fuel[i].km-fuel[i-1].km
+
 let cons=(fuel[i].liters/km)*100
 
-labels.push("Tank "+i)
+labels.push(i)
 data.push(cons)
 
 }
@@ -524,7 +448,7 @@ labels:labels,
 
 datasets:[{
 
-label:"Spotřeba",
+label:"Spotřeba l/100km",
 
 data:data
 
@@ -533,44 +457,6 @@ data:data
 }
 
 })
-
-}
-
-function exportCSV(){
-
-let csv="datum,nakladka,vykladka,vaha,km\n"
-
-drives.forEach(d=>{
-
-csv+=d.date+","+d.from+","+d.to+","+d.weight+","+d.km+"\n"
-
-})
-
-let blob=new Blob([csv])
-
-let url=URL.createObjectURL(blob)
-
-let a=document.createElement("a")
-
-a.href=url
-a.download="trucklog.csv"
-a.click()
-
-}
-
-function backupData(){
-
-let data={drives,fuel,setup}
-
-let blob=new Blob([JSON.stringify(data)])
-
-let url=URL.createObjectURL(blob)
-
-let a=document.createElement("a")
-
-a.href=url
-a.download="trucklog_backup.json"
-a.click()
 
 }
 
