@@ -27,258 +27,82 @@
       --radius:18px;
       --shadow:0 10px 24px rgba(0,0,0,.25);
     }
-
     *{box-sizing:border-box}
     html,body{
-      margin:0;
-      padding:0;
-      background:var(--bg);
-      color:var(--text);
+      margin:0;padding:0;background:var(--bg);color:var(--text);
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     }
-
-    body{
-      padding-bottom:90px;
-    }
-
+    body{padding-bottom:90px}
     header{
-      position:sticky;
-      top:0;
-      z-index:20;
-      background:rgba(2,6,23,.95);
-      backdrop-filter:blur(10px);
-      border-bottom:1px solid var(--line);
-      padding:16px;
+      position:sticky;top:0;z-index:20;background:rgba(2,6,23,.95);
+      backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:16px;
     }
-
-    .title{
-      font-size:22px;
-      font-weight:800;
-    }
-
-    .subtitle{
-      margin-top:4px;
-      color:var(--muted);
-      font-size:13px;
-    }
-
-    .screen{
-      display:none;
-      padding:16px;
-    }
-
-    .screen.active{
-      display:block;
-    }
-
+    .title{font-size:22px;font-weight:800}
+    .subtitle{margin-top:4px;color:var(--muted);font-size:13px}
+    .screen{display:none;padding:16px}
+    .screen.active{display:block}
     .card{
       background:linear-gradient(180deg,var(--panel),var(--panel2));
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      padding:16px;
-      margin-bottom:14px;
-      box-shadow:var(--shadow);
+      border:1px solid var(--line);border-radius:var(--radius);padding:16px;
+      margin-bottom:14px;box-shadow:var(--shadow);
     }
-
-    .card h3,.card h4{
-      margin:0 0 12px 0;
-    }
-
-    label{
-      display:block;
-      margin:10px 0 6px;
-      font-size:14px;
-      font-weight:600;
-      color:#dbeafe;
-    }
-
+    .card h3,.card h4{margin:0 0 12px 0}
+    label{display:block;margin:10px 0 6px;font-size:14px;font-weight:600;color:#dbeafe}
     input,select,textarea{
-      width:100%;
-      padding:14px;
-      border-radius:14px;
-      border:1px solid #334155;
-      background:var(--input);
-      color:var(--text);
-      font-size:16px;
-      outline:none;
+      width:100%;padding:14px;border-radius:14px;border:1px solid #334155;
+      background:var(--input);color:var(--text);font-size:16px;outline:none;
     }
-
-    textarea{
-      min-height:90px;
-      resize:vertical;
-    }
-
-    .grid-2{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-
+    textarea{min-height:90px;resize:vertical}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .btn{
-      width:100%;
-      border:none;
-      border-radius:16px;
-      padding:16px;
-      font-size:17px;
-      font-weight:800;
-      color:white;
-      background:var(--accent);
-      margin-top:10px;
+      width:100%;border:none;border-radius:16px;padding:16px;font-size:17px;
+      font-weight:800;color:white;background:var(--accent);margin-top:10px;
     }
-
     .btn.success{background:var(--success)}
     .btn.danger{background:var(--danger)}
     .btn.secondary{background:#334155}
-
     .checkbox-row{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      background:var(--input);
-      border:1px solid #334155;
-      border-radius:14px;
-      padding:12px 14px;
-      margin-top:8px;
+      display:flex;align-items:center;gap:10px;background:var(--input);
+      border:1px solid #334155;border-radius:14px;padding:12px 14px;margin-top:8px;
     }
-
-    .checkbox-row input{
-      width:auto;
-      margin:0;
-      transform:scale(1.2);
-    }
-
-    .stat-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-bottom:14px;
-    }
-
+    .checkbox-row input{width:auto;margin:0;transform:scale(1.2)}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
     .stat{
-      background:linear-gradient(180deg,#13203a,#0f172a);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      text-align:center;
-      box-shadow:var(--shadow);
+      background:linear-gradient(180deg,#13203a,#0f172a);border:1px solid var(--line);
+      border-radius:18px;padding:16px;text-align:center;box-shadow:var(--shadow);
     }
-
-    .stat-label{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
-
-    .stat-value{
-      font-size:28px;
-      font-weight:800;
-      line-height:1.05;
-    }
-
-    .muted{
-      color:var(--muted);
-    }
-
-    .small{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:6px;
-    }
-
-    .history-list{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .history-item{
-      background:#0b1220;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-    }
-
-    .history-title{
-      font-size:16px;
-      font-weight:800;
-      margin-bottom:6px;
-    }
-
-    .history-meta{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:10px;
-    }
-
-    .history-row{
-      font-size:14px;
-      line-height:1.55;
-    }
-
+    .stat-label{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .stat-value{font-size:28px;font-weight:800;line-height:1.05}
+    .muted{color:var(--muted)}
+    .small{font-size:12px;color:var(--muted);margin-top:6px}
+    .status{margin-top:8px;font-size:13px;color:#bfdbfe}
+    .history-list{display:flex;flex-direction:column;gap:12px}
+    .history-item{background:#0b1220;border:1px solid var(--line);border-radius:16px;padding:14px}
+    .history-title{font-size:16px;font-weight:800;margin-bottom:6px}
+    .history-meta{font-size:13px;color:var(--muted);margin-bottom:10px}
+    .history-row{font-size:14px;line-height:1.55}
     .tag{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-      margin-right:6px;
-      margin-top:6px;
-      background:#1d4ed8;
+      display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;
+      font-weight:700;margin-right:6px;margin-top:6px;background:#1d4ed8;
     }
-
     .tag.gray{background:#334155}
     .tag.green{background:#15803d}
-
-    .preview-img{
-      width:100%;
-      border-radius:14px;
-      margin-top:10px;
-      border:1px solid var(--line);
+    .preview-link{
+      display:block;margin-top:10px;color:#93c5fd;word-break:break-all;font-size:13px;
     }
-
-    .divider{
-      height:1px;
-      background:var(--line);
-      margin:12px 0;
-    }
-
+    .divider{height:1px;background:var(--line);margin:12px 0}
     nav{
-      position:fixed;
-      left:0;
-      right:0;
-      bottom:0;
-      z-index:30;
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      background:rgba(15,23,42,.98);
-      border-top:1px solid var(--line);
-      backdrop-filter:blur(10px);
+      position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;
+      grid-template-columns:repeat(5,1fr);background:rgba(15,23,42,.98);
+      border-top:1px solid var(--line);backdrop-filter:blur(10px);
       padding-bottom:env(safe-area-inset-bottom);
     }
-
     nav button{
-      border:none;
-      background:none;
-      color:var(--text);
-      padding:12px 4px 14px;
-      font-size:12px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:4px;
+      border:none;background:none;color:var(--text);padding:12px 4px 14px;font-size:12px;
+      display:flex;flex-direction:column;align-items:center;gap:4px;
     }
-
-    .icon{
-      font-size:20px;
-      line-height:1;
-    }
-
-    @media (min-width:740px){
-      .screen{
-        max-width:760px;
-        margin:0 auto;
-      }
-    }
+    .icon{font-size:20px;line-height:1}
+    @media (min-width:740px){.screen{max-width:760px;margin:0 auto}}
   </style>
 </head>
 <body>
@@ -287,16 +111,13 @@
     <div class="subtitle">Tahač + silo cisterna</div>
   </header>
 
-  <!-- ONBOARDING / PROFIL -->
   <section id="onboarding" class="screen">
     <div class="card">
       <h3>První nastavení aplikace</h3>
-      <div class="muted">
-        Nejdřív nastav profil řidiče a soupravy. Potom se otevře hlavní aplikace.
-      </div>
+      <div class="muted">Nejdřív nastav profil řidiče a soupravy.</div>
 
       <label for="driverName">Jméno řidiče</label>
-      <input type="text" id="driverName" placeholder="Např. Petr Novák" />
+      <input type="text" id="driverName" />
 
       <label for="truckBrand">Značka tahače</label>
       <select id="truckBrand">
@@ -312,25 +133,25 @@
       </select>
 
       <label for="truckModel">Model tahače</label>
-      <input type="text" id="truckModel" placeholder="Např. XF 480" />
+      <input type="text" id="truckModel" />
 
       <label for="truckPlate">SPZ tahače</label>
-      <input type="text" id="truckPlate" placeholder="Např. 1AB 2345" />
+      <input type="text" id="truckPlate" />
 
       <label for="trailerBrand">Značka cisterny</label>
-      <input type="text" id="trailerBrand" placeholder="Např. Feldbinder / LAG / Spitzer" />
+      <input type="text" id="trailerBrand" />
 
       <label for="trailerPlate">SPZ cisterny</label>
-      <input type="text" id="trailerPlate" placeholder="Např. 2CD 6789" />
+      <input type="text" id="trailerPlate" />
 
       <label for="tankVolume">Objem cisterny (m³)</label>
-      <input type="number" id="tankVolume" placeholder="60" step="0.1" />
+      <input type="number" id="tankVolume" step="0.1" value="60" />
 
       <button class="btn success" onclick="saveProfile(true)">✅ Uložit a otevřít aplikaci</button>
+      <div id="profileStatus" class="status"></div>
     </div>
   </section>
 
-  <!-- COCKPIT -->
   <section id="cockpit" class="screen">
     <div class="card">
       <h3>Profil soupravy</h3>
@@ -338,30 +159,12 @@
     </div>
 
     <div class="stat-grid">
-      <div class="stat">
-        <div class="stat-label">Jízdy</div>
-        <div class="stat-value" id="statTrips">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Tankování</div>
-        <div class="stat-value" id="statFuelings">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Myčky</div>
-        <div class="stat-value" id="statWashes">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Prům. tlak</div>
-        <div class="stat-value" id="statPressure">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Prům. náklad</div>
-        <div class="stat-value" id="statWeight">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Kompresor</div>
-        <div class="stat-value" id="statCompressor">0</div>
-      </div>
+      <div class="stat"><div class="stat-label">Jízdy</div><div class="stat-value" id="statTrips">0</div></div>
+      <div class="stat"><div class="stat-label">Tankování</div><div class="stat-value" id="statFuelings">0</div></div>
+      <div class="stat"><div class="stat-label">Myčky</div><div class="stat-value" id="statWashes">0</div></div>
+      <div class="stat"><div class="stat-label">Prům. tlak</div><div class="stat-value" id="statPressure">0</div></div>
+      <div class="stat"><div class="stat-label">Prům. náklad</div><div class="stat-value" id="statWeight">0</div></div>
+      <div class="stat"><div class="stat-label">Kompresor</div><div class="stat-value" id="statCompressor">0</div></div>
     </div>
 
     <div class="card">
@@ -372,11 +175,9 @@
     </div>
   </section>
 
-  <!-- JÍZDA -->
   <section id="trip" class="screen">
     <div class="card">
       <h3>Evidence jízdy</h3>
-
       <label for="tripDate">Datum</label>
       <input type="date" id="tripDate" />
 
@@ -384,18 +185,17 @@
       <input type="time" id="tripStartTime" />
 
       <label for="tripFrom">Odkud</label>
-      <input type="text" id="tripFrom" placeholder="Např. Prachovice" />
+      <input type="text" id="tripFrom" />
 
       <label for="tripTo">Kam</label>
-      <input type="text" id="tripTo" placeholder="Např. Brno" />
+      <input type="text" id="tripTo" />
 
       <label for="tripNote">Poznámka</label>
-      <textarea id="tripNote" placeholder="Volitelná poznámka k jízdě"></textarea>
+      <textarea id="tripNote"></textarea>
     </div>
 
     <div class="card">
       <h3>Myčka cisterny</h3>
-
       <div class="checkbox-row">
         <input type="checkbox" id="washUsed" />
         <span>Proběhla myčka před nakládkou</span>
@@ -415,7 +215,6 @@
 
     <div class="card">
       <h3>Nakládka</h3>
-
       <label for="loadMaterial">Druh materiálu</label>
       <select id="loadMaterial">
         <option value="">Vyber materiál</option>
@@ -427,20 +226,18 @@
       </select>
 
       <label for="loadWeight">Kolik tun naloženo</label>
-      <input type="number" id="loadWeight" placeholder="Např. 27.8" step="0.1" />
+      <input type="number" id="loadWeight" step="0.1" />
 
       <label for="cmrNumber">Číslo CMR</label>
-      <input type="text" id="cmrNumber" placeholder="Např. CMR-2026-001" />
+      <input type="text" id="cmrNumber" />
 
-      <label for="cmrImage">Sken / foto CMR</label>
-      <input type="file" id="cmrImage" accept="image/*" capture="environment" />
-      <img id="cmrPreview" class="preview-img" style="display:none" alt="Náhled CMR" />
-      <div class="small">CMR se ukládá jako fotka, tuny zadáš ručně podle CMR / váhy.</div>
+      <label for="cmrFile">CMR dokument (PDF / obrázek)</label>
+      <input type="file" id="cmrFile" accept=".pdf,image/*,application/pdf" />
+      <a id="cmrSelectedInfo" class="preview-link" style="display:none"></a>
     </div>
 
     <div class="card">
       <h3>Vykládka a kompresor</h3>
-
       <div class="grid-2">
         <div>
           <label for="unloadStart">Vykládka od</label>
@@ -453,39 +250,38 @@
       </div>
 
       <label for="compressorPressure">Tlak kompresoru (bar)</label>
-      <input type="number" id="compressorPressure" min="1.0" max="3.0" step="0.1" placeholder="Např. 1.6" />
+      <input type="number" id="compressorPressure" min="1.0" max="3.0" step="0.1" />
     </div>
 
     <div class="card">
       <button class="btn success" onclick="saveTrip()">💾 Uložit jízdu</button>
+      <div id="tripStatus" class="status"></div>
     </div>
   </section>
 
-  <!-- TANKOVÁNÍ -->
   <section id="fuel" class="screen">
     <div class="card">
       <h3>Evidence tankování</h3>
-
       <label for="fuelDate">Datum</label>
       <input type="date" id="fuelDate" />
 
       <label for="fuelKm">Stav km</label>
-      <input type="number" id="fuelKm" placeholder="Např. 425680" />
+      <input type="number" id="fuelKm" />
 
       <label for="fuelLiters">Litry</label>
-      <input type="number" id="fuelLiters" placeholder="Např. 412" step="0.1" />
+      <input type="number" id="fuelLiters" step="0.1" />
 
       <label for="fuelPrice">Cena za litr</label>
-      <input type="number" id="fuelPrice" placeholder="Např. 36.90" step="0.01" />
+      <input type="number" id="fuelPrice" step="0.01" />
 
       <label for="fuelStation">Místo / pumpa</label>
-      <input type="text" id="fuelStation" placeholder="Např. MOL Brno" />
+      <input type="text" id="fuelStation" />
 
       <button class="btn success" onclick="saveFueling()">💾 Uložit tankování</button>
+      <div id="fuelStatus" class="status"></div>
     </div>
   </section>
 
-  <!-- HISTORIE -->
   <section id="history" class="screen">
     <div class="card">
       <h3>Historie jízd</h3>
@@ -498,7 +294,6 @@
     </div>
   </section>
 
-  <!-- NASTAVENÍ -->
   <section id="settings" class="screen">
     <div class="card">
       <h3>Úprava profilu</h3>
@@ -544,30 +339,18 @@
     </div>
   </section>
 
-  <nav id="bottomNav">
-    <button onclick="openScreen('cockpit')">
-      <span class="icon">🧭</span>
-      <span>Cockpit</span>
-    </button>
-    <button onclick="openScreen('trip')">
-      <span class="icon">🚛</span>
-      <span>Jízda</span>
-    </button>
-    <button onclick="openScreen('fuel')">
-      <span class="icon">⛽</span>
-      <span>Tankování</span>
-    </button>
-    <button onclick="openScreen('history')">
-      <span class="icon">🗂</span>
-      <span>Historie</span>
-    </button>
-    <button onclick="openScreen('settings')">
-      <span class="icon">⚙️</span>
-      <span>Nastavení</span>
-    </button>
+  <nav>
+    <button onclick="openScreen('cockpit')"><span class="icon">🧭</span><span>Cockpit</span></button>
+    <button onclick="openScreen('trip')"><span class="icon">🚛</span><span>Jízda</span></button>
+    <button onclick="openScreen('fuel')"><span class="icon">⛽</span><span>Tankování</span></button>
+    <button onclick="openScreen('history')"><span class="icon">🗂</span><span>Historie</span></button>
+    <button onclick="openScreen('settings')"><span class="icon">⚙️</span><span>Nastavení</span></button>
   </nav>
 
   <script>
+    // SEM VLOŽ SVOU URL WEBOVÉ APLIKACE Z APPS SCRIPTU:
+    const APPS_SCRIPT_URL = 'SEM_VLOZ_WEB_APP_URL';
+
     let profile = JSON.parse(localStorage.getItem("trucklog_profile") || "null") || {
       driverName: "",
       truckBrand: "",
@@ -580,7 +363,8 @@
 
     let trips = JSON.parse(localStorage.getItem("trucklog_trips") || "[]");
     let fuelings = JSON.parse(localStorage.getItem("trucklog_fuelings") || "[]");
-    let cmrImageData = "";
+
+    let cmrFileData = null;
 
     function qs(id){ return document.getElementById(id); }
 
@@ -589,9 +373,7 @@
     }
 
     function openScreen(id){
-      if(!hasProfile() && id !== "onboarding"){
-        id = "onboarding";
-      }
+      if(!hasProfile() && id !== "onboarding") id = "onboarding";
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       qs(id).classList.add("active");
       renderAll();
@@ -619,43 +401,63 @@
       return `${h} h ${rest} min`;
     }
 
-    function saveProfile(fromOnboarding){
-      if(fromOnboarding){
-        profile = {
-          driverName: qs("driverName").value.trim(),
-          truckBrand: qs("truckBrand").value.trim(),
-          truckModel: qs("truckModel").value.trim(),
-          truckPlate: qs("truckPlate").value.trim(),
-          trailerBrand: qs("trailerBrand").value.trim(),
-          trailerPlate: qs("trailerPlate").value.trim(),
-          tankVolume: qs("tankVolume").value.trim() || "60"
-        };
-      } else {
-        profile = {
-          driverName: qs("settingsDriverName").value.trim(),
-          truckBrand: qs("settingsTruckBrand").value.trim(),
-          truckModel: qs("settingsTruckModel").value.trim(),
-          truckPlate: qs("settingsTruckPlate").value.trim(),
-          trailerBrand: qs("settingsTrailerBrand").value.trim(),
-          trailerPlate: qs("settingsTrailerPlate").value.trim(),
-          tankVolume: qs("settingsTankVolume").value.trim() || "60"
-        };
-      }
+    async function postToScript(payload){
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
 
-      if(!hasProfile()){
+    async function saveProfile(fromOnboarding){
+      const statusEl = qs("profileStatus");
+      if (statusEl) statusEl.textContent = "Ukládám…";
+
+      const newProfile = fromOnboarding ? {
+        driverName: qs("driverName").value.trim(),
+        truckBrand: qs("truckBrand").value.trim(),
+        truckModel: qs("truckModel").value.trim(),
+        truckPlate: qs("truckPlate").value.trim(),
+        trailerBrand: qs("trailerBrand").value.trim(),
+        trailerPlate: qs("trailerPlate").value.trim(),
+        tankVolume: qs("tankVolume").value.trim() || "60"
+      } : {
+        driverName: qs("settingsDriverName").value.trim(),
+        truckBrand: qs("settingsTruckBrand").value.trim(),
+        truckModel: qs("settingsTruckModel").value.trim(),
+        truckPlate: qs("settingsTruckPlate").value.trim(),
+        trailerBrand: qs("settingsTrailerBrand").value.trim(),
+        trailerPlate: qs("settingsTrailerPlate").value.trim(),
+        tankVolume: qs("settingsTankVolume").value.trim() || "60"
+      };
+
+      if(!(newProfile.driverName && newProfile.truckBrand && newProfile.truckPlate && newProfile.trailerBrand && newProfile.trailerPlate)){
+        if (statusEl) statusEl.textContent = "";
         alert("Vyplň prosím jméno řidiče, značku a SPZ tahače i cisterny.");
         return;
       }
 
+      profile = newProfile;
       saveToStorage();
       renderAll();
-      alert("Profil uložen.");
+
+      try {
+        await postToScript({ type: 'profile', ...profile });
+        if (statusEl) statusEl.textContent = "Profil uložen i do Google Sheets.";
+      } catch (e) {
+        if (statusEl) statusEl.textContent = "Profil uložen jen lokálně. Google Sheets se nepodařilo kontaktovat.";
+      }
+
       openScreen("cockpit");
     }
 
-    function saveTrip(){
+    async function saveTrip(){
+      const tripStatus = qs("tripStatus");
+      tripStatus.textContent = "Ukládám…";
+
       const trip = {
-        id: Date.now(),
+        id: `TRIP-${Date.now()}`,
         date: qs("tripDate").value,
         startTime: qs("tripStartTime").value,
         from: qs("tripFrom").value.trim(),
@@ -668,23 +470,56 @@
         material: qs("loadMaterial").value,
         weight: parseFloat(qs("loadWeight").value || "0"),
         cmrNumber: qs("cmrNumber").value.trim(),
-        cmrImage: cmrImageData || "",
         unloadStart: qs("unloadStart").value,
         unloadEnd: qs("unloadEnd").value,
         compressorMinutes: minutesBetween(qs("unloadStart").value, qs("unloadEnd").value),
-        pressure: parseFloat(qs("compressorPressure").value || "0")
+        pressure: parseFloat(qs("compressorPressure").value || "0"),
+        driverName: profile.driverName,
+        truckBrand: profile.truckBrand,
+        truckModel: profile.truckModel,
+        truckPlate: profile.truckPlate,
+        trailerBrand: profile.trailerBrand,
+        trailerPlate: profile.trailerPlate,
+        tankVolume: profile.tankVolume
       };
 
       if(!trip.date || !trip.from || !trip.to){
+        tripStatus.textContent = "";
         alert("Vyplň prosím datum, odkud a kam.");
         return;
       }
 
-      trips.unshift(trip);
+      trips.unshift({ ...trip, cmrLink: '' });
       saveToStorage();
+      renderAll();
+
+      try {
+        const payload = {
+          type: 'trip',
+          ...trip,
+          cmrBase64: cmrFileData?.base64 || '',
+          cmrMimeType: cmrFileData?.mimeType || '',
+          cmrFileName: cmrFileData?.fileName || ''
+        };
+
+        const result = await postToScript(payload);
+
+        if (result.ok) {
+          if (trips[0]) {
+            trips[0].cmrLink = result.cmrFileUrl || '';
+            trips[0].cmrSavedName = result.cmrFileName || '';
+            saveToStorage();
+          }
+          tripStatus.textContent = "Jízda uložena i do Google Sheets.";
+        } else {
+          tripStatus.textContent = "Jízda uložena jen lokálně.";
+        }
+      } catch (e) {
+        tripStatus.textContent = "Jízda uložena jen lokálně. Google Sheets se nepodařilo kontaktovat.";
+      }
+
       resetTripForm();
       renderAll();
-      alert("Jízda uložena.");
       openScreen("history");
     }
 
@@ -700,36 +535,56 @@
       qs("loadMaterial").value = "";
       qs("loadWeight").value = "";
       qs("cmrNumber").value = "";
-      qs("cmrImage").value = "";
-      qs("cmrPreview").style.display = "none";
-      qs("cmrPreview").src = "";
+      qs("cmrFile").value = "";
+      qs("cmrSelectedInfo").style.display = "none";
+      qs("cmrSelectedInfo").textContent = "";
       qs("unloadStart").value = "";
       qs("unloadEnd").value = "";
       qs("compressorPressure").value = "";
-      cmrImageData = "";
+      cmrFileData = null;
     }
 
-    function saveFueling(){
+    async function saveFueling(){
+      const fuelStatus = qs("fuelStatus");
+      fuelStatus.textContent = "Ukládám…";
+
       const fueling = {
-        id: Date.now(),
+        id: `FUEL-${Date.now()}`,
         date: qs("fuelDate").value,
         km: parseFloat(qs("fuelKm").value || "0"),
         liters: parseFloat(qs("fuelLiters").value || "0"),
         price: parseFloat(qs("fuelPrice").value || "0"),
-        station: qs("fuelStation").value.trim()
+        station: qs("fuelStation").value.trim(),
+        driverName: profile.driverName,
+        truckBrand: profile.truckBrand,
+        truckModel: profile.truckModel,
+        truckPlate: profile.truckPlate,
+        trailerBrand: profile.trailerBrand,
+        trailerPlate: profile.trailerPlate
       };
 
       if(!fueling.date || !fueling.km || !fueling.liters){
+        fuelStatus.textContent = "";
         alert("Vyplň prosím datum, km a litry.");
         return;
       }
 
       fuelings.unshift(fueling);
-      fuelings.sort((a,b)=>a.km-b.km);
+      fuelings.sort((a,b) => a.km - b.km);
       saveToStorage();
+      renderAll();
+
+      try {
+        const result = await postToScript({ type: 'fuel', ...fueling });
+        fuelStatus.textContent = result.ok
+          ? "Tankování uloženo i do Google Sheets."
+          : "Tankování uloženo jen lokálně.";
+      } catch (e) {
+        fuelStatus.textContent = "Tankování uloženo jen lokálně. Google Sheets se nepodařilo kontaktovat.";
+      }
+
       resetFuelForm();
       renderAll();
-      alert("Tankování uloženo.");
       openScreen("cockpit");
     }
 
@@ -801,8 +656,8 @@
               <strong>CMR:</strong> ${escapeHtml(t.cmrNumber || "-")}<br>
               <strong>Vykládka:</strong> ${escapeHtml(t.unloadStart || "--:--")} – ${escapeHtml(t.unloadEnd || "--:--")}<br>
               <strong>Poznámka:</strong> ${escapeHtml(t.note || "-")}
+              ${t.cmrLink ? `<br><strong>CMR odkaz:</strong> <a class="preview-link" target="_blank" rel="noopener" href="${t.cmrLink}">${escapeHtml(t.cmrSavedName || t.cmrLink)}</a>` : ``}
             </div>
-            ${t.cmrImage ? `<img class="preview-img" src="${t.cmrImage}" alt="CMR">` : ""}
           </div>
         `).join("");
       }
@@ -837,23 +692,14 @@
 
     function clearAllData(){
       if(!confirm("Opravdu chceš smazat všechna data aplikace?")) return;
-
       localStorage.removeItem("trucklog_profile");
       localStorage.removeItem("trucklog_trips");
       localStorage.removeItem("trucklog_fuelings");
 
-      profile = {
-        driverName: "",
-        truckBrand: "",
-        truckModel: "",
-        truckPlate: "",
-        trailerBrand: "",
-        trailerPlate: "",
-        tankVolume: 60
-      };
+      profile = { driverName:"", truckBrand:"", truckModel:"", truckPlate:"", trailerBrand:"", trailerPlate:"", tankVolume:60 };
       trips = [];
       fuelings = [];
-      cmrImageData = "";
+      cmrFileData = null;
       renderAll();
       initApp();
     }
@@ -875,22 +721,26 @@
 
     function initApp(){
       renderAll();
-      if(hasProfile()){
-        openScreen("cockpit");
-      } else {
+      if(hasProfile()) openScreen("cockpit");
+      else {
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
         qs("onboarding").classList.add("active");
       }
     }
 
-    qs("cmrImage").addEventListener("change", function(e){
+    qs("cmrFile").addEventListener("change", function(e){
       const file = e.target.files && e.target.files[0];
       if(!file) return;
+
       const reader = new FileReader();
       reader.onload = function(evt){
-        cmrImageData = evt.target.result;
-        qs("cmrPreview").src = cmrImageData;
-        qs("cmrPreview").style.display = "block";
+        cmrFileData = {
+          base64: evt.target.result,
+          mimeType: file.type || 'application/octet-stream',
+          fileName: file.name
+        };
+        qs("cmrSelectedInfo").style.display = "block";
+        qs("cmrSelectedInfo").textContent = `Vybraný soubor: ${file.name}`;
       };
       reader.readAsDataURL(file);
     });
