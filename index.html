@@ -335,6 +335,7 @@
   <section id="fuel" class="screen">
     <div class="card">
       <h3 id="fuelFormTitle">Evidence tankování</h3>
+
       <label for="fuelDate">Datum</label>
       <input type="date" id="fuelDate" />
 
@@ -390,62 +391,84 @@
     let editingTripId = null;
     let editingFuelId = null;
 
-    function qs(id){ return document.getElementById(id); }
-
-    function generateId(prefix){
-      return `${prefix}-${Date.now()}-${Math.floor(Math.random()*1000)}`;
+    function qs(id) {
+      return document.getElementById(id);
     }
 
-    function getActiveProfile(){
+    function generateId(prefix) {
+      return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+    }
+
+    function getActiveProfile() {
       return profiles.find(p => p.id === activeProfileId) || null;
     }
 
-    function hasProfile(){
-      return !!getActiveProfile();
+    function hasProfile() {
+      return profiles.length > 0 && !!getActiveProfile();
     }
 
-    function saveToStorage(){
+    function saveToStorage() {
       localStorage.setItem("trucklog_profiles", JSON.stringify(profiles));
       localStorage.setItem("trucklog_active_profile_id", activeProfileId || "");
       localStorage.setItem("trucklog_trips", JSON.stringify(trips));
       localStorage.setItem("trucklog_fuelings", JSON.stringify(fuelings));
     }
 
-    function openScreen(id){
-      if(!hasProfile() && id !== "onboarding"){
+    function openScreen(id) {
+      if (!hasProfile() && id !== "onboarding") {
         id = "onboarding";
       }
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-      qs(id).classList.add("active");
+      const screen = qs(id);
+      if (screen) screen.classList.add("active");
       renderAll();
     }
 
-    function minutesBetween(start, end){
-      if(!start || !end) return 0;
+    function minutesBetween(start, end) {
+      if (!start || !end) return 0;
       const [sh, sm] = start.split(":").map(Number);
       const [eh, em] = end.split(":").map(Number);
-      if([sh, sm, eh, em].some(Number.isNaN)) return 0;
+      if ([sh, sm, eh, em].some(Number.isNaN)) return 0;
       return Math.max(0, (eh * 60 + em) - (sh * 60 + sm));
     }
 
-    function formatMinutes(min){
+    function formatMinutes(min) {
       const m = Number(min || 0);
       const h = Math.floor(m / 60);
       const rest = m % 60;
-      if(h <= 0) return `${rest} min`;
+      if (h <= 0) return `${rest} min`;
       return `${h} h ${rest} min`;
     }
 
-    async function postToScript(payload){
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function postToScript(payload) {
       const res = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload)
       });
       return res.json();
     }
 
-    function getProfileFormDataFromOnboarding(){
+    function profileIsValid(profile) {
+      return !!(
+        profile.driverName &&
+        profile.truckBrand &&
+        profile.truckPlate &&
+        profile.trailerBrand &&
+        profile.trailerPlate
+      );
+    }
+
+    function getOnboardingProfileData() {
       return {
         id: editingProfileId || generateId("PROFILE"),
         driverName: qs("driverName").value.trim(),
@@ -458,7 +481,7 @@
       };
     }
 
-    function getProfileFormDataFromProfiles(){
+    function getProfilesScreenData() {
       return {
         id: editingProfileId || generateId("PROFILE"),
         driverName: qs("profilesDriverName").value.trim(),
@@ -471,55 +494,71 @@
       };
     }
 
-    async function saveProfile(fromOnboarding){
+    async function saveProfile(fromOnboarding) {
       const statusEl = fromOnboarding ? qs("profileStatus") : qs("profilesStatus");
       if (statusEl) statusEl.textContent = "Ukládám…";
 
-      const newProfile = fromOnboarding ? getProfileFormDataFromOnboarding() : getProfileFormDataFromProfiles();
+      const newProfile = fromOnboarding ? getOnboardingProfileData() : getProfilesScreenData();
 
-      if(!(newProfile.driverName && newProfile.truckBrand && newProfile.truckPlate && newProfile.trailerBrand && newProfile.trailerPlate)){
-        if(statusEl) statusEl.textContent = "";
+      if (!profileIsValid(newProfile)) {
+        if (statusEl) statusEl.textContent = "";
         alert("Vyplň prosím jméno řidiče, značku a SPZ tahače i cisterny.");
         return;
       }
 
-      const existingIndex = profiles.findIndex(p => p.id === newProfile.id);
-      if(existingIndex >= 0){
-        profiles[existingIndex] = newProfile;
+      const index = profiles.findIndex(p => p.id === newProfile.id);
+      if (index >= 0) {
+        profiles[index] = newProfile;
       } else {
         profiles.push(newProfile);
       }
 
       activeProfileId = newProfile.id;
       saveToStorage();
-      renderAll();
 
       try {
-        await postToScript({ type: 'profile', ...newProfile });
-        if(statusEl) statusEl.textContent = "Profil uložen i do Google Sheets.";
-      } catch(e){
-        if(statusEl) statusEl.textContent = "Profil uložen jen lokálně.";
+        await postToScript({ type: "profile", ...newProfile });
+        if (statusEl) statusEl.textContent = "Profil uložen i do Google Sheets.";
+      } catch (e) {
+        if (statusEl) statusEl.textContent = "Profil uložen jen lokálně.";
       }
 
       editingProfileId = null;
       resetProfileFormProfiles();
+      renderAll();
       openScreen("cockpit");
     }
 
-    function renderProfilesList(){
+    function renderProfileBox() {
+      const profile = getActiveProfile();
+      if (!profile) {
+        qs("profileBox").innerHTML = `<span class="muted">Profil není nastaven.</span>`;
+        return;
+      }
+
+      qs("profileBox").innerHTML = `
+        <strong>Řidič:</strong> ${escapeHtml(profile.driverName)}<br>
+        <strong>Tahač:</strong> ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
+        <strong>Cisterna:</strong> ${escapeHtml(profile.trailerBrand)} ${escapeHtml(profile.trailerPlate)}<br>
+        <strong>Objem cisterny:</strong> ${escapeHtml(String(profile.tankVolume || 60))} m³
+      `;
+    }
+
+    function renderProfilesList() {
       const box = qs("profilesList");
-      if(!profiles.length){
+      if (!box) return;
+
+      if (!profiles.length) {
         box.innerHTML = `<div class="muted">Zatím není vytvořená žádná souprava.</div>`;
         return;
       }
 
       box.innerHTML = profiles.map(profile => `
-        <div class="history-item ${profile.id === activeProfileId ? 'profile-card-active' : ''}">
+        <div class="history-item ${profile.id === activeProfileId ? "profile-card-active" : ""}">
           <div class="history-title">${escapeHtml(profile.driverName)}</div>
           <div class="history-meta">
-            ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || '')} ${escapeHtml(profile.truckPlate)}
-            <br>
-            ${escapeHtml(profile.trailerBrand)} ${escapeHtml(profile.trailerPlate)} • ${escapeHtml(String(profile.tankVolume))} m³
+            ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
+            ${escapeHtml(profile.trailerBrand)} ${escapeHtml(profile.trailerPlate)} • ${escapeHtml(String(profile.tankVolume || 60))} m³
           </div>
           <div class="history-actions">
             <button class="btn small success" onclick="setActiveProfile('${profile.id}')">Aktivovat</button>
@@ -530,16 +569,16 @@
       `).join("");
     }
 
-    function setActiveProfile(profileId){
+    function setActiveProfile(profileId) {
       activeProfileId = profileId;
       saveToStorage();
       renderAll();
       alert("Aktivní souprava nastavena.");
     }
 
-    function editProfile(profileId){
+    function editProfile(profileId) {
       const profile = profiles.find(p => p.id === profileId);
-      if(!profile) return;
+      if (!profile) return;
 
       editingProfileId = profileId;
       qs("profileFormTitle").textContent = "Úprava profilu";
@@ -551,18 +590,18 @@
       qs("profilesTruckPlate").value = profile.truckPlate || "";
       qs("profilesTrailerBrand").value = profile.trailerBrand || "";
       qs("profilesTrailerPlate").value = profile.trailerPlate || "";
-      qs("profilesTankVolume").value = profile.tankVolume || 60;
+      qs("profilesTankVolume").value = profile.tankVolume || "60";
 
       openScreen("profiles");
     }
 
-    function cancelProfileEdit(){
+    function cancelProfileEdit() {
       editingProfileId = null;
       resetProfileFormProfiles();
       renderAll();
     }
 
-    function resetProfileFormProfiles(){
+    function resetProfileFormProfiles() {
       qs("profileFormTitle").textContent = "Nový profil";
       qs("cancelProfileEditBtn").style.display = "none";
       qs("profilesDriverName").value = "";
@@ -575,78 +614,67 @@
       qs("profilesStatus").textContent = "";
     }
 
-    function deleteProfile(profileId){
+    function deleteProfile(profileId) {
+      const profile = profiles.find(p => p.id === profileId);
+      if (!profile) return;
+
       const usedInTrips = trips.some(t => t.profileId === profileId);
       const usedInFuel = fuelings.some(f => f.profileId === profileId);
 
-      if(usedInTrips || usedInFuel){
-        const ok = confirm("Tato souprava má navázané záznamy. Profil se smaže, ale staré záznamy zůstanou v historii. Pokračovat?");
-        if(!ok) return;
-      } else {
-        if(!confirm("Opravdu chceš smazat tento profil?")) return;
-      }
+      const question = (usedInTrips || usedInFuel)
+        ? "Tato souprava má navázané záznamy. Profil se smaže, ale staré jízdy a tankování zůstanou v historii. Pokračovat?"
+        : "Opravdu chceš smazat tento profil?";
+
+      if (!confirm(question)) return;
 
       profiles = profiles.filter(p => p.id !== profileId);
 
-      if(activeProfileId === profileId){
+      if (activeProfileId === profileId) {
         activeProfileId = profiles[0]?.id || "";
+      }
+
+      if (editingProfileId === profileId) {
+        editingProfileId = null;
+        resetProfileFormProfiles();
       }
 
       saveToStorage();
       renderAll();
 
-      if(!profiles.length){
+      if (!profiles.length) {
         initApp();
       }
     }
 
-    function getActiveProfileBoxHtml(){
-      const profile = getActiveProfile();
-      if(!profile){
-        return `<span class="muted">Profil není nastaven.</span>`;
-      }
-
-      return `
-        <strong>Řidič:</strong> ${escapeHtml(profile.driverName)}<br>
-        <strong>Tahač:</strong> ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
-        <strong>Cisterna:</strong> ${escapeHtml(profile.trailerBrand)} ${escapeHtml(profile.trailerPlate)}<br>
-        <strong>Objem cisterny:</strong> ${escapeHtml(String(profile.tankVolume || 60))} m³
-      `;
-    }
-
-    function renderProfileBox(){
-      qs("profileBox").innerHTML = getActiveProfileBoxHtml();
-    }
-
-    function tripsForActiveProfile(){
+    function tripsForActiveProfile() {
       return trips.filter(t => t.profileId === activeProfileId);
     }
 
-    function fuelingsForActiveProfile(){
+    function fuelingsForActiveProfile() {
       return fuelings.filter(f => f.profileId === activeProfileId);
     }
 
-    function renderCockpit(){
+    function renderCockpit() {
       const localTrips = tripsForActiveProfile();
       const localFuel = fuelingsForActiveProfile();
 
       qs("statTrips").textContent = localTrips.length;
       qs("statFuelings").textContent = localFuel.length;
-      qs("statWashes").textContent = localTrips.filter(t=>t.washUsed).length;
+      qs("statWashes").textContent = localTrips.filter(t => t.washUsed).length;
 
-      const pressures = localTrips.map(t=>Number(t.pressure)).filter(v=>v>0);
-      const avgPressure = pressures.length ? (pressures.reduce((a,b)=>a+b,0)/pressures.length).toFixed(1) : "0";
+      const pressures = localTrips.map(t => Number(t.pressure)).filter(v => v > 0);
+      const avgPressure = pressures.length ? (pressures.reduce((a, b) => a + b, 0) / pressures.length).toFixed(1) : "0";
       qs("statPressure").textContent = `${avgPressure} b`;
 
-      const weights = localTrips.map(t=>Number(t.weight)).filter(v=>v>0);
-      const avgWeight = weights.length ? (weights.reduce((a,b)=>a+b,0)/weights.length).toFixed(1) : "0";
+      const weights = localTrips.map(t => Number(t.weight)).filter(v => v > 0);
+      const avgWeight = weights.length ? (weights.reduce((a, b) => a + b, 0) / weights.length).toFixed(1) : "0";
       qs("statWeight").textContent = `${avgWeight} t`;
 
-      const totalCompressor = localTrips.reduce((sum,t)=>sum+Number(t.compressorMinutes||0),0);
+      const totalCompressor = localTrips.reduce((sum, t) => sum + Number(t.compressorMinutes || 0), 0);
       qs("statCompressor").textContent = formatMinutes(totalCompressor);
     }
 
-    function startNewTrip(){
+    function startNewTrip() {
       editingTripId = null;
       resetTripForm();
       qs("tripFormTitle").textContent = "Evidence jízdy";
@@ -655,12 +683,12 @@
       openScreen("trip");
     }
 
-    async function saveTrip(){
+    async function saveTrip() {
       const tripStatus = qs("tripStatus");
       tripStatus.textContent = "Ukládám…";
 
       const profile = getActiveProfile();
-      if(!profile){
+      if (!profile) {
         tripStatus.textContent = "";
         alert("Nejdřív nastav aktivní soupravu.");
         return;
@@ -696,26 +724,26 @@
         tankVolume: profile.tankVolume
       };
 
-      if(!trip.date || !trip.from || !trip.to){
+      if (!trip.date || !trip.from || !trip.to) {
         tripStatus.textContent = "";
         alert("Vyplň prosím datum, odkud a kam.");
         return;
       }
 
-      const existingIndex = trips.findIndex(t => t.id === tripId);
-      if(existingIndex >= 0){
-        const oldLink = trips[existingIndex].cmrLink || "";
-        const oldSavedName = trips[existingIndex].cmrSavedName || "";
-        const oldImage = trips[existingIndex].cmrImage || "";
-
-        trips[existingIndex] = {
+      const index = trips.findIndex(t => t.id === tripId);
+      if (index >= 0) {
+        const old = trips[index];
+        trips[index] = {
           ...trip,
-          cmrLink: oldLink,
-          cmrSavedName: oldSavedName,
-          cmrImage: oldImage
+          cmrLink: old.cmrLink || "",
+          cmrSavedName: old.cmrSavedName || ""
         };
       } else {
-        trips.unshift({ ...trip, cmrLink: '', cmrSavedName:'', cmrImage:'' });
+        trips.unshift({
+          ...trip,
+          cmrLink: "",
+          cmrSavedName: ""
+        });
       }
 
       saveToStorage();
@@ -723,30 +751,27 @@
 
       try {
         const payload = {
-          type: 'trip',
+          type: "trip",
           ...trip,
-          cmrBase64: cmrFileData?.base64 || '',
-          cmrMimeType: cmrFileData?.mimeType || '',
-          cmrFileName: cmrFileData?.fileName || ''
+          cmrBase64: cmrFileData?.base64 || "",
+          cmrMimeType: cmrFileData?.mimeType || "",
+          cmrFileName: cmrFileData?.fileName || ""
         };
 
         const result = await postToScript(payload);
+        const idx = trips.findIndex(t => t.id === tripId);
 
-        if (result.ok) {
-          const idx = trips.findIndex(t => t.id === tripId);
-          if (idx >= 0 && result.cmrFileUrl) {
-            trips[idx].cmrLink = result.cmrFileUrl || '';
-            trips[idx].cmrSavedName = result.cmrFileName || '';
-            saveToStorage();
-          }
-          tripStatus.textContent = editingTripId
-            ? "Jízda upravena lokálně a nově zapsána do Google Sheets."
-            : "Jízda uložena i do Google Sheets.";
-        } else {
-          tripStatus.textContent = "Jízda uložena jen lokálně.";
+        if (result.ok && idx >= 0) {
+          if (result.cmrFileUrl) trips[idx].cmrLink = result.cmrFileUrl;
+          if (result.cmrFileName) trips[idx].cmrSavedName = result.cmrFileName;
+          saveToStorage();
         }
+
+        tripStatus.textContent = result.ok
+          ? (editingTripId ? "Jízda upravena." : "Jízda uložena.")
+          : "Jízda uložena jen lokálně.";
       } catch (e) {
-        tripStatus.textContent = "Jízda uložena jen lokálně. Google Sheets se nepodařilo kontaktovat.";
+        tripStatus.textContent = "Jízda uložena jen lokálně.";
       }
 
       editingTripId = null;
@@ -755,14 +780,9 @@
       openScreen("history");
     }
 
-    function editTrip(tripId){
+    function editTrip(tripId) {
       const trip = trips.find(t => t.id === tripId);
-      if(!trip) return;
-
-      if(trip.profileId !== activeProfileId){
-        alert("Tuto jízdu můžeš upravit až po aktivaci správné soupravy.");
-        return;
-      }
+      if (!trip) return;
 
       editingTripId = tripId;
       qs("tripFormTitle").textContent = "Úprava jízdy";
@@ -786,7 +806,7 @@
 
       cmrFileData = null;
       qs("cmrFile").value = "";
-      if(trip.cmrSavedName || trip.cmrLink){
+      if (trip.cmrSavedName || trip.cmrLink) {
         qs("cmrSelectedInfo").style.display = "block";
         qs("cmrSelectedInfo").textContent = `Aktuální CMR: ${trip.cmrSavedName || trip.cmrLink}`;
       } else {
@@ -797,7 +817,7 @@
       openScreen("trip");
     }
 
-    function cancelTripEdit(){
+    function cancelTripEdit() {
       editingTripId = null;
       resetTripForm();
       qs("tripFormTitle").textContent = "Evidence jízdy";
@@ -806,14 +826,15 @@
       openScreen("history");
     }
 
-    function deleteTrip(tripId){
-      if(!confirm("Opravdu chceš smazat tuto jízdu?")) return;
+    function deleteTrip(tripId) {
+      if (!confirm("Opravdu chceš smazat tuto jízdu?")) return;
       trips = trips.filter(t => t.id !== tripId);
+      if (editingTripId === tripId) cancelTripEdit();
       saveToStorage();
       renderAll();
     }
 
-    function resetTripForm(){
+    function resetTripForm() {
       qs("tripDate").value = "";
       qs("tripStartTime").value = "";
       qs("tripFrom").value = "";
@@ -835,7 +856,7 @@
       cmrFileData = null;
     }
 
-    function startNewFuel(){
+    function startNewFuel() {
       editingFuelId = null;
       resetFuelForm();
       qs("fuelFormTitle").textContent = "Evidence tankování";
@@ -844,19 +865,18 @@
       openScreen("fuel");
     }
 
-    async function saveFueling(){
+    async function saveFueling() {
       const fuelStatus = qs("fuelStatus");
       fuelStatus.textContent = "Ukládám…";
 
       const profile = getActiveProfile();
-      if(!profile){
+      if (!profile) {
         fuelStatus.textContent = "";
         alert("Nejdřív nastav aktivní soupravu.");
         return;
       }
 
       const fuelId = editingFuelId || generateId("FUEL");
-
       const fueling = {
         id: fuelId,
         profileId: profile.id,
@@ -873,30 +893,30 @@
         trailerPlate: profile.trailerPlate
       };
 
-      if(!fueling.date || !fueling.km || !fueling.liters){
+      if (!fueling.date || !fueling.km || !fueling.liters) {
         fuelStatus.textContent = "";
         alert("Vyplň prosím datum, km a litry.");
         return;
       }
 
-      const existingIndex = fuelings.findIndex(f => f.id === fuelId);
-      if(existingIndex >= 0){
-        fuelings[existingIndex] = fueling;
+      const index = fuelings.findIndex(f => f.id === fuelId);
+      if (index >= 0) {
+        fuelings[index] = fueling;
       } else {
-        fuelings.unshift(fueling);
+        fuelings.push(fueling);
       }
 
-      fuelings.sort((a,b) => a.km - b.km);
+      fuelings.sort((a, b) => Number(a.km || 0) - Number(b.km || 0));
       saveToStorage();
       renderAll();
 
       try {
-        const result = await postToScript({ type: 'fuel', ...fueling });
+        const result = await postToScript({ type: "fuel", ...fueling });
         fuelStatus.textContent = result.ok
-          ? (editingFuelId ? "Tankování upraveno lokálně a nově zapsáno do Google Sheets." : "Tankování uloženo i do Google Sheets.")
+          ? (editingFuelId ? "Tankování upraveno." : "Tankování uloženo.")
           : "Tankování uloženo jen lokálně.";
       } catch (e) {
-        fuelStatus.textContent = "Tankování uloženo jen lokálně. Google Sheets se nepodařilo kontaktovat.";
+        fuelStatus.textContent = "Tankování uloženo jen lokálně.";
       }
 
       editingFuelId = null;
@@ -905,14 +925,9 @@
       openScreen("history");
     }
 
-    function editFuel(fuelId){
+    function editFuel(fuelId) {
       const fuel = fuelings.find(f => f.id === fuelId);
-      if(!fuel) return;
-
-      if(fuel.profileId !== activeProfileId){
-        alert("Toto tankování můžeš upravit až po aktivaci správné soupravy.");
-        return;
-      }
+      if (!fuel) return;
 
       editingFuelId = fuelId;
       qs("fuelFormTitle").textContent = "Úprava tankování";
@@ -928,7 +943,7 @@
       openScreen("fuel");
     }
 
-    function cancelFuelEdit(){
+    function cancelFuelEdit() {
       editingFuelId = null;
       resetFuelForm();
       qs("fuelFormTitle").textContent = "Evidence tankování";
@@ -937,14 +952,15 @@
       openScreen("history");
     }
 
-    function deleteFuel(fuelId){
-      if(!confirm("Opravdu chceš smazat toto tankování?")) return;
+    function deleteFuel(fuelId) {
+      if (!confirm("Opravdu chceš smazat toto tankování?")) return;
       fuelings = fuelings.filter(f => f.id !== fuelId);
+      if (editingFuelId === fuelId) cancelFuelEdit();
       saveToStorage();
       renderAll();
     }
 
-    function resetFuelForm(){
+    function resetFuelForm() {
       qs("fuelDate").value = "";
       qs("fuelKm").value = "";
       qs("fuelLiters").value = "";
@@ -953,69 +969,65 @@
       qs("fuelStatus").textContent = "";
     }
 
-    function renderHistory(){
+    function renderHistory() {
       const tripsBox = qs("historyTrips");
       const fuelBox = qs("historyFuel");
 
       const activeTrips = trips
         .filter(t => t.profileId === activeProfileId)
-        .sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+        .sort((a, b) => {
+          const ad = `${a.date || ""} ${a.startTime || ""}`;
+          const bd = `${b.date || ""} ${b.startTime || ""}`;
+          return bd.localeCompare(ad);
+        });
 
       const activeFuel = fuelings
         .filter(f => f.profileId === activeProfileId)
-        .sort((a,b) => Number(b.km || 0) - Number(a.km || 0));
+        .sort((a, b) => Number(b.km || 0) - Number(a.km || 0));
 
-      if(!activeTrips.length){
-        tripsBox.innerHTML = `<div class="muted">Zatím není uložená žádná jízda pro aktivní soupravu.</div>`;
-      } else {
-        tripsBox.innerHTML = activeTrips.map(t => `
-          <div class="history-item">
-            <div class="history-title">${escapeHtml(t.date || "-")} • ${escapeHtml(t.from || "-")} → ${escapeHtml(t.to || "-")}</div>
-            <div class="history-meta">${escapeHtml(t.startTime || "--:--")} • ${escapeHtml(t.material || "-")} • ${Number(t.weight || 0).toFixed(1)} t</div>
-            <div class="history-row">
-              <span class="tag">${escapeHtml(t.material || "Materiál")}</span>
-              ${t.washUsed ? `<span class="tag green">Myčka ${formatMinutes(t.washMinutes)}</span>` : `<span class="tag gray">Bez myčky</span>`}
-              <span class="tag gray">Kompresor ${formatMinutes(t.compressorMinutes)}</span>
-              <span class="tag gray">Tlak ${Number(t.pressure || 0).toFixed(1)} bar</span>
-            </div>
-            <div class="divider"></div>
-            <div class="history-row">
-              <strong>CMR:</strong> ${escapeHtml(t.cmrNumber || "-")}<br>
-              <strong>Vykládka:</strong> ${escapeHtml(t.unloadStart || "--:--")} – ${escapeHtml(t.unloadEnd || "--:--")}<br>
-              <strong>Poznámka:</strong> ${escapeHtml(t.note || "-")}
-              ${t.cmrLink ? `<br><strong>CMR odkaz:</strong> <a class="preview-link" target="_blank" rel="noopener" href="${t.cmrLink}">${escapeHtml(t.cmrSavedName || t.cmrLink)}</a>` : ``}
-            </div>
-            <div class="history-actions">
-              <button class="btn small warning" onclick="editTrip('${t.id}')">Upravit</button>
-              <button class="btn small danger" onclick="deleteTrip('${t.id}')">Smazat</button>
-            </div>
+      tripsBox.innerHTML = activeTrips.length ? activeTrips.map(t => `
+        <div class="history-item">
+          <div class="history-title">${escapeHtml(t.date || "-")} • ${escapeHtml(t.from || "-")} → ${escapeHtml(t.to || "-")}</div>
+          <div class="history-meta">${escapeHtml(t.startTime || "--:--")} • ${escapeHtml(t.material || "-")} • ${Number(t.weight || 0).toFixed(1)} t</div>
+          <div class="history-row">
+            <span class="tag">${escapeHtml(t.material || "Materiál")}</span>
+            ${t.washUsed ? `<span class="tag green">Myčka ${formatMinutes(t.washMinutes)}</span>` : `<span class="tag gray">Bez myčky</span>`}
+            <span class="tag gray">Kompresor ${formatMinutes(t.compressorMinutes)}</span>
+            <span class="tag gray">Tlak ${Number(t.pressure || 0).toFixed(1)} bar</span>
           </div>
-        `).join("");
-      }
+          <div class="divider"></div>
+          <div class="history-row">
+            <strong>CMR:</strong> ${escapeHtml(t.cmrNumber || "-")}<br>
+            <strong>Vykládka:</strong> ${escapeHtml(t.unloadStart || "--:--")} – ${escapeHtml(t.unloadEnd || "--:--")}<br>
+            <strong>Poznámka:</strong> ${escapeHtml(t.note || "-")}
+            ${t.cmrLink ? `<br><strong>CMR odkaz:</strong> <a class="preview-link" target="_blank" rel="noopener" href="${t.cmrLink}">${escapeHtml(t.cmrSavedName || t.cmrLink)}</a>` : ``}
+          </div>
+          <div class="history-actions">
+            <button class="btn small warning" onclick="editTrip('${t.id}')">Upravit</button>
+            <button class="btn small danger" onclick="deleteTrip('${t.id}')">Smazat</button>
+          </div>
+        </div>
+      `).join("") : `<div class="muted">Zatím není uložená žádná jízda pro aktivní soupravu.</div>`;
 
-      if(!activeFuel.length){
-        fuelBox.innerHTML = `<div class="muted">Zatím není uložené žádné tankování pro aktivní soupravu.</div>`;
-      } else {
-        fuelBox.innerHTML = activeFuel.map(f => `
-          <div class="history-item">
-            <div class="history-title">${escapeHtml(f.date || "-")} • ${Number(f.liters || 0).toFixed(1)} l</div>
-            <div class="history-meta">${Number(f.km || 0).toFixed(0)} km • ${escapeHtml(f.station || "-")}</div>
-            <div class="history-row">
-              <strong>Cena/l:</strong> ${Number(f.price || 0).toFixed(2)} Kč<br>
-              <strong>Celkem:</strong> ${(Number(f.price || 0) * Number(f.liters || 0)).toFixed(2)} Kč
-            </div>
-            <div class="history-actions">
-              <button class="btn small warning" onclick="editFuel('${f.id}')">Upravit</button>
-              <button class="btn small danger" onclick="deleteFuel('${f.id}')">Smazat</button>
-            </div>
+      fuelBox.innerHTML = activeFuel.length ? activeFuel.map(f => `
+        <div class="history-item">
+          <div class="history-title">${escapeHtml(f.date || "-")} • ${Number(f.liters || 0).toFixed(1)} l</div>
+          <div class="history-meta">${Number(f.km || 0).toFixed(0)} km • ${escapeHtml(f.station || "-")}</div>
+          <div class="history-row">
+            <strong>Cena/l:</strong> ${Number(f.price || 0).toFixed(2)} Kč<br>
+            <strong>Celkem:</strong> ${(Number(f.price || 0) * Number(f.liters || 0)).toFixed(2)} Kč
           </div>
-        `).join("");
-      }
+          <div class="history-actions">
+            <button class="btn small warning" onclick="editFuel('${f.id}')">Upravit</button>
+            <button class="btn small danger" onclick="deleteFuel('${f.id}')">Smazat</button>
+          </div>
+        </div>
+      `).join("") : `<div class="muted">Zatím není uložené žádné tankování pro aktivní soupravu.</div>`;
     }
 
-    function exportBackup(){
-      const data = { profiles, activeProfileId, trips, fuelings, exportedAt:new Date().toISOString() };
-      const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+    function exportBackup() {
+      const data = { profiles, activeProfileId, trips, fuelings, exportedAt: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -1024,15 +1036,8 @@
       URL.revokeObjectURL(url);
     }
 
-    function renderAll(){
-      renderProfileBox();
-      renderCockpit();
-      renderHistory();
-      renderProfilesList();
-    }
-
-    function clearAllData(){
-      if(!confirm("Opravdu chceš smazat všechna data aplikace?")) return;
+    function clearAllData() {
+      if (!confirm("Opravdu chceš smazat všechna data aplikace?")) return;
 
       localStorage.removeItem("trucklog_profiles");
       localStorage.removeItem("trucklog_active_profile_id");
@@ -1052,33 +1057,38 @@
       initApp();
     }
 
-    function escapeHtml(str){
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    function renderAll() {
+      renderProfileBox();
+      renderCockpit();
+      renderHistory();
+      renderProfilesList();
     }
 
-    function initApp(){
+    function initApp() {
+      if (profiles.length && !getActiveProfile()) {
+        activeProfileId = profiles[0].id;
+        saveToStorage();
+      }
+
       renderAll();
-      if(hasProfile()) openScreen("cockpit");
-      else {
+
+      if (hasProfile()) {
+        openScreen("cockpit");
+      } else {
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
         qs("onboarding").classList.add("active");
       }
     }
 
-    qs("cmrFile").addEventListener("change", function(e){
+    qs("cmrFile").addEventListener("change", function(e) {
       const file = e.target.files && e.target.files[0];
-      if(!file) return;
+      if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(evt){
+      reader.onload = function(evt) {
         cmrFileData = {
           base64: evt.target.result,
-          mimeType: file.type || 'application/octet-stream',
+          mimeType: file.type || "application/octet-stream",
           fileName: file.name
         };
         qs("cmrSelectedInfo").style.display = "block";
