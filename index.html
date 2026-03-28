@@ -124,7 +124,32 @@ font-size:14px;
 <div class="card">
 
 <h3>Nová jízda</h3>
+<h4>Čas jízdy</h4>
 
+<input type="time" id="drive_start" placeholder="Odjezd">
+
+<input type="time" id="drive_end" placeholder="Příjezd">
+
+
+<h4>Vykládka kompresorem</h4>
+
+<input type="time" id="unload_start" placeholder="Začátek vykládky">
+
+<input type="time" id="unload_end" placeholder="Konec vykládky">
+
+<input type="number" id="compressor_pressure" placeholder="Tlak kompresoru (bar)">
+
+
+<h4>Myčka cisterny</h4>
+
+<label>
+<input type="checkbox" id="wash_done">
+ Myčka provedena
+</label>
+
+<input type="time" id="wash_start" placeholder="Myčka od">
+
+<input type="time" id="wash_end" placeholder="Myčka do">
 <input type="date" id="d_date">
 
 <input type="text" id="d_from" placeholder="Nakládka">
@@ -147,7 +172,34 @@ font-size:14px;
 <input type="number" id="d_km" placeholder="Ujeté km">
 
 <button onclick="addDrive()">Uložit jízdu</button>
+function addDrive(){
 
+drives.push({
+
+date:d_date.value,
+from:d_from.value,
+to:d_to.value,
+material:d_material.value,
+weight:d_weight.value,
+km:d_km.value,
+
+driveStart:drive_start.value,
+driveEnd:drive_end.value,
+
+unloadStart:unload_start.value,
+unloadEnd:unload_end.value,
+pressure:compressor_pressure.value,
+
+wash:wash_done.checked,
+washStart:wash_start.value,
+washEnd:wash_end.value
+
+})
+
+save()
+render()
+
+}
 </div>
 
 <table>
