@@ -525,22 +525,18 @@
 
             <div class="block">
               <h3>Technika za tahačem</h3>
-              <p class="desc">Cisterna, šasi nebo jiná technika</p>
+              <p class="desc">Silo cisterna, šasi nebo jiná technika</p>
 
               <div class="grid">
                 <div class="field">
                   <label for="profileEquipmentType">Typ techniky</label>
                   <select id="profileEquipmentType">
                     <option value="">Vyber typ</option>
-                    <option>Silocisterna</option>
+                    <option>Silo cisterna</option>
                     <option>Kontejnerové šasi</option>
                     <option>Sklápěcí šasi</option>
-                    <option>Jiný</option>
+                    <option>Jiná technika</option>
                   </select>
-                </div>
-                <div class="field">
-                  <label for="profileEquipmentBrand">Značka návěsu / techniky</label>
-                  <input id="profileEquipmentBrand" />
                 </div>
                 <div class="field">
                   <label for="profileEquipmentModel">Model / typ</label>
@@ -713,7 +709,6 @@
         truckModel: '',
         truckPlate: '',
         equipmentType: '',
-        equipmentBrand: '',
         equipmentModel: '',
         equipmentPlate: '',
         note: '',
@@ -992,7 +987,6 @@
         truckModel: trim(qs('profileTruckModel').value),
         truckPlate: trim(qs('profileTruckPlate').value).toUpperCase(),
         equipmentType: trim(qs('profileEquipmentType').value),
-        equipmentBrand: trim(qs('profileEquipmentBrand').value),
         equipmentModel: trim(qs('profileEquipmentModel').value),
         equipmentPlate: trim(qs('profileEquipmentPlate').value).toUpperCase(),
         note: trim(qs('profileNote').value),
@@ -1016,7 +1010,6 @@
       qs('profileTruckModel').value = p.truckModel || '';
       qs('profileTruckPlate').value = p.truckPlate || '';
       qs('profileEquipmentType').value = p.equipmentType || '';
-      qs('profileEquipmentBrand').value = p.equipmentBrand || '';
       qs('profileEquipmentModel').value = p.equipmentModel || '';
       qs('profileEquipmentPlate').value = p.equipmentPlate || '';
       qs('profileNote').value = p.note || '';
@@ -1158,7 +1151,7 @@
       qs(targetId).innerHTML = `
         <div class="summary">
           <strong>${esc(profileLabel(profile))}</strong>
-          <span>${esc([profile.equipmentType, profile.equipmentBrand, profile.equipmentModel, profile.equipmentPlate].filter(Boolean).join(' • ') || 'Technika za tahačem není vyplněná')}</span>
+          <span>${esc([profile.equipmentType, profile.equipmentModel, profile.equipmentPlate].filter(Boolean).join(' • ') || 'Technika za tahačem není vyplněná')}</span>
           ${profile.note ? `<span>${esc(profile.note)}</span>` : ''}
         </div>
       `;
@@ -1282,7 +1275,7 @@
             <div style="min-width:0;flex:1">
               <div class="badge ${item.id === activeId ? 'badge-ok' : 'badge-warn'}">${item.id === activeId ? 'Aktivní' : 'Profil'}</div>
               <h3 class="mt-12">${esc(profileLabel(item))}</h3>
-              <p class="desc">${esc([item.equipmentType, item.equipmentBrand, item.equipmentModel, item.equipmentPlate].filter(Boolean).join(' • ') || 'Technika není vyplněná')}</p>
+              <p class="desc">${esc([item.equipmentType, item.equipmentModel, item.equipmentPlate].filter(Boolean).join(' • ') || 'Technika není vyplněná')}</p>
               ${item.note ? `<div class="summary mt-16"><strong>Poznámka</strong><span>${esc(item.note)}</span></div>` : ''}
             </div>
             <div class="row">
