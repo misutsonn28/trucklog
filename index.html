@@ -342,8 +342,7 @@
                   </div>
                 </div>
                 <div class="row">
-                  <button class="icon-btn" type="button" onclick="openTripMap('from')">Otevřít Odkud v mapě</button>
-                  <button class="icon-btn" type="button" onclick="applyCompanyAddress('from')">Doplnit adresu z firem</button>
+                  <button class="icon-btn" type="button" onclick="applyCompanyAddress('from')">Doplnit Odkud z firem</button>
                 </div>
                 <div class="grid g2">
                   <div class="field">
@@ -356,8 +355,7 @@
                   </div>
                 </div>
                 <div class="row">
-                  <button class="icon-btn" type="button" onclick="openTripMap('to')">Otevřít Kam v mapě</button>
-                  <button class="icon-btn" type="button" onclick="applyCompanyAddress('to')">Doplnit adresu z firem</button>
+                  <button class="icon-btn" type="button" onclick="applyCompanyAddress('to')">Doplnit Kam z firem</button>
                 </div>
               </div>
             </div>
@@ -402,14 +400,15 @@
                     </select>
                   </div>
                   <div class="field">
-                    <label for="tripQuantity">Množství</label>
-                    <input id="tripQuantity" placeholder="Např. 27 t" />
+                    <label for="tripQuantity">Naložené množství (kg)</label>
+                    <input id="tripQuantity" type="number" min="0" step="1" inputmode="numeric" placeholder="Např. 25450" />
                   </div>
                 </div>
                 <div class="field hidden" id="tripCommodityCustomWrap">
                   <label for="tripCommodityCustom">Vlastní komodita</label>
                   <input id="tripCommodityCustom" placeholder="Např. Struska" />
                 </div>
+                <p class="desc" style="margin-top:-6px">Tonáž zadávej v kilogramech podle CMR, například 25450.</p>
                 <div class="grid g2">
                   <div class="field">
                     <label for="tripWashFrom">Mytí od</label>
@@ -517,8 +516,8 @@
 
                 <div class="grid g2">
                   <div class="field">
-                    <label for="containerWeight">Naloženo tun</label>
-                    <input id="containerWeight" inputmode="decimal" />
+                    <label for="containerWeight">Naloženo (kg)</label>
+                    <input id="containerWeight" type="number" min="0" step="1" inputmode="numeric" placeholder="Např. 25450" />
                   </div>
                   <div class="field">
                     <label for="containerReference">Reference / zakázka</label>
@@ -860,19 +859,13 @@
             </div>
             <div class="field">
               <label for="companyZip">PSČ</label>
-              <input id="companyZip" />
+              <input id="companyZip" inputmode="numeric" />
             </div>
           </div>
 
-          <div class="grid g2">
-            <div class="field">
-              <label for="companyCountry">Stát</label>
-              <input id="companyCountry" value="Česko" />
-            </div>
-            <div class="field">
-              <label for="companyMapsUrl">Odkaz na Google Maps</label>
-              <input id="companyMapsUrl" placeholder="Volitelné" />
-            </div>
+          <div class="field">
+            <label for="companyCountry">Stát</label>
+            <input id="companyCountry" value="Česko" />
           </div>
 
           <div class="field">
@@ -1111,6 +1104,12 @@
       return `${Number(value).toFixed(1)} l/100 km`;
     }
 
+    function formatKg(value){
+      const num = Number(value || 0);
+      if (!num) return '—';
+      return `${num.toLocaleString('cs-CZ')} kg`;
+    }
+
     function activeProfile(){
       return state.profiles.find(p => p.id === state.activeProfileId) || null;
     }
@@ -1125,10 +1124,6 @@
       return [company.street, company.city, company.zip, company.country].filter(Boolean).join(', ');
     }
 
-    function buildMapsUrl(address){
-      const query = trim(address);
-      return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : '';
-    }
 
     function renderCompanySuggestions(){
       const list = qs('companySuggestions');
@@ -1152,15 +1147,6 @@
       }
     }
 
-    function openTripMap(kind){
-      const company = kind === 'from' ? trim(qs('tripFromCompany').value) : trim(qs('tripToCompany').value);
-      const address = kind === 'from' ? trim(qs('tripFromAddress').value) : trim(qs('tripToAddress').value);
-      const match = getCompanyByName(company);
-      const url = match && trim(match.mapsUrl)
-        ? trim(match.mapsUrl)
-        : buildMapsUrl([company, address].filter(Boolean).join(', '));
-      if (url) window.open(url, '_blank');
-    }
 
     function getCompanyFormData(){
       return {
@@ -1168,16 +1154,15 @@
         name: trim(qs('companyName').value),
         street: trim(qs('companyStreet').value),
         city: trim(qs('companyCity').value),
-        zip: trim(qs('companyZip').value),
+        zip: digitsOnly(qs('companyZip').value),
         country: trim(qs('companyCountry').value),
-        mapsUrl: trim(qs('companyMapsUrl').value),
         note: trim(qs('companyNote').value),
         updatedAt: new Date().toISOString()
       };
     }
 
     function companyValid(company){
-      return !!(company.name && (company.street || company.city || company.mapsUrl));
+      return !!(company.name && (company.street || company.city));
     }
 
     function resetCompanyForm(){
@@ -1197,7 +1182,6 @@
       qs('companyCity').value = company.city || '';
       qs('companyZip').value = company.zip || '';
       qs('companyCountry').value = company.country || 'Česko';
-      qs('companyMapsUrl').value = company.mapsUrl || '';
       qs('companyNote').value = company.note || '';
       openScreen('profiles');
     }
@@ -1451,7 +1435,7 @@
           terminal: trim(qs('containerTerminal').value),
           containerNumber: trim(qs('containerNumber').value).toUpperCase(),
           containerState: trim(qs('containerState').value),
-          containerWeight: decimalOnly(qs('containerWeight').value),
+          containerWeight: digitsOnly(qs('containerWeight').value),
           containerReference: trim(qs('containerReference').value),
           equipmentBrand: trim(qs('containerEquipmentBrand').value || 'HETU'),
           equipmentNumber: normalizeEquipmentNumber(qs('containerEquipmentNumber').value),
@@ -1475,7 +1459,7 @@
         loadingPlace: trim(qs('tripLoadingPlace').value),
         unloadingPlace: trim(qs('tripUnloadingPlace').value),
         commodity: qs('tripCommodityPreset').value === 'Jiná' ? trim(qs('tripCommodityCustom').value) : trim(qs('tripCommodityPreset').value),
-        quantity: trim(qs('tripQuantity').value),
+        quantity: digitsOnly(qs('tripQuantity').value),
         washDone: qs('tripWashDone').checked,
         washFrom: qs('tripWashFrom').value,
         washTo: qs('tripWashTo').value,
@@ -1715,8 +1699,8 @@
         if (filter !== 'all' && t.mode !== filter) return false;
         if (!q) return true;
         return [
-          t.from, t.to, t.loadingPlace, t.unloadingPlace, t.commodity,
-          t.containerNumber, t.containerReference, t.truckPlate, t.trailerPlate, t.note
+          t.from, t.to, t.fromAddress, t.toAddress, t.loadingPlace, t.unloadingPlace, t.commodity, t.quantity,
+          t.containerNumber, t.containerReference, t.containerWeight, t.truckPlate, t.trailerPlate, t.note
         ].join(' ').toLowerCase().includes(q);
       }).sort(sortByCreated);
     }
@@ -1765,6 +1749,7 @@
                 <div class="metric"><div class="l">Km</div><div class="v">${esc(String(kmDiff(t.kmStart, t.kmEnd)))}</div></div>
                 <div class="metric"><div class="l">Tahač</div><div class="v">${esc(t.truckPlate || '—')}</div></div>
                 <div class="metric"><div class="l">${esc(t.mode === 'container' ? 'Kontejner' : 'Komodita')}</div><div class="v">${esc(t.mode === 'container' ? (t.containerNumber || '—') : (t.commodity || '—'))}</div></div>
+                <div class="metric"><div class="l">${esc(t.mode === 'container' ? 'Naloženo' : 'Tonáž')}</div><div class="v">${esc(t.mode === 'container' ? formatKg(t.containerWeight) : formatKg(t.quantity))}</div></div>
               </div>
 
               ${(t.note || t.containerReference || t.cmrNumber) ? `
@@ -1797,7 +1782,7 @@
       e.preventDefault();
       const company = getCompanyFormData();
       if (!companyValid(company)) {
-        alert('Vyplň prosím název firmy a aspoň část adresy nebo odkaz na mapu.');
+        alert('Vyplň prosím název firmy a aspoň část adresy.');
         return;
       }
 
@@ -1873,6 +1858,9 @@
     qs('fuelOdo').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
     qs('tripKmStart').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
     qs('tripKmEnd').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
+    qs('tripQuantity').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
+    qs('containerWeight').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
+    qs('companyZip').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
     qs('profileEquipmentNumber').addEventListener('blur', e => e.target.value = normalizeEquipmentNumber(e.target.value));
     qs('containerEquipmentNumber').addEventListener('blur', e => e.target.value = normalizeEquipmentNumber(e.target.value));
 
