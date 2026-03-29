@@ -331,13 +331,33 @@
                     <input id="tripKmEnd" inputmode="numeric" placeholder="Např. 246038" />
                   </div>
                 </div>
-                <div class="field">
-                  <label for="tripFrom">Odkud</label>
-                  <input id="tripFrom" placeholder="Např. Ostrava – silo Hruška" />
+                <div class="grid g2">
+                  <div class="field">
+                    <label for="tripFromCompany">Odkud firma / místo</label>
+                    <input id="tripFromCompany" list="companySuggestions" placeholder="Např. Silo Hruška" />
+                  </div>
+                  <div class="field">
+                    <label for="tripFromAddress">Odkud adresa</label>
+                    <input id="tripFromAddress" placeholder="Např. Ostrava, ulice..." />
+                  </div>
                 </div>
-                <div class="field">
-                  <label for="tripTo">Kam</label>
-                  <input id="tripTo" placeholder="Např. Brno – provozovna jih" />
+                <div class="row">
+                  <button class="icon-btn" type="button" onclick="openTripMap('from')">Otevřít Odkud v mapě</button>
+                  <button class="icon-btn" type="button" onclick="applyCompanyAddress('from')">Doplnit adresu z firem</button>
+                </div>
+                <div class="grid g2">
+                  <div class="field">
+                    <label for="tripToCompany">Kam firma / místo</label>
+                    <input id="tripToCompany" list="companySuggestions" placeholder="Např. Provozovna jih" />
+                  </div>
+                  <div class="field">
+                    <label for="tripToAddress">Kam adresa</label>
+                    <input id="tripToAddress" placeholder="Např. Brno, ulice..." />
+                  </div>
+                </div>
+                <div class="row">
+                  <button class="icon-btn" type="button" onclick="openTripMap('to')">Otevřít Kam v mapě</button>
+                  <button class="icon-btn" type="button" onclick="applyCompanyAddress('to')">Doplnit adresu z firem</button>
                 </div>
               </div>
             </div>
@@ -797,8 +817,74 @@
         </div>
         <div id="profilesList"></div>
       </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title" id="companyFormTitle">Firma a adresa</h2>
+            <p class="desc">Adresář firem pro rychlé doplňování Odkud a Kam</p>
+          </div>
+        </div>
+
+        <form id="companyForm" class="grid">
+          <div class="grid g2">
+            <div class="field">
+              <label for="companyName">Název firmy / místa</label>
+              <input id="companyName" />
+            </div>
+            <div class="field">
+              <label for="companyCity">Město</label>
+              <input id="companyCity" />
+            </div>
+          </div>
+
+          <div class="grid g2">
+            <div class="field">
+              <label for="companyStreet">Ulice a číslo</label>
+              <input id="companyStreet" />
+            </div>
+            <div class="field">
+              <label for="companyZip">PSČ</label>
+              <input id="companyZip" />
+            </div>
+          </div>
+
+          <div class="grid g2">
+            <div class="field">
+              <label for="companyCountry">Stát</label>
+              <input id="companyCountry" value="Česko" />
+            </div>
+            <div class="field">
+              <label for="companyMapsUrl">Odkaz na Google Maps</label>
+              <input id="companyMapsUrl" placeholder="Volitelné" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="companyNote">Poznámka</label>
+            <textarea id="companyNote" placeholder="Např. vjezd zezadu, váha vlevo, brána 2"></textarea>
+          </div>
+
+          <div class="row">
+            <button class="btn" type="submit" id="companySubmitBtn">Uložit firmu</button>
+            <button class="btn2" type="button" onclick="resetCompanyForm()">Zrušit editaci firmy</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Seznam firem</h2>
+            <p class="desc">Vybereš firmu a jedním klikem ji použiješ do trasy</p>
+          </div>
+        </div>
+        <div id="companiesList"></div>
+      </section>
     </section>
   </div>
+
+  <datalist id="companySuggestions"></datalist>
 
   <nav class="nav">
     <div class="nav-in">
@@ -818,7 +904,7 @@
 
   <script>
     const GOOGLE_SYNC = {
-      enabled: true,
+      enabled: false,
       webAppUrl: 'https://script.google.com/macros/s/AKfycbyrn_MwM8BYgTxGPuaIh7rs8dAjVUwUWZSfE31Ld8ZFZS8xy32_iV-qf4mfXgentTqZcA/exec'
     };
 
@@ -826,7 +912,8 @@
       profiles: 'trucklog_profiles',
       activeProfileId: 'trucklog_active_profile_id',
       trips: 'trucklog_trips',
-      fuelings: 'trucklog_fuelings'
+      fuelings: 'trucklog_fuelings',
+      companies: 'trucklog_companies'
     };
 
     const state = {
@@ -835,10 +922,12 @@
       editingProfileId: null,
       editingTripId: null,
       editingFuelId: null,
+      editingCompanyId: null,
       profiles: safeParse(localStorage.getItem(STORAGE.profiles), []),
       activeProfileId: localStorage.getItem(STORAGE.activeProfileId) || '',
       trips: safeParse(localStorage.getItem(STORAGE.trips), []),
-      fuelings: safeParse(localStorage.getItem(STORAGE.fuelings), [])
+      fuelings: safeParse(localStorage.getItem(STORAGE.fuelings), []),
+      companies: safeParse(localStorage.getItem(STORAGE.companies), [])
     };
 
     function qs(id){ return document.getElementById(id); }
@@ -902,8 +991,122 @@
       return String(Math.round(l * p));
     }
 
+
     function activeProfile(){
       return state.profiles.find(p => p.id === state.activeProfileId) || null;
+    }
+
+    function getCompanyByName(name){
+      const normalized = trim(name).toLowerCase();
+      if (!normalized) return null;
+      return state.companies.find(c => trim(c.name).toLowerCase() === normalized) || null;
+    }
+
+    function buildCompanyAddress(company){
+      return [company.street, company.city, company.zip, company.country].filter(Boolean).join(', ');
+    }
+
+    function buildMapsUrl(address){
+      const query = trim(address);
+      return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : '';
+    }
+
+    function renderCompanySuggestions(){
+      const list = qs('companySuggestions');
+      if (!list) return;
+      list.innerHTML = state.companies
+        .slice()
+        .sort((a, b) => trim(a.name).localeCompare(trim(b.name), 'cs'))
+        .map(c => `<option value="${esc(c.name)}"></option>`)
+        .join('');
+    }
+
+    function applyCompanyAddress(kind){
+      const companyName = kind === 'from' ? qs('tripFromCompany').value : qs('tripToCompany').value;
+      const company = getCompanyByName(companyName);
+      if (!company) return;
+      const address = buildCompanyAddress(company);
+      if (kind === 'from') {
+        qs('tripFromAddress').value = address;
+      } else {
+        qs('tripToAddress').value = address;
+      }
+    }
+
+    function openTripMap(kind){
+      const company = kind === 'from' ? trim(qs('tripFromCompany').value) : trim(qs('tripToCompany').value);
+      const address = kind === 'from' ? trim(qs('tripFromAddress').value) : trim(qs('tripToAddress').value);
+      const match = getCompanyByName(company);
+      const url = match && trim(match.mapsUrl)
+        ? trim(match.mapsUrl)
+        : buildMapsUrl([company, address].filter(Boolean).join(', '));
+      if (url) window.open(url, '_blank');
+    }
+
+    function getCompanyFormData(){
+      return {
+        id: state.editingCompanyId || generateId('COMPANY'),
+        name: trim(qs('companyName').value),
+        street: trim(qs('companyStreet').value),
+        city: trim(qs('companyCity').value),
+        zip: trim(qs('companyZip').value),
+        country: trim(qs('companyCountry').value),
+        mapsUrl: trim(qs('companyMapsUrl').value),
+        note: trim(qs('companyNote').value),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function companyValid(company){
+      return !!(company.name && (company.street || company.city || company.mapsUrl));
+    }
+
+    function resetCompanyForm(){
+      state.editingCompanyId = null;
+      qs('companyFormTitle').textContent = 'Firma a adresa';
+      qs('companySubmitBtn').textContent = 'Uložit firmu';
+      qs('companyForm').reset();
+      qs('companyCountry').value = 'Česko';
+    }
+
+    function fillCompanyForm(company){
+      state.editingCompanyId = company.id;
+      qs('companyFormTitle').textContent = 'Upravit firmu';
+      qs('companySubmitBtn').textContent = 'Uložit změny';
+      qs('companyName').value = company.name || '';
+      qs('companyStreet').value = company.street || '';
+      qs('companyCity').value = company.city || '';
+      qs('companyZip').value = company.zip || '';
+      qs('companyCountry').value = company.country || 'Česko';
+      qs('companyMapsUrl').value = company.mapsUrl || '';
+      qs('companyNote').value = company.note || '';
+      openScreen('profiles');
+    }
+
+    function editCompany(id){
+      const company = state.companies.find(c => c.id === id);
+      if (company) fillCompanyForm(company);
+    }
+
+    function removeCompany(id){
+      if (!confirm('Opravdu smazat firmu?')) return;
+      state.companies = state.companies.filter(c => c.id !== id);
+      saveState();
+      renderAll();
+    }
+
+    function useCompanyFor(kind, id){
+      const company = state.companies.find(c => c.id === id);
+      if (!company) return;
+      const address = buildCompanyAddress(company);
+      if (kind === 'from') {
+        qs('tripFromCompany').value = company.name || '';
+        qs('tripFromAddress').value = address;
+      } else {
+        qs('tripToCompany').value = company.name || '';
+        qs('tripToAddress').value = address;
+      }
+      openScreen('trip');
     }
 
     function saveState(){
@@ -911,6 +1114,7 @@
       localStorage.setItem(STORAGE.activeProfileId, state.activeProfileId || '');
       localStorage.setItem(STORAGE.trips, JSON.stringify(state.trips));
       localStorage.setItem(STORAGE.fuelings, JSON.stringify(state.fuelings));
+      localStorage.setItem(STORAGE.companies, JSON.stringify(state.companies));
     }
 
     function sendToGoogle(action, payload){
@@ -1109,8 +1313,12 @@
         endTime: qs('tripEndTime').value,
         kmStart: digitsOnly(qs('tripKmStart').value),
         kmEnd: digitsOnly(qs('tripKmEnd').value),
-        from: trim(qs('tripFrom').value),
-        to: trim(qs('tripTo').value),
+        fromCompany: trim(qs('tripFromCompany').value),
+        fromAddress: trim(qs('tripFromAddress').value),
+        toCompany: trim(qs('tripToCompany').value),
+        toAddress: trim(qs('tripToAddress').value),
+        from: trim(qs('tripFromCompany').value) || trim(qs('tripFromAddress').value),
+        to: trim(qs('tripToCompany').value) || trim(qs('tripToAddress').value),
         truckPlate: trim(qs('tripTruckPlate').value).toUpperCase(),
         trailerPlate: trim(qs('tripTrailerPlate').value).toUpperCase(),
         createdAt: new Date().toISOString()
@@ -1174,8 +1382,10 @@
       qs('tripEndTime').value = trip.endTime || '';
       qs('tripKmStart').value = trip.kmStart || '';
       qs('tripKmEnd').value = trip.kmEnd || '';
-      qs('tripFrom').value = trip.from || '';
-      qs('tripTo').value = trip.to || '';
+      qs('tripFromCompany').value = trip.fromCompany || trip.from || '';
+      qs('tripFromAddress').value = trip.fromAddress || '';
+      qs('tripToCompany').value = trip.toCompany || trip.to || '';
+      qs('tripToAddress').value = trip.toAddress || '';
       qs('tripTruckPlate').value = trip.truckPlate || '';
       qs('tripTrailerPlate').value = trip.trailerPlate || '';
 
@@ -1349,6 +1559,28 @@
       `).join('') : '<div class="empty">Zatím tu není žádný profil soupravy.</div>';
     }
 
+    function renderCompanies(){
+      renderCompanySuggestions();
+      const list = [...state.companies].sort((a, b) => trim(a.name).localeCompare(trim(b.name), 'cs'));
+      qs('companiesList').innerHTML = list.length ? list.map(c => `
+        <div class="history-item" style="margin-bottom:12px;padding:18px">
+          <div class="row">
+            <div>
+              <div class="badge">Firma</div>
+              <strong style="margin-top:10px">${esc(c.name)}</strong>
+              <span>${esc(buildCompanyAddress(c) || 'Bez adresy')}${c.note ? ' • ' + esc(c.note) : ''}</span>
+            </div>
+            <div class="row">
+              <button class="icon-btn" onclick="useCompanyFor('from', '${c.id}')">Použít Odkud</button>
+              <button class="icon-btn" onclick="useCompanyFor('to', '${c.id}')">Použít Kam</button>
+              <button class="icon-btn" onclick="editCompany('${c.id}')">Upravit</button>
+              <button class="btn-danger" onclick="removeCompany('${c.id}')">Smazat</button>
+            </div>
+          </div>
+        </div>
+      `).join('') : '<div class="empty">Zatím tu není žádná firma v adresáři.</div>';
+    }
+
     function filteredTrips(){
       const q = trim(qs('historySearch')?.value || '').toLowerCase();
       const filter = qs('historyTransportFilter')?.value || 'all';
@@ -1429,8 +1661,24 @@
       renderRecentTrips();
       renderRecentFuelings();
       renderProfiles();
+      renderCompanies();
       renderHistory();
     }
+
+    qs('companyForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const company = getCompanyFormData();
+      if (!companyValid(company)) {
+        alert('Vyplň prosím název firmy a aspoň část adresy nebo odkaz na mapu.');
+        return;
+      }
+
+      const exists = state.companies.some(c => c.id === company.id);
+      state.companies = exists ? state.companies.map(c => c.id === company.id ? company : c) : [company, ...state.companies];
+      saveState();
+      resetCompanyForm();
+      renderAll();
+    });
 
     qs('profileForm').addEventListener('submit', function(e){
       e.preventDefault();
@@ -1503,8 +1751,13 @@
     resetProfileForm();
     resetTripForm();
     resetFuelForm();
+    resetCompanyForm();
     setHistoryMode('trips');
     if (state.activeProfileId && activeProfile()) prefillFromProfile(activeProfile());
+
+    qs('tripFromCompany').addEventListener('blur', function(){ applyCompanyAddress('from'); });
+    qs('tripToCompany').addEventListener('blur', function(){ applyCompanyAddress('to'); });
+
     renderAll();
   </script>
 </body>
