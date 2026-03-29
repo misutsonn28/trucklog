@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>TruckLog PRO V8</title>
+  <title>TruckLog PRO V8.1</title>
 
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0f172a" />
@@ -244,6 +244,16 @@
 
     .hidden{display:none !important}
 
+    .readonly-box{
+      width:100%;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid #334155;
+      background:#182233;
+      color:#cbd5e1;
+      font-size:16px;
+    }
+
     nav{
       position:fixed;
       left:0;
@@ -279,8 +289,8 @@
 </head>
 <body>
   <header>
-    <div class="title">🚛 TruckLog PRO V8</div>
-    <div class="subtitle">Silo + kontejnerová přeprava</div>
+    <div class="title">🚛 TruckLog PRO V8.1</div>
+    <div class="subtitle">Cisterna + kontejnerová přeprava</div>
   </header>
 
   <section id="onboarding" class="screen">
@@ -310,14 +320,33 @@
       <label for="truckPlate">SPZ tahače</label>
       <input type="text" id="truckPlate" />
 
-      <label for="trailerBrand">Značka cisterny / návěsu</label>
-      <input type="text" id="trailerBrand" />
+      <label for="profileTransportType">Typ přepravy</label>
+      <select id="profileTransportType" onchange="toggleProfileTransportFields('onboarding')">
+        <option value="cisterna">Cisterna</option>
+        <option value="kontejner">Kontejner</option>
+      </select>
 
-      <label for="trailerPlate">SPZ cisterny / návěsu</label>
-      <input type="text" id="trailerPlate" />
+      <div id="onboardingCisternaFields">
+        <label for="trailerBrand">Značka cisterny</label>
+        <input type="text" id="trailerBrand" />
 
-      <label for="tankVolume">Objem cisterny (m³)</label>
-      <input type="number" id="tankVolume" step="0.1" value="60" />
+        <label for="trailerPlate">SPZ cisterny</label>
+        <input type="text" id="trailerPlate" />
+
+        <label for="tankVolume">Objem cisterny (m³)</label>
+        <input type="number" id="tankVolume" step="0.1" value="60" />
+      </div>
+
+      <div id="onboardingContainerFields" class="hidden">
+        <label>Značka vybavení</label>
+        <div class="readonly-box">HETU</div>
+
+        <label for="equipmentNumber">Číslo vybavení HETU (0–999)</label>
+        <input type="number" id="equipmentNumber" min="0" max="999" step="1" placeholder="Např. 27" />
+
+        <label for="trailerPlateContainer">SPZ šasi / vybavení</label>
+        <input type="text" id="trailerPlateContainer" />
+      </div>
 
       <button class="btn success" onclick="saveProfile(true)">✅ Uložit a otevřít aplikaci</button>
       <div id="profileStatus" class="status"></div>
@@ -379,14 +408,33 @@
       <label for="profilesTruckPlate">SPZ tahače</label>
       <input type="text" id="profilesTruckPlate" />
 
-      <label for="profilesTrailerBrand">Značka cisterny / návěsu</label>
-      <input type="text" id="profilesTrailerBrand" />
+      <label for="profilesTransportType">Typ přepravy</label>
+      <select id="profilesTransportType" onchange="toggleProfileTransportFields('profiles')">
+        <option value="cisterna">Cisterna</option>
+        <option value="kontejner">Kontejner</option>
+      </select>
 
-      <label for="profilesTrailerPlate">SPZ cisterny / návěsu</label>
-      <input type="text" id="profilesTrailerPlate" />
+      <div id="profilesCisternaFields">
+        <label for="profilesTrailerBrand">Značka cisterny</label>
+        <input type="text" id="profilesTrailerBrand" />
 
-      <label for="profilesTankVolume">Objem cisterny (m³)</label>
-      <input type="number" id="profilesTankVolume" step="0.1" value="60" />
+        <label for="profilesTrailerPlate">SPZ cisterny</label>
+        <input type="text" id="profilesTrailerPlate" />
+
+        <label for="profilesTankVolume">Objem cisterny (m³)</label>
+        <input type="number" id="profilesTankVolume" step="0.1" value="60" />
+      </div>
+
+      <div id="profilesContainerFields" class="hidden">
+        <label>Značka vybavení</label>
+        <div class="readonly-box">HETU</div>
+
+        <label for="profilesEquipmentNumber">Číslo vybavení HETU (0–999)</label>
+        <input type="number" id="profilesEquipmentNumber" min="0" max="999" step="1" placeholder="Např. 27" />
+
+        <label for="profilesTrailerPlateContainer">SPZ šasi / vybavení</label>
+        <input type="text" id="profilesTrailerPlateContainer" />
+      </div>
 
       <button class="btn success" onclick="saveProfile(false)">💾 Uložit profil</button>
       <button class="btn secondary" id="cancelProfileEditBtn" style="display:none" onclick="cancelProfileEdit()">Zrušit editaci profilu</button>
@@ -679,6 +727,13 @@
       return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     }
 
+    function normalizeEquipmentNumber(value) {
+      const num = Number(value);
+      if (Number.isNaN(num)) return "";
+      const safe = Math.min(999, Math.max(0, Math.floor(num)));
+      return String(safe).padStart(3, "0");
+    }
+
     function getActiveProfile() {
       return profiles.find(p => p.id === activeProfileId) || null;
     }
@@ -736,58 +791,97 @@
       return res.json();
     }
 
+    function toggleProfileTransportFields(scope) {
+      const isOnboarding = scope === "onboarding";
+      const typeEl = isOnboarding ? qs("profileTransportType") : qs("profilesTransportType");
+      const type = typeEl.value;
+
+      const cisternaBox = isOnboarding ? qs("onboardingCisternaFields") : qs("profilesCisternaFields");
+      const containerBox = isOnboarding ? qs("onboardingContainerFields") : qs("profilesContainerFields");
+
+      cisternaBox.classList.toggle("hidden", type !== "cisterna");
+      containerBox.classList.toggle("hidden", type !== "kontejner");
+    }
+
     function profileIsValid(profile) {
-      return !!(
-        profile.driverName &&
-        profile.truckBrand &&
-        profile.truckPlate &&
-        profile.trailerBrand &&
-        profile.trailerPlate
-      );
-    }
+      if (!(profile.driverName && profile.truckBrand && profile.truckPlate)) return false;
 
-    function toggleTransportMode() {
-      const mode = qs("transportMode").value;
-      qs("siloForm").classList.toggle("hidden", mode !== "silo");
-      qs("containerForm").classList.toggle("hidden", mode !== "container");
-      toggleContainerFields();
-    }
-
-    function toggleContainerFields() {
-      const state = qs("containerState")?.value || "Plný";
-      const dropped = qs("containerDropped")?.checked;
-      const swap = qs("containerSwap")?.checked;
-
-      if (qs("containerWeight")) {
-        if (state === "Prázdný") qs("containerWeight").value = "0";
+      if (profile.transportType === "kontejner") {
+        return !!(profile.equipmentBrand === "HETU" && profile.equipmentNumber && profile.trailerPlate);
       }
-      if (qs("containerDropLocation")) qs("containerDropLocation").disabled = !dropped;
-      if (qs("containerNewChassis")) qs("containerNewChassis").disabled = !swap;
+
+      return !!(profile.trailerBrand && profile.trailerPlate);
     }
 
     function getOnboardingProfileData() {
+      const transportType = qs("profileTransportType").value;
+
+      if (transportType === "kontejner") {
+        return {
+          id: editingProfileId || generateId("PROFILE"),
+          driverName: qs("driverName").value.trim(),
+          truckBrand: qs("truckBrand").value.trim(),
+          truckModel: qs("truckModel").value.trim(),
+          truckPlate: qs("truckPlate").value.trim(),
+          transportType: "kontejner",
+          equipmentBrand: "HETU",
+          equipmentNumber: normalizeEquipmentNumber(qs("equipmentNumber").value),
+          trailerBrand: "HETU",
+          trailerPlate: qs("trailerPlateContainer").value.trim(),
+          tankVolume: "",
+          displayEquipmentLabel: `HETU ${normalizeEquipmentNumber(qs("equipmentNumber").value)}`
+        };
+      }
+
       return {
         id: editingProfileId || generateId("PROFILE"),
         driverName: qs("driverName").value.trim(),
         truckBrand: qs("truckBrand").value.trim(),
         truckModel: qs("truckModel").value.trim(),
         truckPlate: qs("truckPlate").value.trim(),
+        transportType: "cisterna",
+        equipmentBrand: "",
+        equipmentNumber: "",
         trailerBrand: qs("trailerBrand").value.trim(),
         trailerPlate: qs("trailerPlate").value.trim(),
-        tankVolume: qs("tankVolume").value.trim() || "60"
+        tankVolume: qs("tankVolume").value.trim() || "60",
+        displayEquipmentLabel: ""
       };
     }
 
     function getProfilesScreenData() {
+      const transportType = qs("profilesTransportType").value;
+
+      if (transportType === "kontejner") {
+        return {
+          id: editingProfileId || generateId("PROFILE"),
+          driverName: qs("profilesDriverName").value.trim(),
+          truckBrand: qs("profilesTruckBrand").value.trim(),
+          truckModel: qs("profilesTruckModel").value.trim(),
+          truckPlate: qs("profilesTruckPlate").value.trim(),
+          transportType: "kontejner",
+          equipmentBrand: "HETU",
+          equipmentNumber: normalizeEquipmentNumber(qs("profilesEquipmentNumber").value),
+          trailerBrand: "HETU",
+          trailerPlate: qs("profilesTrailerPlateContainer").value.trim(),
+          tankVolume: "",
+          displayEquipmentLabel: `HETU ${normalizeEquipmentNumber(qs("profilesEquipmentNumber").value)}`
+        };
+      }
+
       return {
         id: editingProfileId || generateId("PROFILE"),
         driverName: qs("profilesDriverName").value.trim(),
         truckBrand: qs("profilesTruckBrand").value.trim(),
         truckModel: qs("profilesTruckModel").value.trim(),
         truckPlate: qs("profilesTruckPlate").value.trim(),
+        transportType: "cisterna",
+        equipmentBrand: "",
+        equipmentNumber: "",
         trailerBrand: qs("profilesTrailerBrand").value.trim(),
         trailerPlate: qs("profilesTrailerPlate").value.trim(),
-        tankVolume: qs("profilesTankVolume").value.trim() || "60"
+        tankVolume: qs("profilesTankVolume").value.trim() || "60",
+        displayEquipmentLabel: ""
       };
     }
 
@@ -799,7 +893,7 @@
 
       if (!profileIsValid(newProfile)) {
         if (statusEl) statusEl.textContent = "";
-        alert("Vyplň prosím jméno řidiče, značku a SPZ tahače i cisterny.");
+        alert("Vyplň prosím jméno řidiče, tahač a povinná pole podle typu přepravy.");
         return;
       }
 
@@ -830,10 +924,23 @@
         return;
       }
 
+      if (profile.transportType === "kontejner") {
+        qs("profileBox").innerHTML = `
+          <strong>Řidič:</strong> ${escapeHtml(profile.driverName)}<br>
+          <strong>Tahač:</strong> ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
+          <strong>Typ přepravy:</strong> Kontejner<br>
+          <strong>Vybavení:</strong> ${escapeHtml(profile.displayEquipmentLabel || "HETU")}<br>
+          <strong>SPZ šasi / vybavení:</strong> ${escapeHtml(profile.trailerPlate || "-")}
+        `;
+        return;
+      }
+
       qs("profileBox").innerHTML = `
         <strong>Řidič:</strong> ${escapeHtml(profile.driverName)}<br>
         <strong>Tahač:</strong> ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
-        <strong>Cisterna / návěs:</strong> ${escapeHtml(profile.trailerBrand)} ${escapeHtml(profile.trailerPlate)}<br>
+        <strong>Typ přepravy:</strong> Cisterna<br>
+        <strong>Značka cisterny:</strong> ${escapeHtml(profile.trailerBrand || "-")}<br>
+        <strong>SPZ cisterny:</strong> ${escapeHtml(profile.trailerPlate || "-")}<br>
         <strong>Objem cisterny:</strong> ${escapeHtml(String(profile.tankVolume || 60))} m³
       `;
     }
@@ -847,20 +954,27 @@
         return;
       }
 
-      box.innerHTML = profiles.map(profile => `
-        <div class="history-item ${profile.id === activeProfileId ? "profile-card-active" : ""}">
-          <div class="history-title">${escapeHtml(profile.driverName)}</div>
-          <div class="history-meta">
-            ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
-            ${escapeHtml(profile.trailerBrand)} ${escapeHtml(profile.trailerPlate)} • ${escapeHtml(String(profile.tankVolume || 60))} m³
+      box.innerHTML = profiles.map(profile => {
+        const transportLabel = profile.transportType === "kontejner" ? "Kontejner" : "Cisterna";
+        const equipmentLine = profile.transportType === "kontejner"
+          ? `${escapeHtml(profile.displayEquipmentLabel || "HETU")} • ${escapeHtml(profile.trailerPlate || "-")}`
+          : `${escapeHtml(profile.trailerBrand || "-")} ${escapeHtml(profile.trailerPlate || "-")} • ${escapeHtml(String(profile.tankVolume || 60))} m³`;
+
+        return `
+          <div class="history-item ${profile.id === activeProfileId ? "profile-card-active" : ""}">
+            <div class="history-title">${escapeHtml(profile.driverName)}</div>
+            <div class="history-meta">
+              ${escapeHtml(profile.truckBrand)} ${escapeHtml(profile.truckModel || "")} ${escapeHtml(profile.truckPlate)}<br>
+              ${transportLabel} • ${equipmentLine}
+            </div>
+            <div class="history-actions">
+              <button class="btn small success" onclick="setActiveProfile('${profile.id}')">Aktivovat</button>
+              <button class="btn small warning" onclick="editProfile('${profile.id}')">Upravit</button>
+              <button class="btn small danger" onclick="deleteProfile('${profile.id}')">Smazat</button>
+            </div>
           </div>
-          <div class="history-actions">
-            <button class="btn small success" onclick="setActiveProfile('${profile.id}')">Aktivovat</button>
-            <button class="btn small warning" onclick="editProfile('${profile.id}')">Upravit</button>
-            <button class="btn small danger" onclick="deleteProfile('${profile.id}')">Smazat</button>
-          </div>
-        </div>
-      `).join("");
+        `;
+      }).join("");
     }
 
     function setActiveProfile(profileId) {
@@ -882,9 +996,18 @@
       qs("profilesTruckBrand").value = profile.truckBrand || "";
       qs("profilesTruckModel").value = profile.truckModel || "";
       qs("profilesTruckPlate").value = profile.truckPlate || "";
-      qs("profilesTrailerBrand").value = profile.trailerBrand || "";
-      qs("profilesTrailerPlate").value = profile.trailerPlate || "";
-      qs("profilesTankVolume").value = profile.tankVolume || "60";
+      qs("profilesTransportType").value = profile.transportType || "cisterna";
+
+      toggleProfileTransportFields("profiles");
+
+      if (profile.transportType === "kontejner") {
+        qs("profilesEquipmentNumber").value = Number(profile.equipmentNumber || 0);
+        qs("profilesTrailerPlateContainer").value = profile.trailerPlate || "";
+      } else {
+        qs("profilesTrailerBrand").value = profile.trailerBrand || "";
+        qs("profilesTrailerPlate").value = profile.trailerPlate || "";
+        qs("profilesTankVolume").value = profile.tankVolume || "60";
+      }
 
       openScreen("profiles");
     }
@@ -902,10 +1025,14 @@
       qs("profilesTruckBrand").value = "";
       qs("profilesTruckModel").value = "";
       qs("profilesTruckPlate").value = "";
+      qs("profilesTransportType").value = "cisterna";
       qs("profilesTrailerBrand").value = "";
       qs("profilesTrailerPlate").value = "";
       qs("profilesTankVolume").value = "60";
+      qs("profilesEquipmentNumber").value = "";
+      qs("profilesTrailerPlateContainer").value = "";
       qs("profilesStatus").textContent = "";
+      toggleProfileTransportFields("profiles");
     }
 
     function deleteProfile(profileId) {
@@ -1016,7 +1143,10 @@
           truckPlate: profile.truckPlate,
           trailerBrand: profile.trailerBrand,
           trailerPlate: profile.trailerPlate,
-          tankVolume: profile.tankVolume
+          tankVolume: profile.tankVolume,
+          transportType: profile.transportType,
+          equipmentBrand: profile.equipmentBrand || "",
+          equipmentNumber: profile.equipmentNumber || ""
         };
 
         if (!trip.date || !trip.from || !trip.to) {
@@ -1057,7 +1187,10 @@
           truckPlate: profile.truckPlate,
           trailerBrand: profile.trailerBrand,
           trailerPlate: profile.trailerPlate,
-          tankVolume: profile.tankVolume
+          tankVolume: profile.tankVolume,
+          transportType: profile.transportType,
+          equipmentBrand: profile.equipmentBrand || "",
+          equipmentNumber: profile.equipmentNumber || ""
         };
 
         if (!trip.date || !trip.operationType || !trip.from || !trip.to || !trip.containerNumber || !trip.chassis) {
@@ -1117,6 +1250,23 @@
       resetTripForm();
       renderAll();
       openScreen("history");
+    }
+
+    function toggleTransportMode() {
+      const mode = qs("transportMode").value;
+      qs("siloForm").classList.toggle("hidden", mode !== "silo");
+      qs("containerForm").classList.toggle("hidden", mode !== "container");
+      toggleContainerFields();
+    }
+
+    function toggleContainerFields() {
+      const state = qs("containerState")?.value || "Plný";
+      const dropped = qs("containerDropped")?.checked;
+      const swap = qs("containerSwap")?.checked;
+
+      if (qs("containerWeight") && state === "Prázdný") qs("containerWeight").value = "0";
+      if (qs("containerDropLocation")) qs("containerDropLocation").disabled = !dropped;
+      if (qs("containerNewChassis")) qs("containerNewChassis").disabled = !swap;
     }
 
     function editTrip(tripId) {
@@ -1297,7 +1447,8 @@
         truckModel: profile.truckModel,
         truckPlate: profile.truckPlate,
         trailerBrand: profile.trailerBrand,
-        trailerPlate: profile.trailerPlate
+        trailerPlate: profile.trailerPlate,
+        transportType: profile.transportType
       };
 
       if (!fueling.date || !fueling.km || !fueling.liters) {
@@ -1405,6 +1556,7 @@
               <div class="history-row">
                 <strong>Přepřah:</strong> ${t.swap ? "ANO" : "NE"}<br>
                 <strong>Odstavení:</strong> ${t.dropped ? "ANO" : "NE"} ${escapeHtml(t.dropLocation || "")}<br>
+                <strong>Profil:</strong> ${escapeHtml(t.equipmentBrand || "HETU")} ${escapeHtml(t.equipmentNumber || "")}<br>
                 <strong>Poznámka:</strong> ${escapeHtml(t.note || "-")}
                 ${t.docLink ? `<br><strong>Dokument:</strong> <a class="preview-link" target="_blank" rel="noopener" href="${t.docLink}">${escapeHtml(t.docSavedName || t.docLink)}</a>` : ``}
               </div>
@@ -1421,7 +1573,7 @@
             <div class="history-title">${escapeHtml(t.date || "-")} • ${escapeHtml(t.from || "-")} → ${escapeHtml(t.to || "-")}</div>
             <div class="history-meta">${escapeHtml(t.startTime || "--:--")} • ${escapeHtml(t.material || "-")} • ${Number(t.weight || 0).toFixed(1)} t</div>
             <div class="history-row">
-              <span class="tag">Silo</span>
+              <span class="tag">Cisterna</span>
               ${t.washUsed ? `<span class="tag green">Myčka ${formatMinutes(t.washMinutes)}</span>` : `<span class="tag gray">Bez myčky</span>`}
               <span class="tag gray">Kompresor ${formatMinutes(t.compressorMinutes)}</span>
               <span class="tag gray">Tlak ${Number(t.pressure || 0).toFixed(1)} bar</span>
@@ -1463,7 +1615,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "trucklog-v8-backup.json";
+      a.download = "trucklog-v8-1-backup.json";
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -1550,6 +1702,8 @@
     initApp();
     toggleTransportMode();
     toggleContainerFields();
+    toggleProfileTransportFields("onboarding");
+    toggleProfileTransportFields("profiles");
   </script>
 </body>
 </html>
