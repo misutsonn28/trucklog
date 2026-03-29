@@ -387,13 +387,28 @@
                 </div>
                 <div class="grid g2">
                   <div class="field">
-                    <label for="tripCommodity">Komodita</label>
-                    <input id="tripCommodity" placeholder="Např. Cement" />
+                    <label for="tripCommodityPreset">Komodita</label>
+                    <select id="tripCommodityPreset" onchange="toggleCommodityCustom()">
+                      <option value="">Vyber komoditu</option>
+                      <option value="Cement">Cement</option>
+                      <option value="Popílek">Popílek</option>
+                      <option value="Granulát">Granulát</option>
+                      <option value="Vápno">Vápno</option>
+                      <option value="Moučka">Moučka</option>
+                      <option value="Sádra">Sádra</option>
+                      <option value="Písek">Písek</option>
+                      <option value="Kamenivo">Kamenivo</option>
+                      <option value="Jiná">Jiná</option>
+                    </select>
                   </div>
                   <div class="field">
                     <label for="tripQuantity">Množství</label>
                     <input id="tripQuantity" placeholder="Např. 27 t" />
                   </div>
+                </div>
+                <div class="field hidden" id="tripCommodityCustomWrap">
+                  <label for="tripCommodityCustom">Vlastní komodita</label>
+                  <input id="tripCommodityCustom" placeholder="Např. Struska" />
                 </div>
                 <div class="grid g2">
                   <div class="field">
@@ -908,6 +923,17 @@
       webAppUrl: 'https://script.google.com/macros/s/AKfycbyrn_MwM8BYgTxGPuaIh7rs8dAjVUwUWZSfE31Ld8ZFZS8xy32_iV-qf4mfXgentTqZcA/exec'
     };
 
+    const COMMODITY_OPTIONS = [
+      'Cement',
+      'Popílek',
+      'Granulát',
+      'Vápno',
+      'Moučka',
+      'Sádra',
+      'Písek',
+      'Kamenivo'
+    ];
+
     const STORAGE = {
       profiles: 'trucklog_profiles',
       activeProfileId: 'trucklog_active_profile_id',
@@ -1298,6 +1324,7 @@
       qs('tripDate').value = today();
       qs('tripStartTime').value = '06:00';
       qs('containerEquipmentBrand').value = 'HETU';
+      setCommodityFields('');
       setTransportMode('silo');
       toggleContainerFields();
       prefillFromProfile(activeProfile());
@@ -1354,7 +1381,7 @@
         ...base,
         loadingPlace: trim(qs('tripLoadingPlace').value),
         unloadingPlace: trim(qs('tripUnloadingPlace').value),
-        commodity: trim(qs('tripCommodity').value),
+        commodity: qs('tripCommodityPreset').value === 'Jiná' ? trim(qs('tripCommodityCustom').value) : trim(qs('tripCommodityPreset').value),
         quantity: trim(qs('tripQuantity').value),
         washDone: qs('tripWashDone').checked,
         washFrom: qs('tripWashFrom').value,
@@ -1416,7 +1443,7 @@
         setTransportMode('silo');
         qs('tripLoadingPlace').value = trip.loadingPlace || '';
         qs('tripUnloadingPlace').value = trip.unloadingPlace || '';
-        qs('tripCommodity').value = trip.commodity || '';
+        setCommodityFields(trip.commodity || '');
         qs('tripQuantity').value = trip.quantity || '';
         qs('tripWashDone').checked = !!trip.washDone;
         qs('tripWashFrom').value = trip.washFrom || '';
@@ -1496,15 +1523,19 @@
       const todayTrips = state.trips.filter(t => t.date === today());
       const kmToday = todayTrips.reduce((sum, t) => sum + kmDiff(t.kmStart, t.kmEnd), 0);
       const lastFuel = [...state.fuelings].sort(sortByCreated)[0];
+      const lastFuelInterval = lastFuel ? getFuelIntervalById(lastFuel.id) : null;
       const profile = activeProfile();
+      const averageConsumption = getAverageConsumption();
+
       qs('miniTrips').textContent = state.trips.length;
       qs('miniFuel').textContent = state.fuelings.length;
 
       qs('statsGrid').innerHTML = [
         { label:'Dnešní jízdy', value:String(todayTrips.length), hint:'Počet uložených operací za dnešek' },
         { label:'Km dnes', value:String(kmToday), hint:'Součet kilometrů z dnešních jízd' },
+        { label:'Průměrná spotřeba', value:formatConsumption(averageConsumption), hint:'Počítá se mezi uloženými tankováními' },
         { label:'Aktivní souprava', value:profile ? `${profile.truckPlate || '—'} • ${profile.trailerPlate || profile.containerPlate || '—'}` : 'Zatím bez soupravy', hint:'Poslední zvolený aktivní profil' },
-        { label:'Poslední tankování', value:lastFuel ? `${lastFuel.place || 'Pumpa'} • ${lastFuel.liters || 0} l` : 'Zatím bez tankování', hint:'Poslední uložené tankování' }
+        { label:'Poslední tankování', value:lastFuel ? `${lastFuel.place || 'Pumpa'} • ${lastFuel.liters || 0} l` : 'Zatím bez tankování', hint:lastFuelInterval ? `${lastFuelInterval.intervalKm} km • ${formatConsumption(lastFuelInterval.consumption)}` : 'Spotřeba se ukáže po druhém tankování' }
       ].map(item => `
         <div class="stat-card">
           <div class="tiny">${esc(item.label)}</div>
@@ -1526,12 +1557,14 @@
 
     function renderRecentFuelings(){
       const list = [...state.fuelings].sort(sortByCreated).slice(0,4);
-      qs('recentFuelings').innerHTML = list.length ? list.map(f => `
+      qs('recentFuelings').innerHTML = list.length ? list.map(f => {
+        const interval = getFuelIntervalById(f.id);
+        return `
         <div class="summary">
           <strong>${esc(formatDate(f.date))} • ${esc(f.place || 'Čerpací stanice')}</strong>
-          <span>${esc((f.liters || 0) + ' l')} • ${esc((f.total || computeFuelTotalValues(f.liters, f.pricePerLiter) || 0) + ' Kč')}</span>
-        </div>
-      `).join('') : '<div class="empty">Zatím tu není žádné tankování.</div>';
+          <span>${esc((f.liters || 0) + ' l')} • ${esc((f.total || computeFuelTotalValues(f.liters, f.pricePerLiter) || 0) + ' Kč')}${interval ? ` • ${esc(formatConsumption(interval.consumption))}` : ''}</span>
+        </div>`;
+      }).join('') : '<div class="empty">Zatím tu není žádné tankování.</div>';
     }
 
     function renderProfiles(){
@@ -1611,8 +1644,10 @@
                   <div class="metric"><div class="l">Litry</div><div class="v">${esc((f.liters || 0) + ' l')}</div></div>
                   <div class="metric"><div class="l">Cena/l</div><div class="v">${esc((f.pricePerLiter || 0) + ' Kč')}</div></div>
                   <div class="metric"><div class="l">Celkem</div><div class="v">${esc((f.total || 0) + ' Kč')}</div></div>
+                  <div class="metric"><div class="l">Spotřeba</div><div class="v">${esc(getFuelIntervalById(f.id) ? formatConsumption(getFuelIntervalById(f.id).consumption) : '—')}</div></div>
+                  <div class="metric"><div class="l">Interval km</div><div class="v">${esc(getFuelIntervalById(f.id) ? String(getFuelIntervalById(f.id).intervalKm) : '—')}</div></div>
                 </div>
-                ${f.note ? `<div class="summary" style="margin-top:14px"><strong>Poznámka</strong><span>${esc(f.note)}</span></div>` : ''}
+                ${getFuelIntervalById(f.id) ? `<div class="summary" style="margin-top:14px"><strong>Výpočet spotřeby</strong><span>Od minulého tankování ${esc(getFuelIntervalById(f.id).intervalKm)} km • ${esc(getFuelIntervalById(f.id).liters + ' l')} • ${esc(formatConsumption(getFuelIntervalById(f.id).consumption))}</span></div>` : ''}${f.note ? `<div class="summary" style="margin-top:14px"><strong>Poznámka</strong><span>${esc(f.note)}</span></div>` : ''}
               </div>
               <div class="row">
                 <button class="icon-btn" onclick="editFuel('${f.id}')">Upravit</button>
