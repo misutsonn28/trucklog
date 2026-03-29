@@ -1,18 +1,26 @@
-/assets
-/src
-/images
 {
-  "name": "TruckLog PRO",
+  "name": "TruckLog PRO V9",
   "short_name": "TruckLog",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#0f172a",
+  "background_color": "#061225",
+  "theme_color": "#061225",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
