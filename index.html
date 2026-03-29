@@ -1018,6 +1018,99 @@
     }
 
 
+
+
+    function toggleCommodityCustom(){
+      const preset = qs('tripCommodityPreset');
+      const wrap = qs('tripCommodityCustomWrap');
+      const custom = qs('tripCommodityCustom');
+      if (!preset || !wrap || !custom) return;
+      const isOther = preset.value === 'Jiná';
+      wrap.classList.toggle('hidden', !isOther);
+      if (!isOther) custom.value = '';
+    }
+
+    function setCommodityFields(value){
+      const preset = qs('tripCommodityPreset');
+      const custom = qs('tripCommodityCustom');
+      if (!preset || !custom) return;
+
+      const clean = trim(value);
+      if (!clean) {
+        preset.value = '';
+        custom.value = '';
+        toggleCommodityCustom();
+        return;
+      }
+
+      if (COMMODITY_OPTIONS.includes(clean)) {
+        preset.value = clean;
+        custom.value = '';
+      } else {
+        preset.value = 'Jiná';
+        custom.value = clean;
+      }
+      toggleCommodityCustom();
+    }
+
+    function getSortedFuelings(){
+      return [...state.fuelings]
+        .filter(item => item && item.date && item.odometer && item.liters)
+        .sort((a, b) => {
+          const byDate = new Date(a.date) - new Date(b.date);
+          if (byDate !== 0) return byDate;
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
+    }
+
+    function getFuelIntervals(){
+      const fuelings = getSortedFuelings();
+      const intervals = [];
+
+      for (let i = 1; i < fuelings.length; i++) {
+        const prev = fuelings[i - 1];
+        const curr = fuelings[i];
+
+        const prevOdo = Number(prev.odometer || 0);
+        const currOdo = Number(curr.odometer || 0);
+        const liters = Number(String(curr.liters || '').replace(',', '.'));
+
+        const intervalKm = currOdo - prevOdo;
+        if (intervalKm > 0 && liters > 0) {
+          const consumption = (liters / intervalKm) * 100;
+          intervals.push({
+            id: curr.id,
+            previousId: prev.id,
+            intervalKm,
+            liters,
+            consumption
+          });
+        }
+      }
+
+      return intervals;
+    }
+
+    function getFuelIntervalById(id){
+      return getFuelIntervals().find(item => item.id === id) || null;
+    }
+
+    function getAverageConsumption(){
+      const intervals = getFuelIntervals();
+      if (!intervals.length) return null;
+
+      const totalKm = intervals.reduce((sum, item) => sum + item.intervalKm, 0);
+      const totalLiters = intervals.reduce((sum, item) => sum + item.liters, 0);
+      if (!totalKm || !totalLiters) return null;
+
+      return (totalLiters / totalKm) * 100;
+    }
+
+    function formatConsumption(value){
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+      return `${Number(value).toFixed(1)} l/100 km`;
+    }
+
     function activeProfile(){
       return state.profiles.find(p => p.id === state.activeProfileId) || null;
     }
