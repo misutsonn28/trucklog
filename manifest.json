@@ -1,8 +1,11 @@
 {
   "name": "TruckLog PRO V9",
   "short_name": "TruckLog",
+  "description": "Webová aplikace pro evidenci jízd, tankování a souprav pro cisternu i kontejnerovou přepravu.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#061225",
   "theme_color": "#061225",
   "icons": [
