@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>TruckLog PRO V10</title>
+  <title>TruckLog PRO V10.1</title>
   <meta name="theme-color" content="#061225" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="TruckLog" />
-  <link rel="manifest" href="manifest.json?v=5" />
-  <link rel="icon" href="icon-192.png?v=5" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=5" />
+  <link rel="manifest" href="manifest.json?v=6" />
+  <link rel="icon" href="icon-192.png?v=6" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=6" />
   <style>
     :root{
       --bg:#061225;
@@ -62,8 +62,7 @@
       box-shadow:0 0 0 4px rgba(52,211,153,.1);
       background:rgba(28,50,84,.98);
     }
-
-    .app{max-width:var(--max);margin:0 auto;padding:18px 16px 126px}
+    .app{max-width:var(--max);margin:0 auto;padding:18px 16px 120px}
     .hero,.section{
       background:var(--card);
       border:1px solid var(--line);
@@ -91,24 +90,25 @@
     .metrics{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px}
     .title{font-size:clamp(1.3rem,2vw,1.8rem);font-weight:800;letter-spacing:-.03em}
     .desc{margin-top:4px;color:var(--muted);font-size:.95rem}
-    .mini-stat,.cardish,.history-card,.summary,.metric,.block{
+    .mini-stat,.cardish,.history-card,.summary,.metric{
       background:var(--card2);
       border:1px solid var(--line);
       border-radius:22px;
     }
     .mini-stat{padding:14px 16px}
     .tiny,.mini-stat .l,.metric .l{
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      font-size:.76rem;
-      color:var(--muted2);
-      font-weight:700;
+      text-transform:uppercase;letter-spacing:.12em;font-size:.76rem;color:var(--muted2);font-weight:700;
     }
     .mini-stat .v{margin-top:6px;font-size:1.3rem;font-weight:800}
-    .cardish,.history-card,.summary,.metric,.block{padding:18px}
+    .cardish{padding:18px}
     .big{font-size:1.8rem;font-weight:900;margin-top:10px;line-height:1.08;letter-spacing:-.04em}
     .hint{margin-top:8px;color:var(--muted);font-size:.92rem}
-    .block{border-radius:26px}
+    .block{
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:18px;
+    }
     .block h3{font-size:1.08rem}
     .block .desc{font-size:.9rem;margin-bottom:14px}
     .field{display:flex;flex-direction:column;gap:8px}
@@ -119,12 +119,10 @@
       border:1px solid var(--line);flex-wrap:wrap;
     }
     .seg button,.tabs button{
-      background:transparent;color:var(--muted);padding:10px 14px;border-radius:14px;
-      font-weight:800;transition:.18s;
+      background:transparent;color:var(--muted);padding:10px 14px;border-radius:14px;font-weight:800;transition:.18s;
     }
     .seg button.active,.tabs button.active{
-      background:linear-gradient(135deg,var(--acc2),var(--acc));
-      color:#06251f;
+      background:linear-gradient(135deg,var(--acc2),var(--acc));color:#06251f;
     }
     .btn,.btn2,.btn-danger,.chip{
       border-radius:18px;min-height:50px;padding:0 16px;font-weight:800;transition:.18s;
@@ -138,6 +136,8 @@
       position:sticky;bottom:14px;z-index:15;background:rgba(4,12,25,.88);backdrop-filter:blur(12px);
       border:1px solid var(--line);border-radius:28px;padding:12px;box-shadow:var(--shadow)
     }
+    .metric{padding:12px}
+    .metric .v{margin-top:4px;font-weight:800}
     .badge{
       display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;font-size:.75rem;
       font-weight:800;text-transform:uppercase;letter-spacing:.12em;border:1px solid transparent;
@@ -145,8 +145,10 @@
     .badge-ok{background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.18)}
     .badge-warn{background:rgba(245,158,11,.12);color:#fcd34d;border-color:rgba(245,158,11,.18)}
     .badge-danger{background:rgba(251,113,133,.12);color:#fecdd3;border-color:rgba(251,113,133,.22)}
+    .summary{padding:14px 16px}
     .summary strong{display:block}
     .summary span{display:block;color:var(--muted);margin-top:6px;font-size:.92rem;line-height:1.4}
+    .history-card{padding:18px}
     .empty{
       padding:28px;border-radius:24px;border:1px dashed var(--line2);background:rgba(10,22,39,.4);
       text-align:center;color:var(--muted)
@@ -157,9 +159,7 @@
       backdrop-filter:blur(14px);border-top:1px solid var(--line)
     }
     .nav-in{
-      max-width:var(--max);margin:0 auto;padding:10px 12px;
-      grid-template-columns:repeat(6,minmax(0,1fr));
-      gap:8px;
+      max-width:var(--max);margin:0 auto;padding:10px 16px;grid-template-columns:repeat(6,minmax(0,1fr));
     }
     .nav button{
       min-height:60px;border-radius:20px;background:transparent;color:var(--muted);
@@ -167,7 +167,7 @@
     }
     .nav button.active{background:rgba(16,36,63,.95);color:var(--txt);border:1px solid var(--line)}
     .nav .i{font-size:1.08rem}
-    .nav .t{font-size:.72rem;font-weight:800}
+    .nav .t{font-size:.75rem;font-weight:800}
     .text-muted{color:var(--muted)}
     .mt-12{margin-top:12px}
     .mt-16{margin-top:16px}
@@ -180,10 +180,9 @@
       .header-stats,.stats-grid,.split,.metrics{grid-template-columns:1fr}
       .hero,.section{padding:16px;border-radius:26px}
       .block{padding:14px;border-radius:22px}
-      .nav-in{gap:6px;padding:10px 8px}
+      .nav-in{gap:6px;padding:10px 10px;grid-template-columns:repeat(3,minmax(0,1fr))}
       .nav button{min-height:56px;border-radius:16px}
       .btn,.btn2,.btn-danger{width:100%}
-      .nav .t{font-size:.65rem}
     }
   </style>
 </head>
@@ -194,8 +193,8 @@
         <div class="brand">
           <div class="logo">🚛</div>
           <div>
-            <h1>TruckLog PRO V10</h1>
-            <p class="subtitle">Osobní jízdní deník pro přehled jízd, tankování, spotřeby, techniky a profilu soupravy</p>
+            <h1>TruckLog PRO V10.1</h1>
+            <p class="subtitle">Osobní jízdní deník s více profily řidičů a vozidel</p>
           </div>
         </div>
         <div class="header-stats">
@@ -210,33 +209,24 @@
         <div class="section-head">
           <div>
             <h2 class="title">Přehled</h2>
-            <p class="desc">To nejdůležitější hned po otevření appky</p>
+            <p class="desc">Přehled je vždy navázaný na aktivní profil</p>
           </div>
         </div>
-        <div class="stats-grid" id="cockpitStats"></div>
+        <div id="activeProfileSummary"></div>
+        <div class="stats-grid mt-16" id="cockpitStats"></div>
       </section>
 
       <section class="section split">
         <div class="block">
-          <h3>Aktivní profil</h3>
-          <p class="desc">Řidič a souprava, pro kterou si vedeš záznamy</p>
-          <div id="profileSummaryCard"></div>
+          <h3>Poslední jízdy</h3>
+          <p class="desc">Poslední záznamy pro aktivní profil</p>
+          <div id="recentTrips" class="list-gap"></div>
         </div>
         <div class="block">
           <h3>Nejbližší termín techniky</h3>
           <p class="desc">STK, emise nebo servis podle kilometru</p>
           <div id="nextTechCard"></div>
         </div>
-      </section>
-
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="title">Poslední jízdy</h2>
-            <p class="desc">Rychlá orientace bez proklikávání historie</p>
-          </div>
-        </div>
-        <div id="recentTrips" class="list-gap"></div>
       </section>
     </section>
 
@@ -246,11 +236,12 @@
           <div class="section-head">
             <div>
               <h2 class="title" id="tripFormTitle">Nová jízda</h2>
-              <p class="desc">Jednoduchý zápis pro vlastní orientaci</p>
+              <p class="desc">Jízda se uloží pod aktivní profil</p>
             </div>
           </div>
+          <div id="tripProfileInfo"></div>
 
-          <div class="split">
+          <div class="split mt-16">
             <div class="block">
               <h3>Základ jízdy</h3>
               <p class="desc">Nejdůležitější údaje nahoře</p>
@@ -274,19 +265,19 @@
 
                 <div class="field">
                   <label for="tripFromPlace">Odkud firma / místo</label>
-                  <input id="tripFromPlace" placeholder="Např. Cement Hranice" />
+                  <input id="tripFromPlace" />
                 </div>
                 <div class="field">
                   <label for="tripFromAddress">Odkud adresa</label>
-                  <input id="tripFromAddress" placeholder="Např. Hranice na Moravě, areál..." />
+                  <input id="tripFromAddress" />
                 </div>
                 <div class="field">
                   <label for="tripToPlace">Kam firma / místo</label>
-                  <input id="tripToPlace" placeholder="Např. Stavba Brno" />
+                  <input id="tripToPlace" />
                 </div>
                 <div class="field">
                   <label for="tripToAddress">Kam adresa</label>
-                  <input id="tripToAddress" placeholder="Např. Brno, provozovna..." />
+                  <input id="tripToAddress" />
                 </div>
               </div>
             </div>
@@ -314,7 +305,7 @@
 
                 <div class="field hidden" id="tripCommodityCustomWrap">
                   <label for="tripCommodityCustom">Jiná komodita</label>
-                  <input id="tripCommodityCustom" placeholder="Napiš vlastní komoditu" />
+                  <input id="tripCommodityCustom" />
                 </div>
 
                 <div class="field">
@@ -325,7 +316,7 @@
 
                 <div class="field">
                   <label for="tripNote">Poznámka</label>
-                  <textarea id="tripNote" placeholder="Např. delší čekání, objížďka, zvláštní poznámka"></textarea>
+                  <textarea id="tripNote"></textarea>
                 </div>
               </div>
             </div>
@@ -347,11 +338,12 @@
           <div class="section-head">
             <div>
               <h2 class="title" id="fuelFormTitle">Tankování</h2>
-              <p class="desc">Spotřeba se počítá mezi dvěma tankováními</p>
+              <p class="desc">Spotřeba se počítá vždy pro aktivní profil</p>
             </div>
           </div>
+          <div id="fuelProfileInfo"></div>
 
-          <div class="split">
+          <div class="split mt-16">
             <div class="block">
               <h3>Základ</h3>
               <p class="desc">Datum, tachometr, litry</p>
@@ -413,14 +405,15 @@
           <div class="section-head">
             <div>
               <h2 class="title">Technika a termíny</h2>
-              <p class="desc">Jen to, co potřebuješ hlídat pro vlastní přehled</p>
+              <p class="desc">Termíny jsou uložené zvlášť pro každý profil</p>
             </div>
           </div>
+          <div id="techProfileInfo"></div>
 
-          <div class="split">
+          <div class="split mt-16">
             <div class="block">
               <h3>Tahač a návěs</h3>
-              <p class="desc">Základní údaje a termíny kontrol</p>
+              <p class="desc">Základní termíny kontrol</p>
 
               <div class="grid">
                 <div class="field">
@@ -472,17 +465,30 @@
       </form>
     </section>
 
-    <section id="screen-profile" class="screen hidden">
+    <section id="screen-profiles" class="screen hidden">
       <form id="profileForm">
         <section class="section">
           <div class="section-head">
             <div>
-              <h2 class="title">Profil</h2>
-              <p class="desc">Řidič, tahač a návěs v jednoduché osobní podobě</p>
+              <h2 class="title" id="profileFormTitle">Nový profil</h2>
+              <p class="desc">Ulož si více řidičů a souprav a přepínej mezi nimi</p>
             </div>
           </div>
 
-          <div class="split">
+          <div class="block">
+            <h3>Aktivní profil</h3>
+            <p class="desc">Tenhle profil používá Přehled, Jízda, Tankování i Technika</p>
+            <div class="grid" style="grid-template-columns:1fr auto auto">
+              <div class="field">
+                <label for="activeProfileSelect">Vybraný profil</label>
+                <select id="activeProfileSelect"></select>
+              </div>
+              <button class="btn2" type="button" onclick="activateSelectedProfile()">Aktivovat</button>
+              <button class="btn2" type="button" onclick="resetProfileForm()">Nový profil</button>
+            </div>
+          </div>
+
+          <div class="split mt-16">
             <div class="block">
               <h3>Řidič a tahač</h3>
               <p class="desc">Základní údaje o tobě a vozidle</p>
@@ -546,25 +552,26 @@
                 </div>
                 <div class="field">
                   <label for="profileNote">Poznámka k soupravě</label>
-                  <textarea id="profileNote" placeholder="Např. objem cisterny, poznámka k soupravě..."></textarea>
+                  <textarea id="profileNote"></textarea>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="mt-16 row">
-            <button class="btn" type="submit">Uložit profil</button>
+            <button class="btn" type="submit" id="profileSubmitBtn">Uložit profil</button>
+            <button class="btn2" type="button" onclick="resetProfileForm()">Vyčistit formulář</button>
           </div>
         </section>
 
         <section class="section">
           <div class="section-head">
             <div>
-              <h2 class="title">Shrnutí profilu</h2>
-              <p class="desc">Rychlý přehled uložené soupravy</p>
+              <h2 class="title">Uložené profily</h2>
+              <p class="desc">Přepínání mezi řidiči a vozidly</p>
             </div>
           </div>
-          <div id="profileDetailsCard"></div>
+          <div id="profilesList" class="list-gap"></div>
         </section>
       </form>
     </section>
@@ -582,7 +589,7 @@
           </div>
         </div>
 
-        <div id="historyTripFilters" class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px">
+        <div id="historyTripFilters" class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px">
           <div class="field">
             <label for="historySearch">Hledat</label>
             <input id="historySearch" placeholder="Odkud, kam, komodita..." oninput="renderHistory()" />
@@ -601,6 +608,13 @@
               <option>Kamenivo</option>
             </select>
           </div>
+          <div class="field">
+            <label for="historyProfileFilter">Profil</label>
+            <select id="historyProfileFilter" onchange="renderHistory()">
+              <option value="all">Všechny profily</option>
+              <option value="active">Jen aktivní profil</option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -614,17 +628,17 @@
       <button id="nav-trip" onclick="openScreen('trip')"><span class="i">📝</span><span class="t">Jízda</span></button>
       <button id="nav-fuel" onclick="openScreen('fuel')"><span class="i">⛽</span><span class="t">Tankování</span></button>
       <button id="nav-tech" onclick="openScreen('tech')"><span class="i">🛠️</span><span class="t">Technika</span></button>
-      <button id="nav-profile" onclick="openScreen('profile')"><span class="i">👤</span><span class="t">Profil</span></button>
+      <button id="nav-profiles" onclick="openScreen('profiles')"><span class="i">👤</span><span class="t">Profily</span></button>
       <button id="nav-history" onclick="openScreen('history')"><span class="i">📁</span><span class="t">Historie</span></button>
     </div>
   </nav>
 
   <script>
     const STORAGE = {
-      trips: 'trucklog_trips',
-      fuelings: 'trucklog_fuelings',
-      tech: 'trucklog_tech_v10',
-      profile: 'trucklog_profile_v10'
+      trips: 'trucklog_trips_v101',
+      fuelings: 'trucklog_fuelings_v101',
+      profiles: 'trucklog_profiles_v101',
+      activeProfileId: 'trucklog_active_profile_id_v101'
     };
 
     const COMMODITY_OPTIONS = ['Cement','Popílek','Granulát','Vápno','Moučka','Sádra','Písek','Kamenivo'];
@@ -634,26 +648,11 @@
       historyMode: 'trips',
       editingTripId: null,
       editingFuelId: null,
+      editingProfileId: null,
       trips: safeParse(localStorage.getItem(STORAGE.trips), []),
       fuelings: safeParse(localStorage.getItem(STORAGE.fuelings), []),
-      tech: safeParse(localStorage.getItem(STORAGE.tech), {
-        truckStk: '',
-        trailerStk: '',
-        emissions: '',
-        serviceDueKm: '',
-        serviceNote: ''
-      }),
-      profile: safeParse(localStorage.getItem(STORAGE.profile), {
-        driverName: '',
-        truckBrand: '',
-        truckModel: '',
-        truckPlate: '',
-        equipmentType: '',
-        equipmentBrand: '',
-        equipmentModel: '',
-        equipmentPlate: '',
-        note: ''
-      })
+      profiles: safeParse(localStorage.getItem(STORAGE.profiles), []),
+      activeProfileId: localStorage.getItem(STORAGE.activeProfileId) || ''
     };
 
     function qs(id){ return document.getElementById(id); }
@@ -691,7 +690,7 @@
     }
 
     function sortByCreated(a,b){
-      return new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0);
+      return new Date(b.createdAt || b.date || b.updatedAt || 0) - new Date(a.createdAt || a.date || a.updatedAt || 0);
     }
 
     function kmDiff(start,end){
@@ -699,17 +698,54 @@
       return e > s ? e - s : 0;
     }
 
-    function currentOdometer(){
-      const fromTrips = state.trips.reduce((max, item) => Math.max(max, Number(item.kmEnd || 0)), 0);
-      const fromFuel = state.fuelings.reduce((max, item) => Math.max(max, Number(item.odometer || 0)), 0);
-      return Math.max(fromTrips, fromFuel);
+    function profileLabel(profile){
+      if (!profile) return 'Bez profilu';
+      const driver = trim(profile.driverName) || 'Bez jména';
+      const truck = [profile.truckBrand, profile.truckModel, profile.truckPlate].filter(Boolean).join(' ');
+      return truck ? `${driver} • ${truck}` : driver;
+    }
+
+    function blankProfile(){
+      return {
+        id: '',
+        driverName: '',
+        truckBrand: '',
+        truckModel: '',
+        truckPlate: '',
+        equipmentType: '',
+        equipmentBrand: '',
+        equipmentModel: '',
+        equipmentPlate: '',
+        note: '',
+        truckStk: '',
+        trailerStk: '',
+        emissions: '',
+        serviceDueKm: '',
+        serviceNote: '',
+        updatedAt: ''
+      };
+    }
+
+    function getActiveProfile(){
+      return state.profiles.find(item => item.id === state.activeProfileId) || null;
+    }
+
+    function ensureActiveProfile(){
+      if (!state.profiles.length) {
+        state.activeProfileId = '';
+        return null;
+      }
+      if (!getActiveProfile()) {
+        state.activeProfileId = state.profiles[0].id;
+      }
+      return getActiveProfile();
     }
 
     function saveState(){
       localStorage.setItem(STORAGE.trips, JSON.stringify(state.trips));
       localStorage.setItem(STORAGE.fuelings, JSON.stringify(state.fuelings));
-      localStorage.setItem(STORAGE.tech, JSON.stringify(state.tech));
-      localStorage.setItem(STORAGE.profile, JSON.stringify(state.profile));
+      localStorage.setItem(STORAGE.profiles, JSON.stringify(state.profiles));
+      localStorage.setItem(STORAGE.activeProfileId, state.activeProfileId || '');
     }
 
     function openScreen(screen){
@@ -760,9 +796,26 @@
       return trim(preset);
     }
 
+    function getTripsForProfile(profileId){
+      return state.trips.filter(item => item.profileId === profileId);
+    }
+
+    function getFuelingsForProfile(profileId){
+      return state.fuelings.filter(item => item.profileId === profileId);
+    }
+
+    function currentOdometer(profileId){
+      const fromTrips = getTripsForProfile(profileId).reduce((max, item) => Math.max(max, Number(item.kmEnd || 0)), 0);
+      const fromFuel = getFuelingsForProfile(profileId).reduce((max, item) => Math.max(max, Number(item.odometer || 0)), 0);
+      return Math.max(fromTrips, fromFuel);
+    }
+
     function getTripFormData(){
+      const profile = getActiveProfile();
       return {
         id: state.editingTripId || generateId('TRIP'),
+        profileId: profile ? profile.id : '',
+        profileLabel: profileLabel(profile),
         date: qs('tripDate').value,
         kmStart: digitsOnly(qs('tripKmStart').value),
         kmEnd: digitsOnly(qs('tripKmEnd').value),
@@ -778,7 +831,7 @@
     }
 
     function tripValid(trip){
-      return !!(trip.date && trip.kmStart && trip.kmEnd && (trip.fromPlace || trip.fromAddress) && (trip.toPlace || trip.toAddress));
+      return !!(trip.profileId && trip.date && trip.kmStart && trip.kmEnd && (trip.fromPlace || trip.fromAddress) && (trip.toPlace || trip.toAddress));
     }
 
     function resetTripForm(){
@@ -793,6 +846,7 @@
     function editTrip(id){
       const trip = state.trips.find(item => item.id === id);
       if (!trip) return;
+      if (trip.profileId) state.activeProfileId = trip.profileId;
       state.editingTripId = id;
       qs('tripFormTitle').textContent = 'Upravit jízdu';
       qs('tripSubmitBtn').textContent = 'Uložit změny';
@@ -806,6 +860,7 @@
       setCommodityFields(trip.commodity || '');
       qs('tripQuantityKg').value = trip.quantityKg || '';
       qs('tripNote').value = trip.note || '';
+      saveState();
       openScreen('trip');
     }
 
@@ -824,8 +879,11 @@
     }
 
     function getFuelFormData(){
+      const profile = getActiveProfile();
       return {
         id: state.editingFuelId || generateId('FUEL'),
+        profileId: profile ? profile.id : '',
+        profileLabel: profileLabel(profile),
         date: qs('fuelDate').value,
         odometer: digitsOnly(qs('fuelOdometer').value),
         liters: decimalOnly(qs('fuelLiters').value),
@@ -838,7 +896,7 @@
     }
 
     function fuelValid(fuel){
-      return !!(fuel.date && fuel.odometer && fuel.liters);
+      return !!(fuel.profileId && fuel.date && fuel.odometer && fuel.liters);
     }
 
     function resetFuelForm(){
@@ -852,6 +910,7 @@
     function editFuel(id){
       const fuel = state.fuelings.find(item => item.id === id);
       if (!fuel) return;
+      if (fuel.profileId) state.activeProfileId = fuel.profileId;
       state.editingFuelId = id;
       qs('fuelFormTitle').textContent = 'Upravit tankování';
       qs('fuelSubmitBtn').textContent = 'Uložit změny';
@@ -862,6 +921,7 @@
       qs('fuelTotal').value = fuel.total || '';
       qs('fuelStation').value = fuel.station || '';
       qs('fuelNote').value = fuel.note || '';
+      saveState();
       openScreen('fuel');
     }
 
@@ -872,8 +932,8 @@
       renderAll();
     }
 
-    function getSortedFuelings(){
-      return [...state.fuelings]
+    function getSortedFuelings(profileId){
+      return getFuelingsForProfile(profileId)
         .filter(item => item && item.date && item.odometer && item.liters)
         .sort((a, b) => {
           const byDate = new Date(a.date) - new Date(b.date);
@@ -882,8 +942,8 @@
         });
     }
 
-    function getFuelIntervals(){
-      const fuelings = getSortedFuelings();
+    function getFuelIntervals(profileId){
+      const fuelings = getSortedFuelings(profileId);
       const intervals = [];
       for (let i = 1; i < fuelings.length; i++) {
         const prev = fuelings[i - 1];
@@ -905,12 +965,12 @@
       return intervals;
     }
 
-    function getFuelIntervalById(id){
-      return getFuelIntervals().find(item => item.id === id) || null;
+    function getFuelIntervalById(id, profileId){
+      return getFuelIntervals(profileId).find(item => item.id === id) || null;
     }
 
-    function getAverageConsumption(){
-      const intervals = getFuelIntervals();
+    function getAverageConsumption(profileId){
+      const intervals = getFuelIntervals(profileId);
       if (!intervals.length) return null;
       const totalKm = intervals.reduce((sum, item) => sum + item.intervalKm, 0);
       const totalLiters = intervals.reduce((sum, item) => sum + item.liters, 0);
@@ -923,26 +983,10 @@
       return `${Number(value).toFixed(1)} l/100 km`;
     }
 
-    function getTechFormData(){
-      return {
-        truckStk: qs('techTruckStk').value,
-        trailerStk: qs('techTrailerStk').value,
-        emissions: qs('techEmissions').value,
-        serviceDueKm: digitsOnly(qs('techServiceDueKm').value),
-        serviceNote: trim(qs('techServiceNote').value)
-      };
-    }
-
-    function fillTechForm(){
-      qs('techTruckStk').value = state.tech.truckStk || '';
-      qs('techTrailerStk').value = state.tech.trailerStk || '';
-      qs('techEmissions').value = state.tech.emissions || '';
-      qs('techServiceDueKm').value = state.tech.serviceDueKm || '';
-      qs('techServiceNote').value = state.tech.serviceNote || '';
-    }
-
     function getProfileFormData(){
+      const current = getActiveProfile();
       return {
+        id: state.editingProfileId || (current && !state.editingProfileId ? current.id : generateId('PROFILE')),
         driverName: trim(qs('profileDriverName').value),
         truckBrand: trim(qs('profileTruckBrand').value),
         truckModel: trim(qs('profileTruckModel').value),
@@ -951,20 +995,95 @@
         equipmentBrand: trim(qs('profileEquipmentBrand').value),
         equipmentModel: trim(qs('profileEquipmentModel').value),
         equipmentPlate: trim(qs('profileEquipmentPlate').value).toUpperCase(),
-        note: trim(qs('profileNote').value)
+        note: trim(qs('profileNote').value),
+        truckStk: current && current.id === (state.editingProfileId || (current ? current.id : '')) ? (current.truckStk || '') : '',
+        trailerStk: current && current.id === (state.editingProfileId || (current ? current.id : '')) ? (current.trailerStk || '') : '',
+        emissions: current && current.id === (state.editingProfileId || (current ? current.id : '')) ? (current.emissions || '') : '',
+        serviceDueKm: current && current.id === (state.editingProfileId || (current ? current.id : '')) ? (current.serviceDueKm || '') : '',
+        serviceNote: current && current.id === (state.editingProfileId || (current ? current.id : '')) ? (current.serviceNote || '') : '',
+        updatedAt: new Date().toISOString()
       };
     }
 
-    function fillProfileForm(){
-      qs('profileDriverName').value = state.profile.driverName || '';
-      qs('profileTruckBrand').value = state.profile.truckBrand || '';
-      qs('profileTruckModel').value = state.profile.truckModel || '';
-      qs('profileTruckPlate').value = state.profile.truckPlate || '';
-      qs('profileEquipmentType').value = state.profile.equipmentType || '';
-      qs('profileEquipmentBrand').value = state.profile.equipmentBrand || '';
-      qs('profileEquipmentModel').value = state.profile.equipmentModel || '';
-      qs('profileEquipmentPlate').value = state.profile.equipmentPlate || '';
-      qs('profileNote').value = state.profile.note || '';
+    function profileValid(profile){
+      return !!(profile.driverName && profile.truckPlate);
+    }
+
+    function fillProfileForm(profile = null){
+      const p = profile || blankProfile();
+      qs('profileDriverName').value = p.driverName || '';
+      qs('profileTruckBrand').value = p.truckBrand || '';
+      qs('profileTruckModel').value = p.truckModel || '';
+      qs('profileTruckPlate').value = p.truckPlate || '';
+      qs('profileEquipmentType').value = p.equipmentType || '';
+      qs('profileEquipmentBrand').value = p.equipmentBrand || '';
+      qs('profileEquipmentModel').value = p.equipmentModel || '';
+      qs('profileEquipmentPlate').value = p.equipmentPlate || '';
+      qs('profileNote').value = p.note || '';
+    }
+
+    function resetProfileForm(){
+      state.editingProfileId = null;
+      qs('profileFormTitle').textContent = 'Nový profil';
+      qs('profileSubmitBtn').textContent = 'Uložit profil';
+      fillProfileForm(blankProfile());
+    }
+
+    function editProfile(id){
+      const profile = state.profiles.find(item => item.id === id);
+      if (!profile) return;
+      state.editingProfileId = id;
+      qs('profileFormTitle').textContent = 'Upravit profil';
+      qs('profileSubmitBtn').textContent = 'Uložit změny';
+      fillProfileForm(profile);
+      openScreen('profiles');
+    }
+
+    function removeProfile(id){
+      if (!confirm('Opravdu smazat profil?')) return;
+      state.profiles = state.profiles.filter(item => item.id !== id);
+      if (state.activeProfileId === id) {
+        state.activeProfileId = state.profiles[0]?.id || '';
+      }
+      saveState();
+      resetProfileForm();
+      renderAll();
+    }
+
+    function activateProfile(id){
+      state.activeProfileId = id;
+      saveState();
+      renderAll();
+    }
+
+    function activateSelectedProfile(){
+      const id = qs('activeProfileSelect').value;
+      if (!id) return;
+      activateProfile(id);
+      alert('Aktivní profil změněn.');
+    }
+
+    function getTechFormData(){
+      const profile = getActiveProfile();
+      if (!profile) return null;
+      return {
+        ...profile,
+        truckStk: qs('techTruckStk').value,
+        trailerStk: qs('techTrailerStk').value,
+        emissions: qs('techEmissions').value,
+        serviceDueKm: digitsOnly(qs('techServiceDueKm').value),
+        serviceNote: trim(qs('techServiceNote').value),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function fillTechForm(){
+      const profile = getActiveProfile();
+      qs('techTruckStk').value = profile?.truckStk || '';
+      qs('techTrailerStk').value = profile?.trailerStk || '';
+      qs('techEmissions').value = profile?.emissions || '';
+      qs('techServiceDueKm').value = profile?.serviceDueKm || '';
+      qs('techServiceNote').value = profile?.serviceNote || '';
     }
 
     function daysUntil(dateValue){
@@ -984,21 +1103,22 @@
       return { text: `Za ${days} dní`, cls: 'badge-ok' };
     }
 
-    function getTechItems(){
-      const currentKm = currentOdometer();
-      const serviceDue = Number(state.tech.serviceDueKm || 0);
-      const serviceLeft = serviceDue ? serviceDue - currentKm : null;
+    function getTechItems(profile){
+      const currentKmValue = profile ? currentOdometer(profile.id) : 0;
+      const serviceDue = Number(profile?.serviceDueKm || 0);
+      const serviceLeft = serviceDue ? serviceDue - currentKmValue : null;
       return [
-        { key:'truckStk', label:'STK tahače', value: state.tech.truckStk, type:'date' },
-        { key:'trailerStk', label:'STK návěsu', value: state.tech.trailerStk, type:'date' },
-        { key:'emissions', label:'Emise tahače', value: state.tech.emissions, type:'date' },
-        { key:'serviceDueKm', label:'Servis podle km', value: serviceDue, type:'km', left: serviceLeft }
+        { label:'STK tahače', value: profile?.truckStk || '', type:'date' },
+        { label:'STK návěsu', value: profile?.trailerStk || '', type:'date' },
+        { label:'Emise tahače', value: profile?.emissions || '', type:'date' },
+        { label:'Servis podle km', value: serviceDue, type:'km', left: serviceLeft }
       ];
     }
 
-    function getNextTechDeadline(){
+    function getNextTechDeadline(profile){
+      if (!profile) return null;
       const items = [];
-      getTechItems().forEach(item => {
+      getTechItems(profile).forEach(item => {
         if (item.type === 'date' && item.value) {
           items.push({
             label: item.label,
@@ -1024,40 +1144,45 @@
           });
         }
       });
-
       if (!items.length) return null;
       items.sort((a,b) => a.sort - b.sort);
       return items[0];
     }
 
-    function renderProfileSummary(targetId){
-      const p = state.profile;
-      const hasData = p.driverName || p.truckBrand || p.truckPlate || p.equipmentType || p.equipmentPlate;
-      const html = hasData ? `
+    function renderActiveProfileSummary(targetId, emptyText){
+      const profile = getActiveProfile();
+      if (!profile) {
+        qs(targetId).innerHTML = `<div class="empty">${esc(emptyText || 'Nejdřív si vytvoř profil.')}</div>`;
+        return;
+      }
+      qs(targetId).innerHTML = `
         <div class="summary">
-          <strong>${esc(p.driverName || 'Bez jména řidiče')}</strong>
-          <span>${esc([p.truckBrand, p.truckModel, p.truckPlate].filter(Boolean).join(' • ') || 'Tahač není vyplněný')}</span>
-          <span>${esc([p.equipmentType, p.equipmentBrand, p.equipmentModel, p.equipmentPlate].filter(Boolean).join(' • ') || 'Technika za tahačem není vyplněná')}</span>
-          ${p.note ? `<span>${esc(p.note)}</span>` : ''}
+          <strong>${esc(profileLabel(profile))}</strong>
+          <span>${esc([profile.equipmentType, profile.equipmentBrand, profile.equipmentModel, profile.equipmentPlate].filter(Boolean).join(' • ') || 'Technika za tahačem není vyplněná')}</span>
+          ${profile.note ? `<span>${esc(profile.note)}</span>` : ''}
         </div>
-      ` : '<div class="empty">Profil ještě není vyplněný.</div>';
-      qs(targetId).innerHTML = html;
+      `;
     }
 
     function renderCockpit(){
+      const profile = ensureActiveProfile();
+      const trips = profile ? getTripsForProfile(profile.id) : [];
+      const fuelings = profile ? getFuelingsForProfile(profile.id) : [];
+
       qs('miniTrips').textContent = state.trips.length;
       qs('miniFuel').textContent = state.fuelings.length;
+      renderActiveProfileSummary('activeProfileSummary', 'Nejdřív si založ profil v záložce Profily.');
 
-      const todayTrips = state.trips.filter(item => item.date === today());
+      const todayTrips = trips.filter(item => item.date === today());
       const kmToday = todayTrips.reduce((sum, item) => sum + kmDiff(item.kmStart, item.kmEnd), 0);
-      const lastFuel = [...state.fuelings].sort(sortByCreated)[0];
-      const averageConsumption = getAverageConsumption();
-      const nextTech = getNextTechDeadline();
+      const lastFuel = [...fuelings].sort(sortByCreated)[0];
+      const averageConsumption = profile ? getAverageConsumption(profile.id) : null;
+      const nextTech = getNextTechDeadline(profile);
 
       qs('cockpitStats').innerHTML = [
-        { label:'Dnešní km', value:String(kmToday), hint:'Součet dnešních jízd' },
+        { label:'Dnešní km', value:String(kmToday), hint:'Součet dnešních jízd pro aktivní profil' },
         { label:'Průměrná spotřeba', value:formatConsumption(averageConsumption), hint:'Počítáno mezi tankováními' },
-        { label:'Poslední tankování', value:lastFuel ? `${lastFuel.station || 'Pumpa'} • ${lastFuel.liters || 0} l` : 'Zatím nic', hint:'Poslední uložené tankování' },
+        { label:'Poslední tankování', value:lastFuel ? `${lastFuel.station || 'Pumpa'} • ${lastFuel.liters || 0} l` : 'Zatím nic', hint:'Poslední tankování aktivního profilu' },
         { label:'Nejbližší termín', value:nextTech ? nextTech.label : 'Nenastaveno', hint:nextTech ? nextTech.badge.text : 'Doplň techniku v záložce Technika' }
       ].map(item => `
         <div class="cardish">
@@ -1067,18 +1192,16 @@
         </div>
       `).join('');
 
-      renderProfileSummary('profileSummaryCard');
-
-      const recentTrips = [...state.trips].sort(sortByCreated).slice(0, 3);
+      const recentTrips = [...trips].sort(sortByCreated).slice(0, 3);
       qs('recentTrips').innerHTML = recentTrips.length ? recentTrips.map(item => `
         <div class="summary">
           <strong>${esc((item.fromPlace || item.fromAddress || '—') + ' → ' + (item.toPlace || item.toAddress || '—'))}</strong>
           <span>${esc(formatDate(item.date))} • ${esc(String(kmDiff(item.kmStart, item.kmEnd)))} km • ${esc(item.commodity || 'Bez komodity')}</span>
         </div>
-      `).join('') : '<div class="empty">Zatím tu není žádná jízda.</div>';
+      `).join('') : '<div class="empty">Zatím tu není žádná jízda pro aktivní profil.</div>';
 
       if (!nextTech) {
-        qs('nextTechCard').innerHTML = '<div class="empty">Zatím nejsou nastavené žádné termíny techniky.</div>';
+        qs('nextTechCard').innerHTML = '<div class="empty">Zatím nejsou nastavené žádné termíny techniky pro aktivní profil.</div>';
       } else {
         qs('nextTechCard').innerHTML = `
           <div class="summary">
@@ -1090,9 +1213,23 @@
       }
     }
 
+    function renderTripProfileInfo(){
+      renderActiveProfileSummary('tripProfileInfo', 'Nejdřív si založ a aktivuj profil, jinak nepůjde jízdu uložit.');
+    }
+
+    function renderFuelProfileInfo(){
+      renderActiveProfileSummary('fuelProfileInfo', 'Nejdřív si založ a aktivuj profil, jinak nepůjde tankování uložit.');
+    }
+
     function renderTech(){
+      const profile = ensureActiveProfile();
+      renderActiveProfileSummary('techProfileInfo', 'Nejdřív si založ a aktivuj profil, jinak nepůjde techniku uložit.');
       fillTechForm();
-      const items = getTechItems();
+      if (!profile) {
+        qs('techSummary').innerHTML = '<div class="empty">Zatím není aktivní žádný profil.</div>';
+        return;
+      }
+      const items = getTechItems(profile);
       qs('techSummary').innerHTML = items.map(item => {
         if (item.type === 'date') {
           const days = daysUntil(item.value);
@@ -1116,7 +1253,6 @@
         else if (left <= 1000) badge = { text:`Do ${left} km`, cls:'badge-danger' };
         else if (left <= 3000) badge = { text:`Do ${left} km`, cls:'badge-warn' };
         else badge = { text:`Za ${left} km`, cls:'badge-ok' };
-
         return `
           <div class="history-card">
             <div class="row">
@@ -1131,20 +1267,53 @@
       }).join('') || '<div class="empty">Zatím nejsou zadané žádné termíny techniky.</div>';
     }
 
-    function renderProfile(){
-      fillProfileForm();
-      renderProfileSummary('profileDetailsCard');
+    function renderProfiles(){
+      ensureActiveProfile();
+      const activeId = state.activeProfileId;
+
+      const select = qs('activeProfileSelect');
+      select.innerHTML = state.profiles.length
+        ? state.profiles.map(item => `<option value="${esc(item.id)}" ${item.id === activeId ? 'selected' : ''}>${esc(profileLabel(item))}</option>`).join('')
+        : '<option value="">Žádný profil</option>';
+
+      qs('profilesList').innerHTML = state.profiles.length ? [...state.profiles].sort(sortByCreated).map(item => `
+        <div class="history-card">
+          <div class="row">
+            <div style="min-width:0;flex:1">
+              <div class="badge ${item.id === activeId ? 'badge-ok' : 'badge-warn'}">${item.id === activeId ? 'Aktivní' : 'Profil'}</div>
+              <h3 class="mt-12">${esc(profileLabel(item))}</h3>
+              <p class="desc">${esc([item.equipmentType, item.equipmentBrand, item.equipmentModel, item.equipmentPlate].filter(Boolean).join(' • ') || 'Technika není vyplněná')}</p>
+              ${item.note ? `<div class="summary mt-16"><strong>Poznámka</strong><span>${esc(item.note)}</span></div>` : ''}
+            </div>
+            <div class="row">
+              <button class="chip" type="button" onclick="activateProfile('${item.id}')">Aktivovat</button>
+              <button class="chip" type="button" onclick="editProfile('${item.id}')">Upravit</button>
+              <button class="btn-danger" type="button" onclick="removeProfile('${item.id}')">Smazat</button>
+            </div>
+          </div>
+        </div>
+      `).join('') : '<div class="empty">Zatím tu není žádný profil.</div>';
     }
 
     function filteredTrips(){
       const q = trim(qs('historySearch').value).toLowerCase();
       const commodity = trim(qs('historyCommodityFilter').value);
+      const mode = qs('historyProfileFilter').value;
+      const activeId = state.activeProfileId;
       return [...state.trips].filter(item => {
+        if (mode === 'active' && activeId && item.profileId !== activeId) return false;
         if (commodity && item.commodity !== commodity) return false;
         if (!q) return true;
-        return [
-          item.fromPlace, item.fromAddress, item.toPlace, item.toAddress, item.commodity, item.note
-        ].join(' ').toLowerCase().includes(q);
+        return [item.fromPlace, item.fromAddress, item.toPlace, item.toAddress, item.commodity, item.note, item.profileLabel].join(' ').toLowerCase().includes(q);
+      }).sort(sortByCreated);
+    }
+
+    function filteredFuelings(){
+      const mode = qs('historyProfileFilter').value;
+      const activeId = state.activeProfileId;
+      return [...state.fuelings].filter(item => {
+        if (mode === 'active' && activeId && item.profileId !== activeId) return false;
+        return true;
       }).sort(sortByCreated);
     }
 
@@ -1152,16 +1321,16 @@
       const root = qs('historyList');
 
       if (state.historyMode === 'fuel') {
-        const list = [...state.fuelings].sort(sortByCreated);
+        const list = filteredFuelings();
         root.innerHTML = list.length ? list.map(item => {
-          const interval = getFuelIntervalById(item.id);
+          const interval = getFuelIntervalById(item.id, item.profileId);
           return `
             <section class="section">
               <div class="row">
                 <div style="min-width:0;flex:1">
                   <div class="badge badge-ok">Tankování</div>
                   <h3 class="mt-12">${esc(item.station || 'Čerpací stanice')}</h3>
-                  <p class="desc">${esc(formatDate(item.date))} • tachometr ${esc(item.odometer || '—')} km</p>
+                  <p class="desc">${esc(formatDate(item.date))} • tachometr ${esc(item.odometer || '—')} km • ${esc(item.profileLabel || 'Bez profilu')}</p>
 
                   <div class="metrics">
                     <div class="metric"><div class="l">Litry</div><div class="v">${esc((item.liters || 0) + ' l')}</div></div>
@@ -1191,7 +1360,7 @@
             <div style="min-width:0;flex:1">
               <div class="badge badge-ok">Jízda</div>
               <h3 class="mt-12">${esc((item.fromPlace || item.fromAddress || '—') + ' → ' + (item.toPlace || item.toAddress || '—'))}</h3>
-              <p class="desc">${esc(formatDate(item.date))}</p>
+              <p class="desc">${esc(formatDate(item.date))} • ${esc(item.profileLabel || 'Bez profilu')}</p>
 
               <div class="metrics">
                 <div class="metric"><div class="l">Km</div><div class="v">${esc(String(kmDiff(item.kmStart, item.kmEnd)))}</div></div>
@@ -1199,19 +1368,8 @@
                 <div class="metric"><div class="l">Množství</div><div class="v">${esc(item.quantityKg ? item.quantityKg + ' kg' : '—')}</div></div>
               </div>
 
-              ${(item.fromAddress || item.toAddress) ? `
-                <div class="summary mt-16">
-                  <strong>Adresa</strong>
-                  <span>${esc(item.fromAddress || '—')} → ${esc(item.toAddress || '—')}</span>
-                </div>
-              ` : ''}
-
-              ${item.note ? `
-                <div class="summary mt-16">
-                  <strong>Poznámka</strong>
-                  <span>${esc(item.note)}</span>
-                </div>
-              ` : ''}
+              ${(item.fromAddress || item.toAddress) ? `<div class="summary mt-16"><strong>Adresa</strong><span>${esc(item.fromAddress || '—')} → ${esc(item.toAddress || '—')}</span></div>` : ''}
+              ${item.note ? `<div class="summary mt-16"><strong>Poznámka</strong><span>${esc(item.note)}</span></div>` : ''}
             </div>
 
             <div class="row">
@@ -1225,8 +1383,10 @@
 
     function renderAll(){
       renderCockpit();
+      renderTripProfileInfo();
+      renderFuelProfileInfo();
       renderTech();
-      renderProfile();
+      renderProfiles();
       renderHistory();
     }
 
@@ -1234,6 +1394,11 @@
 
     qs('tripForm').addEventListener('submit', function(e){
       e.preventDefault();
+      if (!ensureActiveProfile()) {
+        alert('Nejdřív si založ a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
       const trip = getTripFormData();
       if (!tripValid(trip)) {
         alert('Vyplň prosím datum, km start, km konec a odkud/kam.');
@@ -1248,6 +1413,11 @@
 
     qs('fuelForm').addEventListener('submit', function(e){
       e.preventDefault();
+      if (!ensureActiveProfile()) {
+        alert('Nejdřív si založ a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
       const fuel = getFuelFormData();
       if (!fuelValid(fuel)) {
         alert('Vyplň prosím datum, stav km a litry.');
@@ -1262,7 +1432,14 @@
 
     qs('techForm').addEventListener('submit', function(e){
       e.preventDefault();
-      state.tech = getTechFormData();
+      const profile = ensureActiveProfile();
+      if (!profile) {
+        alert('Nejdřív si založ a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
+      const updatedProfile = getTechFormData();
+      state.profiles = state.profiles.map(item => item.id === updatedProfile.id ? updatedProfile : item);
       saveState();
       renderAll();
       alert('Technika uložena.');
@@ -1270,8 +1447,35 @@
 
     qs('profileForm').addEventListener('submit', function(e){
       e.preventDefault();
-      state.profile = getProfileFormData();
+      const profile = getProfileFormData();
+      if (!profileValid(profile)) {
+        alert('Vyplň prosím aspoň jméno řidiče a SPZ tahače.');
+        return;
+      }
+
+      if (state.editingProfileId) {
+        const existing = state.profiles.find(item => item.id === state.editingProfileId);
+        const merged = {
+          ...(existing || blankProfile()),
+          ...profile,
+          id: state.editingProfileId,
+          updatedAt: new Date().toISOString()
+        };
+        state.profiles = state.profiles.map(item => item.id === state.editingProfileId ? merged : item);
+        if (!state.activeProfileId) state.activeProfileId = merged.id;
+      } else {
+        const newProfile = {
+          ...blankProfile(),
+          ...profile,
+          id: generateId('PROFILE'),
+          updatedAt: new Date().toISOString()
+        };
+        state.profiles.unshift(newProfile);
+        if (!state.activeProfileId) state.activeProfileId = newProfile.id;
+      }
+
       saveState();
+      resetProfileForm();
       renderAll();
       alert('Profil uložen.');
     });
@@ -1294,10 +1498,11 @@
     qs('fuelOdometer').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
     qs('techServiceDueKm').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
 
+    ensureActiveProfile();
     resetTripForm();
     resetFuelForm();
+    resetProfileForm();
     fillTechForm();
-    fillProfileForm();
     setHistoryMode('trips');
     renderAll();
   </script>
