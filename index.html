@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#061225" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="TruckLog" />
-  <link rel="manifest" href="manifest.json?v=8" />
-  <link rel="icon" href="icon-192.png?v=8" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=8" />
+  <link rel="manifest" href="manifest.json?v=10" />
+  <link rel="icon" href="icon-192.png?v=10" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=10" />
 
   <style>
     :root{
@@ -146,8 +146,8 @@
       flex-direction:column;
       align-items:center;
       text-align:center;
-      gap:10px;
-      padding:6px 0 0;
+      gap:8px;
+      padding:4px 0 0;
     }
 
     .hero-logo-large{
@@ -170,24 +170,16 @@
     }
 
     .hero-tagline{
-      font-size:1.12rem;
+      font-size:1.04rem;
       font-weight:800;
-      color:var(--txt);
-      letter-spacing:-.02em;
-      opacity:.96;
-    }
-
-    .hero-note{
-      max-width:560px;
       color:var(--muted);
-      font-size:1rem;
-      line-height:1.45;
+      letter-spacing:-.02em;
     }
 
     .grid{display:grid;gap:14px}
     .split{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
     .triple{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
-    .stats-grid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
+    .stats-grid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
     .metrics{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}
 
     .icon-stats{
@@ -195,7 +187,7 @@
       gap:12px;
       grid-template-columns:repeat(2,minmax(110px,1fr));
       width:100%;
-      max-width:520px;
+      max-width:420px;
       margin:18px auto 0;
     }
 
@@ -506,7 +498,6 @@
       .hero-version{top:14px;right:14px}
       .hero-logo-large{width:96px;height:96px;font-size:48px;border-radius:26px}
       .hero h1{font-size:2.8rem}
-      .hero-note{font-size:.95rem}
       .block{padding:14px;border-radius:22px}
       .btn,.btn2,.btn-danger{width:100%}
       .history-actions{grid-template-columns:1fr}
@@ -522,7 +513,6 @@
         <div class="hero-logo-large">🚛</div>
         <h1>TruckLog</h1>
         <p class="hero-tagline">osobní jízdní deník</p>
-        <p class="hero-note">Přehled jízd, tankování, spotřeby a termínů techniky</p>
       </div>
 
       <div class="icon-stats">
@@ -542,37 +532,11 @@
         <div class="section-head">
           <div>
             <h2 class="title">Přehled</h2>
-            <p class="desc">To nejdůležitější hned po otevření appky</p>
+            <p class="desc">Jen to nejdůležitější</p>
           </div>
           <div class="profile-switcher" id="profileSwitcher"></div>
         </div>
         <div class="stats-grid" id="overviewStats"></div>
-      </section>
-
-      <section class="section split">
-        <div class="block">
-          <h3>Aktivní profil</h3>
-          <p class="desc">Řidič, tahač a technika za tahačem</p>
-          <div id="activeProfileCard"></div>
-        </div>
-        <div class="block">
-          <h3>Nejbližší termín techniky</h3>
-          <p class="desc">STK, emise nebo servis podle kilometru</p>
-          <div id="nextTechCard"></div>
-        </div>
-      </section>
-
-      <section class="section split">
-        <div class="block">
-          <h3>Poslední jízdy</h3>
-          <p class="desc">Rychlá orientace bez hledání v historii</p>
-          <div id="recentTrips" class="list-gap"></div>
-        </div>
-        <div class="block">
-          <h3>Nejčastější místa</h3>
-          <p class="desc">Místa se učí sama podle tvých jízd</p>
-          <div id="topPlaces" class="list-gap"></div>
-        </div>
       </section>
     </section>
 
@@ -783,14 +747,14 @@
           <div class="section-head">
             <div>
               <h2 class="title">Technika</h2>
-              <p class="desc">Termíny technických kontrol a servisního limitu pro aktivní profil</p>
+              <p class="desc">Technické kontroly pro aktivní profil</p>
             </div>
           </div>
 
           <div class="split">
             <div class="block">
-              <h3>Termíny</h3>
-              <p class="desc">To, co chceš hlídat u aktivní soupravy</p>
+              <h3>STK</h3>
+              <p class="desc">Jen to, co opravdu potřebuješ hlídat</p>
 
               <div class="grid">
                 <div class="field">
@@ -799,25 +763,15 @@
                 </div>
 
                 <div class="field">
-                  <label for="techEquipmentStk">STK techniky do</label>
+                  <label id="techEquipmentStkLabel" for="techEquipmentStk">STK techniky do</label>
                   <input id="techEquipmentStk" type="date" />
-                </div>
-
-                <div class="field">
-                  <label for="techEmissions">Emise tahače do</label>
-                  <input id="techEmissions" type="date" />
-                </div>
-
-                <div class="field">
-                  <label for="techServiceDueKm">Servis při km</label>
-                  <input id="techServiceDueKm" inputmode="numeric" placeholder="Např. 485000" />
                 </div>
               </div>
             </div>
 
             <div class="block">
               <h3>Poznámka k technice</h3>
-              <p class="desc">Olej, filtry, brzdy, pneu nebo cokoli důležitého</p>
+              <p class="desc">Např. brzdy, pneu, hadice, ventil, mytí, oprava…</p>
 
               <div class="grid">
                 <div class="field">
@@ -1120,16 +1074,26 @@
       return {
         truckStk:'',
         equipmentStk:'',
-        emissions:'',
-        serviceDueKm:'',
         serviceNote:''
       };
+    }
+
+    function getEquipmentStkLabel(profile = activeProfile()){
+      const type = profile?.equipmentType || '';
+      if(type === 'Silo cisterna') return 'STK silo cisterny do';
+      if(type === 'Kontejnerové šasi') return 'STK šasi do';
+      if(type === 'Sklápěcí šasi') return 'STK šasi do';
+      return 'STK techniky do';
     }
 
     function ensureProfilesStructure(){
       state.profiles = state.profiles.map(profile => ({
         ...profile,
-        tech: profile.tech || defaultTech()
+        tech: {
+          truckStk: profile.tech?.truckStk || '',
+          equipmentStk: profile.tech?.equipmentStk || '',
+          serviceNote: profile.tech?.serviceNote || ''
+        }
       }));
 
       if(!state.activeProfileId && state.profiles.length){
@@ -1570,35 +1534,22 @@
       return totalKm && totalLiters ? (totalLiters / totalKm) * 100 : null;
     }
 
-    function getAverageCostPerKm(profileId = state.activeProfileId){
-      const intervals = getFuelIntervals(profileId).filter(item => item.total > 0);
-      if(!intervals.length) return null;
-      const totalKm = intervals.reduce((sum, item) => sum + item.intervalKm, 0);
-      const totalCost = intervals.reduce((sum, item) => sum + item.total, 0);
-      return totalKm && totalCost ? totalCost / totalKm : null;
-    }
-
-    function getAverageCostPer100(profileId = state.activeProfileId){
-      const perKm = getAverageCostPerKm(profileId);
-      return perKm === null ? null : perKm * 100;
-    }
-
     function fillTechForm(){
       const profile = activeProfile();
       const tech = profile?.tech || defaultTech();
+
       qs('techTruckStk').value = tech.truckStk || '';
       qs('techEquipmentStk').value = tech.equipmentStk || '';
-      qs('techEmissions').value = tech.emissions || '';
-      qs('techServiceDueKm').value = tech.serviceDueKm || '';
       qs('techServiceNote').value = tech.serviceNote || '';
+
+      const label = qs('techEquipmentStkLabel');
+      if(label) label.textContent = getEquipmentStkLabel(profile);
     }
 
     function getTechFormData(){
       return {
         truckStk: qs('techTruckStk').value,
         equipmentStk: qs('techEquipmentStk').value,
-        emissions: qs('techEmissions').value,
-        serviceDueKm: digitsOnly(qs('techServiceDueKm').value),
         serviceNote: trim(qs('techServiceNote').value)
       };
     }
@@ -1623,14 +1574,10 @@
     function getTechItems(profile = activeProfile()){
       if(!profile) return [];
       const tech = profile.tech || defaultTech();
-      const serviceDue = Number(tech.serviceDueKm || 0);
-      const serviceLeft = serviceDue ? serviceDue - currentOdometer(profile.id) : null;
 
       return [
         { key:'truckStk', label:'STK tahače', value:tech.truckStk, type:'date' },
-        { key:'equipmentStk', label:'STK techniky', value:tech.equipmentStk, type:'date' },
-        { key:'emissions', label:'Emise tahače', value:tech.emissions, type:'date' },
-        { key:'serviceDueKm', label:'Servis podle km', value:serviceDue, type:'km', left:serviceLeft }
+        { key:'equipmentStk', label:getEquipmentStkLabel(profile).replace(' do',''), value:tech.equipmentStk, type:'date' }
       ];
     }
 
@@ -1644,22 +1591,6 @@
             sort:daysUntil(item.value),
             detail:formatDate(item.value),
             badge:statusBadge(daysUntil(item.value))
-          });
-        }
-
-        if(item.type === 'km' && item.value){
-          let badge;
-          if(item.left === null) badge = { text:'Nenastaveno', cls:'badge-warn' };
-          else if(item.left < 0) badge = { text:`Po limitu ${Math.abs(item.left)} km`, cls:'badge-danger' };
-          else if(item.left <= 1000) badge = { text:`Do ${item.left} km`, cls:'badge-danger' };
-          else if(item.left <= 3000) badge = { text:`Do ${item.left} km`, cls:'badge-warn' };
-          else badge = { text:`Za ${item.left} km`, cls:'badge-ok' };
-
-          items.push({
-            label:item.label,
-            sort:item.left === null ? 999999 : item.left,
-            detail:`Limit ${item.value} km`,
-            badge
           });
         }
       });
@@ -1681,23 +1612,8 @@
         : '<button class="active" type="button">Bez profilu</button>';
     }
 
-    function renderTopPlaces(){
-      const list = sortedPlaces().slice(0, 5);
-
-      qs('topPlaces').innerHTML = list.length
-        ? list.map(place => `
-            <div class="summary">
-              <strong>${esc(place.name)}</strong>
-              <span>${esc(place.address)}</span>
-              <span>Použito: ${esc(String(place.usageCount || 0))}</span>
-            </div>
-          `).join('')
-        : '<div class="empty">Zatím tu nejsou žádná místa.</div>';
-    }
-
     function renderOverview(){
       renderProfileSwitcher();
-      renderTopPlaces();
       qs('miniTrips').textContent = state.trips.length;
       qs('miniFuel').textContent = state.fuelings.length;
 
@@ -1706,29 +1622,41 @@
       if(!profile){
         qs('overviewStats').innerHTML = `
           <div class="card">
-            <div class="tiny">Začni profilem</div>
+            <div class="tiny">Řidič</div>
             <div class="big">Bez profilu</div>
-            <div class="hint">Nejdřív si vytvoř profil v záložce Profily.</div>
+            <div class="hint">Nejdřív si vytvoř profil.</div>
+          </div>
+          <div class="card">
+            <div class="tiny">Aktuální stav km</div>
+            <div class="big">—</div>
+          </div>
+          <div class="card">
+            <div class="tiny">Průměrná spotřeba</div>
+            <div class="big">—</div>
           </div>
         `;
-        qs('activeProfileCard').innerHTML = '<div class="empty">Zatím tu není žádný profil.</div>';
-        qs('nextTechCard').innerHTML = '<div class="empty">Po vytvoření profilu se tu ukážou termíny techniky.</div>';
-        qs('recentTrips').innerHTML = '<div class="empty">Po vytvoření profilu můžeš zapisovat jízdy.</div>';
         return;
       }
 
-      const trips = currentProfileTrips();
       const odo = currentOdometer(profile.id);
       const avgCons = getAverageConsumption(profile.id);
-      const avgCostKm = getAverageCostPerKm(profile.id);
-      const avgCost100 = getAverageCostPer100(profile.id);
-      const nextTech = getNextTechDeadline(profile);
 
       qs('overviewStats').innerHTML = [
-        { label:'Aktuální stav km', value: odo ? String(odo) : '—', hint:'Nejvyšší známý stav km aktivního profilu' },
-        { label:'Průměrná spotřeba', value: formatConsumption(avgCons), hint:'Počítáno mezi tankováními' },
-        { label:'Kč / km', value: avgCostKm !== null ? `${avgCostKm.toFixed(2)} Kč` : '—', hint:'Průměrná cena paliva na kilometr' },
-        { label:'Kč / 100 km', value: avgCost100 !== null ? `${avgCost100.toFixed(0)} Kč` : '—', hint:'Průměrná cena paliva na 100 km' }
+        {
+          label:'Řidič',
+          value: profile.driverName || '—',
+          hint: [profile.truckBrand, profile.truckPlate].filter(Boolean).join(' • ') || 'Bez tahače'
+        },
+        {
+          label:'Aktuální stav km',
+          value: odo ? String(odo) : '—',
+          hint:'Nejvyšší známý stav km aktivního profilu'
+        },
+        {
+          label:'Průměrná spotřeba',
+          value: formatConsumption(avgCons),
+          hint:'Počítáno mezi tankováními'
+        }
       ].map(item => `
         <div class="card">
           <div class="tiny">${esc(item.label)}</div>
@@ -1736,36 +1664,6 @@
           <div class="hint">${esc(item.hint)}</div>
         </div>
       `).join('');
-
-      qs('activeProfileCard').innerHTML = `
-        <div class="profile-card">
-          <strong>${esc(profile.driverName || 'Řidič')}</strong>
-          <span>${esc([profile.truckBrand, profile.truckModel, profile.truckPlate].filter(Boolean).join(' • ') || 'Bez tahače')}</span>
-          <span>${esc([profile.equipmentType, profile.equipmentModel, profile.equipmentPlate].filter(Boolean).join(' • ') || 'Bez techniky za tahačem')}</span>
-          ${profile.note ? `<span>${esc(profile.note)}</span>` : ''}
-        </div>
-      `;
-
-      qs('nextTechCard').innerHTML = nextTech
-        ? `
-          <div class="summary">
-            <strong>${esc(nextTech.label)}</strong>
-            <span>${esc(nextTech.detail)}</span>
-            <div class="mt-12"><span class="badge ${nextTech.badge.cls}">${esc(nextTech.badge.text)}</span></div>
-          </div>
-        `
-        : '<div class="empty">Termíny techniky ještě nejsou nastavené.</div>';
-
-      const recentTrips = [...trips].sort(sortByCreated).slice(0,3);
-
-      qs('recentTrips').innerHTML = recentTrips.length
-        ? recentTrips.map(item => `
-            <div class="summary">
-              <strong>${esc((item.fromPlace || item.fromAddress || '—') + ' → ' + (item.toPlace || item.toAddress || '—'))}</strong>
-              <span>${esc(formatDate(item.date))} • ${esc(item.departureTime || '—')} → ${esc(item.arrivalTime || '—')} • ${esc(String(kmDiff(item.kmStart, item.kmEnd)))} km</span>
-            </div>
-          `).join('')
-        : '<div class="empty">Zatím tu není žádná jízda.</div>';
     }
 
     function renderTech(){
@@ -1779,70 +1677,46 @@
       }
 
       const items = getTechItems(profile);
+      const tech = profile.tech || defaultTech();
 
       qs('techQuickCards').innerHTML = items.map(item => {
-        if(item.type === 'date'){
-          const badge = statusBadge(daysUntil(item.value));
-          return `
-            <div class="card">
-              <div class="tiny">${esc(item.label)}</div>
-              <div class="big">${esc(item.value ? formatDate(item.value) : '—')}</div>
-              <div class="mt-12"><span class="badge ${badge.cls}">${esc(badge.text)}</span></div>
-            </div>
-          `;
-        }
-
-        let badge;
-        if(item.left === null) badge = { text:'Nenastaveno', cls:'badge-warn' };
-        else if(item.left < 0) badge = { text:`Po limitu ${Math.abs(item.left)} km`, cls:'badge-danger' };
-        else if(item.left <= 1000) badge = { text:`Do ${item.left} km`, cls:'badge-danger' };
-        else if(item.left <= 3000) badge = { text:`Do ${item.left} km`, cls:'badge-warn' };
-        else badge = { text:`Za ${item.left} km`, cls:'badge-ok' };
-
+        const badge = statusBadge(daysUntil(item.value));
         return `
           <div class="card">
             <div class="tiny">${esc(item.label)}</div>
-            <div class="big">${esc(item.value ? item.value + ' km' : '—')}</div>
+            <div class="big">${esc(item.value ? formatDate(item.value) : '—')}</div>
             <div class="mt-12"><span class="badge ${badge.cls}">${esc(badge.text)}</span></div>
           </div>
         `;
       }).join('');
 
-      qs('techSummary').innerHTML = items.map(item => {
-        if(item.type === 'date'){
-          const badge = statusBadge(daysUntil(item.value));
-          return `
-            <div class="history-card">
-              <div class="row">
-                <div>
-                  <strong>${esc(item.label)}</strong>
-                  <div class="text-muted mt-12">${esc(item.value ? formatDate(item.value) : 'Nenastaveno')}</div>
-                </div>
-                <span class="badge ${badge.cls}">${esc(badge.text)}</span>
-              </div>
-            </div>
-          `;
-        }
-
-        let badge;
-        if(item.left === null) badge = { text:'Nenastaveno', cls:'badge-warn' };
-        else if(item.left < 0) badge = { text:`Po limitu ${Math.abs(item.left)} km`, cls:'badge-danger' };
-        else if(item.left <= 1000) badge = { text:`Do ${item.left} km`, cls:'badge-danger' };
-        else if(item.left <= 3000) badge = { text:`Do ${item.left} km`, cls:'badge-warn' };
-        else badge = { text:`Za ${item.left} km`, cls:'badge-ok' };
-
+      const summaryCards = items.map(item => {
+        const badge = statusBadge(daysUntil(item.value));
         return `
           <div class="history-card">
             <div class="row">
               <div>
                 <strong>${esc(item.label)}</strong>
-                <div class="text-muted mt-12">${esc(item.value ? `Limit ${item.value} km` : 'Nenastaveno')}</div>
+                <div class="text-muted mt-12">${esc(item.value ? formatDate(item.value) : 'Nenastaveno')}</div>
               </div>
               <span class="badge ${badge.cls}">${esc(badge.text)}</span>
             </div>
           </div>
         `;
       }).join('');
+
+      const noteCard = tech.serviceNote
+        ? `
+          <div class="history-card">
+            <div>
+              <strong>Poznámka k technice</strong>
+              <div class="text-muted mt-12">${esc(tech.serviceNote)}</div>
+            </div>
+          </div>
+        `
+        : '';
+
+      qs('techSummary').innerHTML = summaryCards + noteCard;
     }
 
     function renderProfiles(){
@@ -2139,7 +2013,6 @@
     qs('tripKmEnd').addEventListener('input', e => { e.target.value = digitsOnly(e.target.value); updateTripDistancePreview(); });
     qs('tripQuantityKg').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
     qs('fuelOdometer').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
-    qs('techServiceDueKm').addEventListener('input', e => e.target.value = digitsOnly(e.target.value));
 
     qs('fuelLiters').addEventListener('input', () => {
       if(!qs('fuelTotal').matches(':focus')){
