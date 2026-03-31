@@ -716,75 +716,62 @@
     
 
     <section id="screen-fuel" class="screen hidden">
-      <form id="fuelForm">
-        <section class="section">
-          <div class="section-head">
-            <div>
-              <h2 class="title" id="fuelFormTitle">Nové tankování</h2>
-              <p class="desc">Zapiš nové tankování</p>
-            </div>
-          </div>
+  <form id="fuelForm">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2 class="title" id="fuelFormTitle">Nové tankování</h2>
+        </div>
+      </div>
 
-          <div class="split">
-            <div class="block">
-              <h3>Základ</h3>
-              <p class="desc">Datum, tachometr, litry</p>
+      <div class="split">
+        <div class="block">
+          <h3>Tankování</h3>
 
-              <div class="grid">
-                <div class="field">
-                  <label for="fuelDate">Datum</label>
-                  <input id="fuelDate" type="date" />
-                </div>
-
-                <div class="field">
-                  <label for="fuelOdometer">Stav km</label>
-                  <input id="fuelOdometer" inputmode="numeric" />
-                </div>
-
-                <div class="triple">
-                  <div class="field">
-                    <label for="fuelLiters">Litry</label>
-                    <input id="fuelLiters" inputmode="decimal" />
-                  </div>
-                  <div class="field">
-                    <label for="fuelPricePerLiter">Cena za litr</label>
-                    <input id="fuelPricePerLiter" inputmode="decimal" />
-                  </div>
-                  <div class="field">
-                    <label for="fuelTotal">Celkem</label>
-                    <input id="fuelTotal" inputmode="decimal" />
-                  </div>
-                </div>
-              </div>
+          <div class="grid">
+            <div class="field">
+              <label for="fuelDate">Datum</label>
+              <input id="fuelDate" type="date" />
             </div>
 
-            <div class="block">
-              <h3>Doplňující údaje</h3>
-              <p class="desc">Pumpa a poznámka</p>
-
-              <div class="grid">
-                <div class="field">
-                  <label for="fuelStation">Pumpa / místo</label>
-                  <input id="fuelStation" />
-                </div>
-
-                <div class="field">
-                  <label for="fuelNote">Poznámka</label>
-                  <textarea id="fuelNote"></textarea>
-                </div>
-              </div>
+            <div class="field">
+              <label for="fuelOdometer">Stav km</label>
+              <input id="fuelOdometer" inputmode="numeric" />
             </div>
-          </div>
-        </section>
 
-        <div class="sticky-bar">
-          <div class="actions">
-            <button class="btn" type="submit" id="fuelSubmitBtn">Uložit tankování</button>
-            <button class="btn2" type="button" onclick="resetFuelForm()">Vyčistit formulář</button>
+            <div class="field">
+              <label for="fuelLiters">Litry</label>
+              <input id="fuelLiters" inputmode="decimal" />
+            </div>
           </div>
         </div>
-      </form>
+
+        <div class="block">
+          <h3>Doplňující údaje</h3>
+
+          <div class="grid">
+            <div class="field">
+              <label for="fuelStation">Pumpa / místo</label>
+              <input id="fuelStation" />
+            </div>
+
+            <div class="field">
+              <label for="fuelNote">Poznámka</label>
+              <textarea id="fuelNote"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
+
+    <div class="sticky-bar">
+      <div class="actions">
+        <button class="btn" type="submit" id="fuelSubmitBtn">Uložit tankování</button>
+        <button class="btn2" type="button" onclick="resetFuelForm()">Vyčistit formulář</button>
+      </div>
+    </div>
+  </form>
+</section>
 
     <section id="screen-tech" class="screen hidden">
       <form id="techForm">
