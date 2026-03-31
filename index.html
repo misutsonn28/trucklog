@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#061225" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="TruckLog" />
-  <link rel="manifest" href="manifest.json?v=10" />
-  <link rel="icon" href="icon-192.png?v=10" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=10" />
+  <link rel="manifest" href="manifest.json?v=11" />
+  <link rel="icon" href="icon-192.png?v=11" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=11" />
 
   <style>
     :root{
@@ -506,28 +506,28 @@
 </head>
 <body>
   <div class="app">
-    <header class="hero">
-      <div class="hero-version">V10.4</div>
-
-      <div class="hero-main">
-        <div class="hero-logo-large">🚛</div>
-        <h1>TruckLog</h1>
-        <p class="hero-tagline">osobní jízdní deník</p>
-      </div>
-
-      <div class="icon-stats">
-        <div class="icon-stat">
-          <div class="icon-bubble">📝</div>
-          <div class="value" id="miniTrips">0</div>
-        </div>
-        <div class="icon-stat">
-          <div class="icon-bubble">⛽</div>
-          <div class="value" id="miniFuel">0</div>
-        </div>
-      </div>
-    </header>
-
     <section id="screen-overview" class="screen">
+      <header class="hero">
+        <div class="hero-version">V10.4</div>
+
+        <div class="hero-main">
+          <div class="hero-logo-large">🚛</div>
+          <h1>TruckLog</h1>
+          <p class="hero-tagline">osobní jízdní deník</p>
+        </div>
+
+        <div class="icon-stats">
+          <div class="icon-stat">
+            <div class="icon-bubble">📝</div>
+            <div class="value" id="miniTrips">0</div>
+          </div>
+          <div class="icon-stat">
+            <div class="icon-bubble">⛽</div>
+            <div class="value" id="miniFuel">0</div>
+          </div>
+        </div>
+      </header>
+
       <section class="section">
         <div class="section-head">
           <div>
@@ -546,7 +546,7 @@
           <div class="section-head">
             <div>
               <h2 class="title" id="tripFormTitle">Nová jízda</h2>
-              <p class="desc">Místa se našeptávají a nová se ukládají automaticky</p>
+              <p class="desc">Zapiš novou jízdu</p>
             </div>
           </div>
 
@@ -675,8 +675,8 @@
         <section class="section">
           <div class="section-head">
             <div>
-              <h2 class="title" id="fuelFormTitle">Tankování</h2>
-              <p class="desc">Spotřeba se počítá mezi dvěma tankováními</p>
+              <h2 class="title" id="fuelFormTitle">Nové tankování</h2>
+              <p class="desc">Zapiš nové tankování</p>
             </div>
           </div>
 
@@ -1199,14 +1199,6 @@
       renderAll();
     }
 
-    function currentProfileTrips(){
-      return state.trips.filter(item => item.profileId === state.activeProfileId);
-    }
-
-    function currentProfileFuelings(){
-      return state.fuelings.filter(item => item.profileId === state.activeProfileId);
-    }
-
     function currentOdometer(profileId = state.activeProfileId){
       const tripMax = state.trips
         .filter(item => item.profileId === profileId)
@@ -1227,7 +1219,6 @@
 
     function toggleEmptyDrive(){
       const checked = qs('tripEmptyDrive').checked;
-
       qs('tripCommodityField').classList.toggle('hidden', checked);
       qs('tripCommodityCustomWrap').classList.add('hidden');
       qs('tripQuantityField').classList.toggle('hidden', checked);
@@ -1450,7 +1441,7 @@
 
     function resetFuelForm(){
       state.editingFuelId = null;
-      qs('fuelFormTitle').textContent = 'Tankování';
+      qs('fuelFormTitle').textContent = 'Nové tankování';
       qs('fuelSubmitBtn').textContent = 'Uložit tankování';
       qs('fuelForm').reset();
       qs('fuelDate').value = today();
@@ -1579,25 +1570,6 @@
         { key:'truckStk', label:'STK tahače', value:tech.truckStk, type:'date' },
         { key:'equipmentStk', label:getEquipmentStkLabel(profile).replace(' do',''), value:tech.equipmentStk, type:'date' }
       ];
-    }
-
-    function getNextTechDeadline(profile = activeProfile()){
-      const items = [];
-
-      getTechItems(profile).forEach(item => {
-        if(item.type === 'date' && item.value){
-          items.push({
-            label:item.label,
-            sort:daysUntil(item.value),
-            detail:formatDate(item.value),
-            badge:statusBadge(daysUntil(item.value))
-          });
-        }
-      });
-
-      if(!items.length) return null;
-      items.sort((a,b) => a.sort - b.sort);
-      return items[0];
     }
 
     function renderProfileSwitcher(){
