@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>TruckLog PRO V11.3</title>
+  <title>TruckLog PRO V11.4</title>
   <meta name="theme-color" content="#081a33" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="TruckLog" />
-  <link rel="manifest" href="manifest.json?v=113" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico?v=113" />
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=113" />
-  <link rel="icon" href="icon-192.png?v=113" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=113" />
+  <link rel="manifest" href="manifest.json?v=114" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=114" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=114" />
+  <link rel="icon" href="icon-192.png?v=114" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=114" />
 
   <style>
     :root{
@@ -288,7 +288,7 @@
   <div class="app">
     <section id="screen-overview" class="screen">
       <header class="hero">
-        <div class="hero-version">V11.3</div>
+        <div class="hero-version">V11.4</div>
         <div class="hero-main">
           <div class="hero-logo-panel">
             <img class="hero-logo-image" src="brand-logo.png" alt="TruckLog logo" />
@@ -408,6 +408,12 @@
                 <div class="field" id="tripQuantityField">
                   <label for="tripQuantityKg">Naložené množství (kg)</label>
                   <input id="tripQuantityKg" inputmode="numeric" placeholder="Např. 25450" />
+                </div>
+
+                <div class="field hidden" id="tripContainerWrap">
+                  <label for="tripContainerNumber">Číslo kontejneru</label>
+                  <input id="tripContainerNumber" placeholder="Např. TGHU 482915-3" />
+                  <small id="tripContainerInfo"></small>
                 </div>
 
                 <div class="field">
@@ -928,6 +934,9 @@
         toAddress: trim(item?.toAddress),
         commodity: trim(item?.commodity),
         quantityKg: digitsOnly(item?.quantityKg),
+        containerNumber: trim(item?.containerNumber),
+        trailerType: trim(item?.trailerType),
+        trailerPlate: trim(item?.trailerPlate).toUpperCase(),
         note: trim(item?.note),
         createdAt: item?.createdAt || new Date().toISOString(),
         updatedAt: item?.updatedAt || item?.createdAt || new Date().toISOString()
@@ -1216,6 +1225,35 @@
         : trim(qs('tripCommodityPreset').value);
     }
 
+    function trailerNeedsContainerField(trailerType){
+      return ['Silo šasi', 'Kontejnerové šasi'].includes(trim(trailerType));
+    }
+
+    function currentTripTrailerSnapshot(){
+      const trailer = primaryTrailerVehicle(activeProfile());
+      return {
+        type: trim(trailer?.type),
+        plate: trim(trailer?.plate).toUpperCase()
+      };
+    }
+
+    function updateTripContainerField(){
+      const editingTrip = state.trips.find(item => item.id === state.editingTripId) || null;
+      const snapshot = currentTripTrailerSnapshot();
+      const trailerType = trim(editingTrip?.trailerType || snapshot.type);
+      const trailerPlate = trim(editingTrip?.trailerPlate || snapshot.plate).toUpperCase();
+      const shouldShow = trailerNeedsContainerField(trailerType) || !!trim(editingTrip?.containerNumber) || !!trim(qs('tripContainerNumber')?.value);
+
+      qs('tripContainerWrap').classList.toggle('hidden', !shouldShow);
+      qs('tripContainerInfo').textContent = shouldShow
+        ? [trailerType, trailerPlate].filter(Boolean).join(' • ')
+        : '';
+
+      if(!shouldShow){
+        qs('tripContainerNumber').value = '';
+      }
+    }
+
     function resetTripForm(){
       state.editingTripId = null;
       qs('tripForm').reset();
@@ -1224,13 +1262,20 @@
       qs('tripDate').value = today();
       qs('tripDistancePreview').value = '';
       qs('tripEmptyDrive').checked = false;
+      qs('tripContainerNumber').value = '';
+      qs('tripContainerInfo').textContent = '';
       setCommodityFields('');
       toggleEmptyDrive();
+      updateTripContainerField();
     }
 
     function getTripFormData(){
       const existing = state.trips.find(item => item.id === state.editingTripId);
       const emptyDrive = qs('tripEmptyDrive').checked;
+      const trailerSnapshot = currentTripTrailerSnapshot();
+      const containerNumber = trailerNeedsContainerField(trailerSnapshot.type) || existing?.containerNumber
+        ? trim(qs('tripContainerNumber').value)
+        : '';
       return {
         id: existing?.id || generateId('TRIP'),
         profileId: state.activeProfileId,
@@ -1246,6 +1291,9 @@
         toAddress: trim(qs('tripToAddress').value),
         commodity: emptyDrive ? '' : selectedCommodity(),
         quantityKg: emptyDrive ? '0' : digitsOnly(qs('tripQuantityKg').value),
+        containerNumber,
+        trailerType: trailerSnapshot.type,
+        trailerPlate: trailerSnapshot.plate,
         note: trim(qs('tripNote').value),
         createdAt: existing?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -1280,10 +1328,12 @@
       qs('tripToAddress').value = item.toAddress || '';
       setCommodityFields(item.commodity || '');
       qs('tripQuantityKg').value = item.quantityKg || '';
+      qs('tripContainerNumber').value = item.containerNumber || '';
       qs('tripNote').value = item.note || '';
       qs('tripFormTitle').textContent = 'Upravit jízdu';
       qs('tripSubmitBtn').textContent = 'Uložit změny';
       toggleEmptyDrive();
+      updateTripContainerField();
       updateTripDistancePreview();
       saveState();
       openScreen('trip');
@@ -1588,7 +1638,8 @@
           const profile = state.profiles.find(p => p.id === item.profileId);
           const haystack = [
             item.fromPlace, item.fromAddress, item.toPlace, item.toAddress,
-            item.commodity, item.note, profileLabel(profile)
+            item.commodity, item.containerNumber, item.trailerType, item.trailerPlate,
+            item.note, profileLabel(profile)
           ].join(' ');
           return normalizeText(haystack).includes(search);
         })
@@ -1677,6 +1728,7 @@
                     <div class="metric"><div class="l">Typ jízdy</div><div class="v">${esc(item.emptyDrive ? 'Bez nákladu' : 'S nákladem')}</div></div>
                   </div>
                   ${(item.fromAddress || item.toAddress) ? '<div class="summary mt-16"><strong>Adresa</strong><span>' + esc(item.fromAddress || '—') + ' → ' + esc(item.toAddress || '—') + '</span></div>' : ''}
+                  ${item.containerNumber ? '<div class="summary mt-16"><strong>Kontejner</strong><span>' + esc(item.containerNumber) + (item.trailerType || item.trailerPlate ? ' • ' + esc([item.trailerType, item.trailerPlate].filter(Boolean).join(' • ')) : '') + '</span></div>' : ''}
                   ${item.note ? '<div class="summary mt-16"><strong>Poznámka</strong><span>' + esc(item.note) + '</span></div>' : ''}
                   <div class="history-actions">
                     <button class="chip" type="button" onclick="editTrip('${esc(item.id)}')">Upravit</button>
@@ -1693,6 +1745,7 @@
       renderPlacesDatalist();
       renderProfileSwitchers();
       renderActiveProfileHints();
+      updateTripContainerField();
       renderOverview();
       renderProfiles();
       renderVehicles();
@@ -1834,6 +1887,7 @@
       updateTripDistancePreview();
     });
     qs('tripQuantityKg').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); });
+    qs('tripContainerNumber').addEventListener('input', updateTripContainerField);
     qs('fuelOdometer').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); });
     qs('fuelLiters').addEventListener('input', event => { event.target.value = decimalOnly(event.target.value); });
     qs('vehiclePlate').addEventListener('input', event => { event.target.value = event.target.value.toUpperCase(); });
