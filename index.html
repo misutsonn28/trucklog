@@ -249,6 +249,56 @@
       line-height:1;
     }
 
+    .profile-overview{
+      display:grid;
+      gap:14px;
+    }
+
+    .profile-main-card{
+      padding:18px;
+      background:var(--card2);
+      border:1px solid var(--line);
+      border-radius:24px;
+    }
+
+    .profile-name{
+      margin-top:8px;
+      font-size:2rem;
+      font-weight:900;
+      line-height:1.05;
+      letter-spacing:-.04em;
+    }
+
+    .profile-plates{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:1.02rem;
+      font-weight:800;
+      letter-spacing:-.01em;
+    }
+
+    .profile-stats-grid{
+      display:grid;
+      gap:12px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      margin-top:18px;
+    }
+
+    .profile-stat-box{
+      padding:14px;
+      border-radius:18px;
+      background:rgba(8,18,34,.9);
+      border:1px solid var(--line);
+    }
+
+    .profile-stat-box .v{
+      margin-top:6px;
+      font-size:1.24rem;
+      font-weight:900;
+      line-height:1.1;
+      letter-spacing:-.03em;
+    }
+
     .block{
       border-radius:26px;
     }
@@ -493,7 +543,7 @@
     }
 
     @media (max-width:740px){
-      .icon-stats,.stats-grid,.split,.triple,.metrics{grid-template-columns:1fr}
+      .icon-stats,.stats-grid,.split,.triple,.metrics,.profile-stats-grid{grid-template-columns:1fr}
       .hero,.section{padding:16px;border-radius:26px}
       .hero-version{top:14px;right:14px}
       .hero-logo-large{width:96px;height:96px;font-size:48px;border-radius:26px}
@@ -501,6 +551,8 @@
       .block{padding:14px;border-radius:22px}
       .btn,.btn2,.btn-danger{width:100%}
       .history-actions{grid-template-columns:1fr}
+      .profile-name{font-size:1.7rem}
+      .profile-plates{font-size:.96rem}
     }
   </style>
 </head>
@@ -531,12 +583,12 @@
       <section class="section">
         <div class="section-head">
           <div>
-            <h2 class="title">Přehled</h2>
-            <p class="desc">Jen to nejdůležitější</p>
+            <h2 class="title">Profil</h2>
+            <p class="desc">Aktivní řidič a souprava</p>
           </div>
           <div class="profile-switcher" id="profileSwitcher"></div>
         </div>
-        <div class="stats-grid" id="overviewStats"></div>
+        <div id="overviewStats"></div>
       </section>
     </section>
 
@@ -1593,18 +1645,22 @@
 
       if(!profile){
         qs('overviewStats').innerHTML = `
-          <div class="card">
-            <div class="tiny">Řidič</div>
-            <div class="big">Bez profilu</div>
-            <div class="hint">Nejdřív si vytvoř profil.</div>
-          </div>
-          <div class="card">
-            <div class="tiny">Aktuální stav km</div>
-            <div class="big">—</div>
-          </div>
-          <div class="card">
-            <div class="tiny">Průměrná spotřeba</div>
-            <div class="big">—</div>
+          <div class="profile-overview">
+            <div class="profile-main-card">
+              <div class="tiny">Profil</div>
+              <div class="profile-name">Bez profilu</div>
+              <div class="hint">Nejdřív si vytvoř profil.</div>
+              <div class="profile-stats-grid">
+                <div class="profile-stat-box">
+                  <div class="tiny">Aktuální stav km</div>
+                  <div class="v">—</div>
+                </div>
+                <div class="profile-stat-box">
+                  <div class="tiny">Průměrná spotřeba</div>
+                  <div class="v">—</div>
+                </div>
+              </div>
+            </div>
           </div>
         `;
         return;
@@ -1612,30 +1668,28 @@
 
       const odo = currentOdometer(profile.id);
       const avgCons = getAverageConsumption(profile.id);
+      const plates = [profile.truckPlate, profile.equipmentPlate].filter(Boolean).join(' • ');
 
-      qs('overviewStats').innerHTML = [
-        {
-          label:'Řidič',
-          value: profile.driverName || '—',
-          hint: [profile.truckBrand, profile.truckPlate].filter(Boolean).join(' • ') || 'Bez tahače'
-        },
-        {
-          label:'Aktuální stav km',
-          value: odo ? String(odo) : '—',
-          hint:'Nejvyšší známý stav km aktivního profilu'
-        },
-        {
-          label:'Průměrná spotřeba',
-          value: formatConsumption(avgCons),
-          hint:'Počítáno mezi tankováními'
-        }
-      ].map(item => `
-        <div class="card">
-          <div class="tiny">${esc(item.label)}</div>
-          <div class="big">${esc(item.value)}</div>
-          <div class="hint">${esc(item.hint)}</div>
+      qs('overviewStats').innerHTML = `
+        <div class="profile-overview">
+          <div class="profile-main-card">
+            <div class="tiny">Profil</div>
+            <div class="profile-name">${esc(profile.driverName || '—')}</div>
+            <div class="profile-plates">${esc(plates || 'Bez SPZ soupravy')}</div>
+
+            <div class="profile-stats-grid">
+              <div class="profile-stat-box">
+                <div class="tiny">Aktuální stav km</div>
+                <div class="v">${esc(odo > 0 ? String(odo) : '—')}</div>
+              </div>
+              <div class="profile-stat-box">
+                <div class="tiny">Průměrná spotřeba</div>
+                <div class="v">${esc(formatConsumption(avgCons))}</div>
+              </div>
+            </div>
+          </div>
         </div>
-      `).join('');
+      `;
     }
 
     function renderTech(){
