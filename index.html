@@ -93,7 +93,8 @@
     }
 
     .hero{
-      padding:22px;
+      position:relative;
+      padding:24px 22px 22px;
       border-radius:34px;
       margin-bottom:20px;
     }
@@ -104,7 +105,7 @@
       margin-bottom:18px;
     }
 
-    .hero-top,.section-head,.row,.actions,.history-top{
+    .section-head,.row,.actions,.history-top{
       display:flex;
       gap:16px;
       justify-content:space-between;
@@ -112,36 +113,7 @@
       flex-wrap:wrap;
     }
 
-    .brand{
-      display:flex;
-      gap:16px;
-      align-items:flex-start;
-    }
-
-    .logo{
-      width:66px;
-      height:66px;
-      border-radius:22px;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(135deg,rgba(45,212,191,.16),rgba(45,212,191,.04));
-      border:1px solid rgba(45,212,191,.16);
-      font-size:30px;
-      flex:0 0 auto;
-    }
-
     h1,h2,h3,h4,p{margin:0}
-
-    .hero h1{
-      font-size:clamp(2rem,4vw,3rem);
-      line-height:1.05;
-      letter-spacing:-.04em;
-    }
-
-    .subtitle{
-      margin-top:6px;
-      color:var(--muted);
-    }
 
     .title{
       font-size:clamp(1.3rem,2vw,1.8rem);
@@ -155,12 +127,77 @@
       font-size:.95rem;
     }
 
+    .hero-version{
+      position:absolute;
+      top:18px;
+      right:18px;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(45,212,191,.2);
+      background:rgba(45,212,191,.08);
+      color:var(--muted);
+      font-size:.9rem;
+      font-weight:800;
+      letter-spacing:.06em;
+    }
+
+    .hero-main{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      gap:10px;
+      padding:6px 0 0;
+    }
+
+    .hero-logo-large{
+      width:112px;
+      height:112px;
+      border-radius:30px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,rgba(45,212,191,.18),rgba(45,212,191,.05));
+      border:1px solid rgba(45,212,191,.18);
+      font-size:56px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    .hero h1{
+      font-size:clamp(2.7rem,5vw,4rem);
+      line-height:1;
+      letter-spacing:-.05em;
+      margin-top:2px;
+    }
+
+    .hero-tagline{
+      font-size:1.12rem;
+      font-weight:800;
+      color:var(--txt);
+      letter-spacing:-.02em;
+      opacity:.96;
+    }
+
+    .hero-note{
+      max-width:560px;
+      color:var(--muted);
+      font-size:1rem;
+      line-height:1.45;
+    }
+
     .grid{display:grid;gap:14px}
     .split{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
     .triple{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
     .stats-grid{display:grid;gap:14px;grid-template-columns:repeat(4,minmax(0,1fr))}
     .metrics{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}
-    .icon-stats{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(110px,1fr));min-width:min(100%,300px)}
+
+    .icon-stats{
+      display:grid;
+      gap:12px;
+      grid-template-columns:repeat(2,minmax(110px,1fr));
+      width:100%;
+      max-width:520px;
+      margin:18px auto 0;
+    }
 
     .card,.summary,.history-card,.metric,.profile-card,.icon-stat,.block{
       background:var(--card2);
@@ -199,18 +236,18 @@
       align-items:center;
       justify-content:center;
       gap:14px;
-      min-height:92px;
+      min-height:78px;
     }
 
     .icon-bubble{
-      width:52px;
-      height:52px;
+      width:48px;
+      height:48px;
       border-radius:16px;
       display:grid;
       place-items:center;
       background:rgba(45,212,191,.12);
       border:1px solid rgba(45,212,191,.18);
-      font-size:24px;
+      font-size:22px;
       flex:0 0 auto;
     }
 
@@ -466,6 +503,10 @@
     @media (max-width:740px){
       .icon-stats,.stats-grid,.split,.triple,.metrics{grid-template-columns:1fr}
       .hero,.section{padding:16px;border-radius:26px}
+      .hero-version{top:14px;right:14px}
+      .hero-logo-large{width:96px;height:96px;font-size:48px;border-radius:26px}
+      .hero h1{font-size:2.8rem}
+      .hero-note{font-size:.95rem}
       .block{padding:14px;border-radius:22px}
       .btn,.btn2,.btn-danger{width:100%}
       .history-actions{grid-template-columns:1fr}
@@ -475,24 +516,23 @@
 <body>
   <div class="app">
     <header class="hero">
-      <div class="hero-top">
-        <div class="brand">
-          <div class="logo">🚛</div>
-          <div>
-            <h1>TruckLog PRO V10.4</h1>
-            <p class="subtitle">Osobní jízdní deník pro přehled jízd, tankování, spotřeby a termínů techniky</p>
-          </div>
-        </div>
+      <div class="hero-version">V10.4</div>
 
-        <div class="icon-stats">
-          <div class="icon-stat">
-            <div class="icon-bubble">📝</div>
-            <div class="value" id="miniTrips">0</div>
-          </div>
-          <div class="icon-stat">
-            <div class="icon-bubble">⛽</div>
-            <div class="value" id="miniFuel">0</div>
-          </div>
+      <div class="hero-main">
+        <div class="hero-logo-large">🚛</div>
+        <h1>TruckLog</h1>
+        <p class="hero-tagline">osobní jízdní deník</p>
+        <p class="hero-note">Přehled jízd, tankování, spotřeby a termínů techniky</p>
+      </div>
+
+      <div class="icon-stats">
+        <div class="icon-stat">
+          <div class="icon-bubble">📝</div>
+          <div class="value" id="miniTrips">0</div>
+        </div>
+        <div class="icon-stat">
+          <div class="icon-bubble">⛽</div>
+          <div class="value" id="miniFuel">0</div>
         </div>
       </div>
     </header>
@@ -665,6 +705,7 @@
         </div>
       </form>
     </section>
+
     <section id="screen-fuel" class="screen hidden">
       <form id="fuelForm">
         <section class="section">
@@ -974,7 +1015,8 @@
       <button id="nav-history" onclick="openScreen('history')"><span class="i">📁</span><span class="t">Historie</span></button>
     </div>
   </nav>
-    <script>
+
+  <script>
     const STORAGE = {
       profiles: 'trucklog_profiles_v104_inline',
       activeProfileId: 'trucklog_active_profile_id_v104_inline',
