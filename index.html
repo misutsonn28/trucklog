@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>TruckLog PRO V10.6</title>
+  <title>TruckLog PRO V10.7</title>
   <meta name="theme-color" content="#061225" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="TruckLog" />
@@ -249,7 +248,7 @@
   <div class="app">
     <section id="screen-overview" class="screen">
       <header class="hero">
-        <div class="hero-version">V10.6</div>
+        <div class="hero-version">V10.7</div>
         <div class="hero-main">
           <div class="hero-logo-large">🚛</div>
           <h1>TruckLog</h1>
@@ -454,6 +453,11 @@
                     <option value="Sklápěcí šasi">Sklápěcí šasi</option>
                     <option value="Jiné vozidlo">Jiné vozidlo</option>
                   </select>
+                </div>
+
+                <div class="field" id="vehicleBrandWrap">
+                  <label for="vehicleBrand">Značka tahače</label>
+                  <input id="vehicleBrand" placeholder="Např. MAN, VOLVO, SCANIA" />
                 </div>
 
                 <div class="field">
@@ -756,9 +760,11 @@
     }
 
     function normalizeVehicle(vehicle){
+      const type = VEHICLE_TYPES.includes(trim(vehicle?.type)) ? trim(vehicle.type) : 'Jiné vozidlo';
       return {
         id: vehicle?.id || generateId('VEH'),
-        type: VEHICLE_TYPES.includes(trim(vehicle?.type)) ? trim(vehicle.type) : 'Jiné vozidlo',
+        type,
+        brand: type === 'Tahač' ? trim(vehicle?.brand) : '',
         label: trim(vehicle?.label),
         plate: trim(vehicle?.plate).toUpperCase(),
         stk: trim(vehicle?.stk),
@@ -1270,16 +1276,25 @@
       renderAll();
     }
 
+    function toggleVehicleBrandField(){
+      const isTruck = qs('vehicleType').value === 'Tahač';
+      qs('vehicleBrandWrap').classList.toggle('hidden', !isTruck);
+      if(!isTruck) qs('vehicleBrand').value = '';
+    }
+
     function updateVehiclePrimaryLabel(){
-      qs('vehiclePrimaryText').textContent = qs('vehicleType').value === 'Tahač'
+      const isTruck = qs('vehicleType').value === 'Tahač';
+      qs('vehiclePrimaryText').textContent = isTruck
         ? 'Použít jako hlavní tahač v profilu'
         : 'Použít jako hlavní vozidlo za tahačem v profilu';
+      toggleVehicleBrandField();
     }
 
     function resetVehicleForm(){
       state.editingVehicleId = null;
       qs('vehicleForm').reset();
       qs('vehicleType').value = 'Tahač';
+      qs('vehicleBrand').value = '';
       qs('vehiclePrimary').checked = false;
       qs('vehicleBlockTitle').textContent = 'Nové vozidlo';
       qs('vehicleSubmitBtn').textContent = 'Uložit vozidlo';
@@ -1296,6 +1311,7 @@
       return normalizeVehicle({
         id: existing?.id || generateId('VEH'),
         type: qs('vehicleType').value,
+        brand: qs('vehicleBrand').value,
         label: qs('vehicleLabel').value,
         plate: qs('vehiclePlate').value,
         stk: qs('vehicleStk').value,
@@ -1312,6 +1328,7 @@
       if(!vehicle) return;
       state.editingVehicleId = id;
       qs('vehicleType').value = vehicle.type || 'Tahač';
+      qs('vehicleBrand').value = vehicle.brand || '';
       qs('vehicleLabel').value = vehicle.label || '';
       qs('vehiclePlate').value = vehicle.plate || '';
       qs('vehicleStk').value = vehicle.stk || '';
@@ -1467,7 +1484,7 @@
                     <div class="badge ${badge.cls}">${esc(badge.text)}</div>
                     <h3 class="mt-12">${esc(vehicle.label || vehicle.type || 'Vozidlo')}</h3>
                   </div>
-                  <div class="history-sub">${esc([vehicle.type, vehicle.plate].filter(Boolean).join(' • ') || 'Bez detailu')}</div>
+                  <div class="history-sub">${esc([vehicle.type, vehicle.brand, vehicle.plate].filter(Boolean).join(' • ') || 'Bez detailu')}</div>
                   <div class="history-sub">${esc(vehicle.stk ? 'STK do ' + formatDate(vehicle.stk) : 'STK nenastaveno')}</div>
                   ${primaryText ? '<div class="history-sub">' + esc(primaryText) + '</div>' : ''}
                 </div>
@@ -1763,3 +1780,4 @@
   </script>
 </body>
 </html>
+
