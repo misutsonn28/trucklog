@@ -590,136 +590,130 @@
         <div id="overviewStats"></div>
       </section>
     </section>
+<section id="screen-trip" class="screen hidden">
+  <form id="tripForm">
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2 class="title" id="tripFormTitle">Nová jízda</h2>
+        </div>
+      </div>
 
-    <section id="screen-trip" class="screen hidden">
-      <form id="tripForm">
-        <section class="section">
-          <div class="section-head">
-            <div>
-              <h2 class="title" id="tripFormTitle">Nová jízda</h2>
-              <p class="desc">Zapiš novou jízdu</p>
+      <div class="split">
+        <div class="block">
+          <h3>Jízda</h3>
+
+          <div class="grid">
+            <div class="field">
+              <label for="tripDate">Datum</label>
+              <input id="tripDate" type="date" />
             </div>
-          </div>
 
-          <div class="split">
-            <div class="block">
-              <h3>Základ jízdy</h3>
-              <p class="desc">Datum, časy a kilometry nahoře</p>
-
-              <div class="grid">
-                <div class="field">
-                  <label for="tripDate">Datum</label>
-                  <input id="tripDate" type="date" />
+            <div class="triple">
+              <div class="field">
+                <label for="tripDepartureTime">Čas odjezdu</label>
+                <input id="tripDepartureTime" type="time" />
+              </div>
+              <div class="field">
+                <label for="tripArrivalTime">Čas příjezdu</label>
+                <input id="tripArrivalTime" type="time" />
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <div class="toggle-line">
+                  <input id="tripEmptyDrive" type="checkbox" />
+                  <span>Jízda po prázdnu</span>
                 </div>
-
-                <div class="triple">
-                  <div class="field">
-                    <label for="tripDepartureTime">Čas odjezdu</label>
-                    <input id="tripDepartureTime" type="time" />
-                  </div>
-                  <div class="field">
-                    <label for="tripArrivalTime">Čas příjezdu</label>
-                    <input id="tripArrivalTime" type="time" />
-                  </div>
-                  <div class="field">
-                    <label>&nbsp;</label>
-                    <div class="toggle-line">
-                      <input id="tripEmptyDrive" type="checkbox" />
-                      <span>Jízda po prázdnu</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="triple">
-                  <div class="field">
-                    <label for="tripKmStart">Km start</label>
-                    <input id="tripKmStart" inputmode="numeric" />
-                  </div>
-                  <div class="field">
-                    <label for="tripKmEnd">Km konec</label>
-                    <input id="tripKmEnd" inputmode="numeric" />
-                  </div>
-                  <div class="field">
-                    <label for="tripDistancePreview">Ujeto km</label>
-                    <input id="tripDistancePreview" disabled placeholder="Počítá se automaticky" />
-                  </div>
-                </div>
-
-                <div class="field">
-                  <label for="tripFromPlace">Odkud firma / místo</label>
-                  <input id="tripFromPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off" />
-                  <small>Vyber z nabídky nebo napiš nové místo.</small>
-                </div>
-
-                <div class="field">
-                  <label for="tripFromAddress">Odkud adresa</label>
-                  <input id="tripFromAddress" placeholder="Adresa místa odkud" />
-                </div>
-
-                <div class="field">
-                  <label for="tripToPlace">Kam firma / místo</label>
-                  <input id="tripToPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off" />
-                  <small>Vyber z nabídky nebo napiš nové místo.</small>
-                </div>
-
-                <div class="field">
-                  <label for="tripToAddress">Kam adresa</label>
-                  <input id="tripToAddress" placeholder="Adresa místa kam" />
-                </div>
-
-                <datalist id="placesList"></datalist>
               </div>
             </div>
 
-            <div class="block">
-              <h3>Náklad</h3>
-              <p class="desc">Komodita z nabídky a přesná tonáž v kg</p>
-
-              <div class="grid">
-                <div class="field" id="tripCommodityField">
-                  <label for="tripCommodityPreset">Komodita</label>
-                  <select id="tripCommodityPreset">
-                    <option value="">Vyber komoditu</option>
-                    <option>Cement</option>
-                    <option>Popílek</option>
-                    <option>Granulát</option>
-                    <option>Vápno</option>
-                    <option>Moučka</option>
-                    <option>Sádra</option>
-                    <option>Písek</option>
-                    <option>Kamenivo</option>
-                    <option>Jiná</option>
-                  </select>
-                </div>
-
-                <div class="field hidden" id="tripCommodityCustomWrap">
-                  <label for="tripCommodityCustom">Jiná komodita</label>
-                  <input id="tripCommodityCustom" placeholder="Napiš vlastní komoditu" />
-                </div>
-
-                <div class="field" id="tripQuantityField">
-                  <label for="tripQuantityKg">Naložené množství (kg)</label>
-                  <input id="tripQuantityKg" inputmode="numeric" placeholder="Např. 25450" />
-                  <small>Zadávej jen číslo v kilogramech</small>
-                </div>
-
-                <div class="field">
-                  <label for="tripNote">Poznámka</label>
-                  <textarea id="tripNote" placeholder="Např. delší čekání, objížďka, zvláštní poznámka"></textarea>
-                </div>
+            <div class="triple">
+              <div class="field">
+                <label for="tripKmStart">Km start</label>
+                <input id="tripKmStart" inputmode="numeric" />
+              </div>
+              <div class="field">
+                <label for="tripKmEnd">Km konec</label>
+                <input id="tripKmEnd" inputmode="numeric" />
+              </div>
+              <div class="field">
+                <label for="tripDistancePreview">Ujeto km</label>
+                <input id="tripDistancePreview" disabled placeholder="Počítá se automaticky" />
               </div>
             </div>
-          </div>
-        </section>
 
-        <div class="sticky-bar">
-          <div class="actions">
-            <button class="btn" type="submit" id="tripSubmitBtn">Uložit jízdu</button>
-            <button class="btn2" type="button" onclick="resetTripForm()">Vyčistit formulář</button>
+            <div class="field">
+              <label for="tripFromPlace">Odkud firma / místo</label>
+              <input id="tripFromPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label for="tripFromAddress">Odkud adresa</label>
+              <input id="tripFromAddress" placeholder="Adresa místa odkud" />
+            </div>
+
+            <div class="field">
+              <label for="tripToPlace">Kam firma / místo</label>
+              <input id="tripToPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label for="tripToAddress">Kam adresa</label>
+              <input id="tripToAddress" placeholder="Adresa místa kam" />
+            </div>
+
+            <datalist id="placesList"></datalist>
           </div>
         </div>
-      </form>
+
+        <div class="block">
+          <h3>Náklad</h3>
+
+          <div class="grid">
+            <div class="field" id="tripCommodityField">
+              <label for="tripCommodityPreset">Komodita</label>
+              <select id="tripCommodityPreset">
+                <option value="">Vyber komoditu</option>
+                <option>Cement</option>
+                <option>Popílek</option>
+                <option>Granulát</option>
+                <option>Vápno</option>
+                <option>Moučka</option>
+                <option>Sádra</option>
+                <option>Písek</option>
+                <option>Kamenivo</option>
+                <option>Jiná</option>
+              </select>
+            </div>
+
+            <div class="field hidden" id="tripCommodityCustomWrap">
+              <label for="tripCommodityCustom">Jiná komodita</label>
+              <input id="tripCommodityCustom" placeholder="Napiš vlastní komoditu" />
+            </div>
+
+            <div class="field" id="tripQuantityField">
+              <label for="tripQuantityKg">Naložené množství (kg)</label>
+              <input id="tripQuantityKg" inputmode="numeric" placeholder="Např. 25450" />
+            </div>
+
+            <div class="field">
+              <label for="tripNote">Poznámka</label>
+              <textarea id="tripNote" placeholder="Např. delší čekání, objížďka, zvláštní poznámka"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
+
+    <div class="sticky-bar">
+      <div class="actions">
+        <button class="btn" type="submit" id="tripSubmitBtn">Uložit jízdu</button>
+        <button class="btn2" type="button" onclick="resetTripForm()">Vyčistit formulář</button>
+      </div>
+    </div>
+  </form>
+</section>
+    
 
     <section id="screen-fuel" class="screen hidden">
       <form id="fuelForm">
