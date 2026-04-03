@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>TruckLog PRO V12.7.2</title>
+  <title>TruckLog PRO V12.7.3</title>
   <meta name="theme-color" content="#081a33" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="TruckLog" />
-  <link rel="manifest" href="manifest.json?v=1272" />
-  <link rel="icon" type="image/x-icon" href="favicon.ico?v=1272" />
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=1272" />
-  <link rel="icon" href="icon-192.png?v=1272" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1272" />
+  <link rel="manifest" href="manifest.json?v=1273" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=1273" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=1273" />
+  <link rel="icon" href="icon-192.png?v=1273" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1273" />
 
   <style>
     :root{
@@ -261,6 +261,16 @@
     .history-sub{color:var(--muted);font-size:.94rem;line-height:1.45}
     .history-actions{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}
     .vehicle-active-line{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .vehicle-overview-section{padding:14px 16px}
+    .vehicle-quick-grid{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .vehicle-mini-card{
+      padding:12px 14px;
+      background:rgba(8,18,34,.9);
+      border:1px solid var(--line);
+      border-radius:18px;
+    }
+    .vehicle-mini-card .tiny{font-size:.7rem}
+    .vehicle-mini-card .big{margin-top:6px;font-size:1.35rem}
     .vehicle-list-stack{display:grid;gap:12px}
     .vehicle-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
     .vehicle-card{
@@ -646,6 +656,7 @@
       .block{padding:14px;border-radius:22px}
       .btn,.btn2,.btn-danger{width:100%}
       .history-actions{grid-template-columns:1fr}
+      .vehicle-quick-grid{grid-template-columns:1fr}
       .vehicle-card-actions{grid-template-columns:1fr}
       .profile-name{font-size:1.7rem}
       .profile-plates{font-size:.96rem}
@@ -714,7 +725,7 @@
   <div class="app">
     <section id="screen-overview" class="screen">
       <header class="hero">
-        <div class="hero-version">V12.7.2</div>
+        <div class="hero-version">V12.7.3</div>
         <div class="hero-main">
           <div class="hero-logo-panel">
             <img class="hero-logo-image" src="brand-logo.png" alt="TruckLog logo" />
@@ -929,68 +940,61 @@
         <section class="section">
           <div class="section-head"><div><h2 class="title">Vozidla</h2></div></div>
 
-          <div class="split">
-            <div class="block">
-              <h3 id="vehicleBlockTitle">Nové vozidlo</h3>
-              <div class="grid">
-                <div class="field">
-                  <label for="vehicleType">Typ vozidla</label>
-                  <select id="vehicleType">
-                    <option value="Tahač">Tahač</option>
-                    <option value="Silo cisterna">Silo cisterna</option>
-                    <option value="Silo šasi">Silo šasi</option>
-                    <option value="Kontejnerové šasi">Kontejnerové šasi</option>
-                    <option value="Kontejnerový návěs">Kontejnerový návěs</option>
-                    <option value="Frigo návěs">Frigo návěs</option>
-                    <option value="Plachtový návěs">Plachtový návěs</option>
-                    <option value="Skříňový návěs">Skříňový návěs</option>
-                    <option value="Walking floor">Walking floor</option>
-                    <option value="Sklápěcí návěs">Sklápěcí návěs</option>
-                    <option value="Sklápěcí šasi">Sklápěcí šasi</option>
-                    <option value="Valník / plato">Valník / plato</option>
-                    <option value="Tandem / přívěs">Tandem / přívěs</option>
-                    <option value="Jiné vozidlo">Jiné vozidlo</option>
-                  </select>
-                </div>
+          <div class="block">
+            <h3 id="vehicleBlockTitle">Nové vozidlo</h3>
+            <div class="grid">
+              <div class="field">
+                <label for="vehicleType">Typ vozidla</label>
+                <select id="vehicleType">
+                  <option value="Tahač">Tahač</option>
+                  <option value="Silo cisterna">Silo cisterna</option>
+                  <option value="Silo šasi">Silo šasi</option>
+                  <option value="Kontejnerové šasi">Kontejnerové šasi</option>
+                  <option value="Kontejnerový návěs">Kontejnerový návěs</option>
+                  <option value="Frigo návěs">Frigo návěs</option>
+                  <option value="Plachtový návěs">Plachtový návěs</option>
+                  <option value="Skříňový návěs">Skříňový návěs</option>
+                  <option value="Walking floor">Walking floor</option>
+                  <option value="Sklápěcí návěs">Sklápěcí návěs</option>
+                  <option value="Sklápěcí šasi">Sklápěcí šasi</option>
+                  <option value="Valník / plato">Valník / plato</option>
+                  <option value="Tandem / přívěs">Tandem / přívěs</option>
+                  <option value="Jiné vozidlo">Jiné vozidlo</option>
+                </select>
+              </div>
 
-                <div class="field" id="vehicleBrandWrap">
-                  <label for="vehicleBrand">Značka tahače</label>
-                  <input id="vehicleBrand" placeholder="Např. MAN, VOLVO, SCANIA" />
-                </div>
+              <div class="field" id="vehicleBrandWrap">
+                <label for="vehicleBrand">Značka tahače</label>
+                <input id="vehicleBrand" placeholder="Např. MAN, VOLVO, SCANIA" />
+              </div>
 
-                <div class="field">
-                  <label for="vehicleLabel">Označení</label>
-                  <input id="vehicleLabel" placeholder="Např. Hlavní tahač, Silo 1, Šasi 2..." />
-                </div>
+              <div class="field">
+                <label for="vehicleLabel">Označení</label>
+                <input id="vehicleLabel" placeholder="Např. Hlavní tahač, Silo 1, Šasi 2..." />
+              </div>
 
-                <div class="field">
-                  <label for="vehiclePlate">SPZ</label>
-                  <input id="vehiclePlate" placeholder="Např. 6AA4092" />
-                </div>
+              <div class="field">
+                <label for="vehiclePlate">SPZ</label>
+                <input id="vehiclePlate" placeholder="Např. 6AA4092" />
+              </div>
 
-                <div class="field">
-                  <label for="vehicleStk">STK do</label>
-                  <input id="vehicleStk" type="date" />
-                </div>
+              <div class="field">
+                <label for="vehicleStk">STK do</label>
+                <input id="vehicleStk" type="date" />
+              </div>
 
-                <div class="field">
-                  <label for="vehicleNote">Poznámka</label>
-                  <textarea id="vehicleNote" placeholder="Např. servis, rezerva, hlídat termín..."></textarea>
-                </div>
+              <div class="field">
+                <label for="vehicleNote">Poznámka</label>
+                <textarea id="vehicleNote" placeholder="Např. servis, rezerva, hlídat termín..."></textarea>
+              </div>
 
-                <div class="field">
-                  <label>&nbsp;</label>
-                  <div class="toggle-line">
-                    <input id="vehiclePrimary" type="checkbox" />
-                    <span id="vehiclePrimaryText">Použít jako hlavní v profilu</span>
-                  </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <div class="toggle-line">
+                  <input id="vehiclePrimary" type="checkbox" />
+                  <span id="vehiclePrimaryText">Použít jako hlavní v profilu</span>
                 </div>
               </div>
-            </div>
-
-            <div class="block">
-              <h3>Přehled</h3>
-              <div class="stats-grid" id="vehicleQuickCards"></div>
             </div>
           </div>
 
@@ -1000,6 +1004,11 @@
           </div>
         </section>
       </form>
+
+      <section class="section vehicle-overview-section">
+        <div class="section-head"><div><h2 class="title">Přehled</h2></div></div>
+        <div id="vehicleQuickCards" class="vehicle-quick-grid mt-16"></div>
+      </section>
 
       <section class="section">
         <div class="section-head"><div><h2 class="title">Seznam vozidel</h2></div></div>
@@ -2634,9 +2643,9 @@
       const activeTrailer = primaryTrailerVehicle(profile);
 
       qs('vehicleQuickCards').innerHTML = `
-        <div class="card"><div class="tiny">Celkem vozidel</div><div class="big">${esc(String(vehicles.length))}</div></div>
-        <div class="card"><div class="tiny">Po termínu</div><div class="big">${esc(String(expiredCount))}</div></div>
-        <div class="card"><div class="tiny">Do 30 dní</div><div class="big">${esc(String(nearCount))}</div></div>
+        <div class="vehicle-mini-card"><div class="tiny">Celkem vozidel</div><div class="big">${esc(String(vehicles.length))}</div></div>
+        <div class="vehicle-mini-card"><div class="tiny">Po termínu</div><div class="big">${esc(String(expiredCount))}</div></div>
+        <div class="vehicle-mini-card"><div class="tiny">Do 30 dní</div><div class="big">${esc(String(nearCount))}</div></div>
       `;
 
       qs('vehiclesList').innerHTML = vehicles.length
