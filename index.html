@@ -1,0 +1,1164 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>TruckLog PRO V10.4</title>
+  <meta name="theme-color" content="#0f172a">
+  <style>
+    :root{
+      --bg:#f1f5f9;
+      --card:#ffffff;
+      --line:#e2e8f0;
+      --text:#0f172a;
+      --muted:#64748b;
+      --accent:#2563eb;
+      --accent-soft:#dbeafe;
+      --ok:#16a34a;
+      --ok-soft:#dcfce7;
+      --danger:#dc2626;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    body{padding:14px}
+    .app{max-width:1080px;margin:0 auto}
+
+    .hero{
+      background:linear-gradient(180deg,#0f172a,#172554);
+      color:#fff;
+      border-radius:28px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      margin-bottom:14px;
+    }
+    .hero-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+    }
+    .brand{
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .logo{
+      width:64px;height:64px;border-radius:20px;
+      display:grid;place-items:center;
+      background:rgba(255,255,255,.12);
+      font-size:34px;
+      backdrop-filter:blur(6px);
+    }
+    .brand h1{
+      margin:0;
+      font-size:30px;
+      line-height:1.05;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin-top:4px;
+      color:rgba(255,255,255,.78);
+      font-size:14px;
+    }
+    .hero-side{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .mini-counter,.version-chip{
+      background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      border-radius:999px;
+      padding:10px 14px;
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      backdrop-filter:blur(6px);
+      font-weight:700;
+    }
+
+    .summary{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:10px;
+    }
+    .summary-card{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      padding:12px 14px;
+      min-height:78px;
+    }
+    .summary-card .k{
+      font-size:12px;
+      color:rgba(255,255,255,.7);
+      margin-bottom:4px;
+    }
+    .summary-card .v{
+      font-size:16px;
+      font-weight:700;
+      word-break:break-word;
+    }
+
+    .tabs{
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:10px;
+      margin-bottom:14px;
+    }
+    .tab-btn{
+      border:none;
+      background:#fff;
+      border-radius:18px;
+      padding:14px 12px;
+      font-size:15px;
+      font-weight:700;
+      color:var(--text);
+      box-shadow:var(--shadow);
+      cursor:pointer;
+      border:1px solid transparent;
+    }
+    .tab-btn.active{
+      background:var(--accent);
+      color:#fff;
+    }
+
+    .panel{
+      display:none;
+      background:var(--card);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      border:1px solid var(--line);
+      margin-bottom:14px;
+    }
+    .panel.active{display:block}
+
+    .section-title{
+      margin:0 0 16px;
+      font-size:24px;
+      line-height:1.1;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+    .grid-3{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .field.full{grid-column:1/-1}
+    label{
+      font-size:14px;
+      font-weight:700;
+      color:var(--text);
+    }
+    input,select,textarea{
+      width:100%;
+      min-height:52px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:14px 14px;
+      font:inherit;
+      color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:110px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(37,99,235,.12);
+    }
+    .hint{font-size:13px;color:var(--muted)}
+    .preview{
+      min-height:52px;
+      border-radius:16px;
+      border:1px dashed #bfdbfe;
+      background:#eff6ff;
+      padding:14px;
+      display:flex;
+      align-items:center;
+      font-weight:700;
+      color:#1d4ed8;
+    }
+    .row-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+    .btn{
+      min-height:50px;
+      border:none;
+      border-radius:16px;
+      padding:0 18px;
+      font:inherit;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-secondary{background:#e2e8f0;color:#0f172a}
+    .btn-danger{background:#fee2e2;color:#991b1b}
+    .btn-soft{background:#f8fafc;color:#0f172a;border:1px solid var(--line)}
+
+    .cards{
+      display:grid;
+      gap:12px;
+    }
+    .card{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:22px;
+      padding:16px;
+    }
+    .card-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+      margin-bottom:8px;
+    }
+    .card-title{
+      font-size:18px;
+      font-weight:800;
+      margin:0;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      min-height:34px;
+      padding:0 12px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:13px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      color:var(--text);
+    }
+    .pill.ok{
+      background:var(--ok-soft);
+      color:#166534;
+      border-color:#bbf7d0;
+    }
+    .meta{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    .meta-item{
+      border-radius:16px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      padding:10px 12px;
+    }
+    .meta-item .k{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .meta-item .v{
+      font-weight:700;
+      word-break:break-word;
+    }
+
+    .empty{
+      border:1px dashed var(--line);
+      border-radius:22px;
+      padding:18px;
+      color:var(--muted);
+      background:#f8fafc;
+    }
+
+    .stats-strip{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .stats-card{
+      background:#f8fafc;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:14px;
+    }
+    .stats-card .k{
+      font-size:13px;color:var(--muted)
+    }
+    .stats-card .v{
+      margin-top:6px;
+      font-size:24px;
+      font-weight:900;
+    }
+
+    .danger-note,.ok-note{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:18px;
+      font-weight:700;
+    }
+    .danger-note{
+      background:#fef2f2;border:1px solid #fecaca;color:#991b1b;
+    }
+    .ok-note{
+      background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;
+    }
+
+    /* Moderní přepínač */
+    .switch-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      width:100%;
+      padding:14px 16px;
+      border-radius:18px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      cursor:pointer;
+      min-height:72px;
+    }
+    .switch-text{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .switch-label{
+      font-size:15px;
+      font-weight:800;
+      color:var(--text);
+    }
+    .switch-sub{
+      font-size:13px;
+      color:var(--muted);
+    }
+    .switch-control{
+      position:relative;
+      width:58px;
+      height:34px;
+      flex:0 0 auto;
+    }
+    .switch-control input{
+      position:absolute;
+      inset:0;
+      opacity:0;
+      width:100%;
+      height:100%;
+      margin:0;
+      cursor:pointer;
+      z-index:2;
+    }
+    .switch-slider{
+      position:absolute;
+      inset:0;
+      background:#cbd5e1;
+      border-radius:999px;
+      transition:all .25s ease;
+      box-shadow:inset 0 0 0 1px rgba(0,0,0,.04);
+    }
+    .switch-slider::before{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      background:#ffffff;
+      box-shadow:0 3px 10px rgba(0,0,0,.18);
+      transition:transform .25s ease;
+    }
+    .switch-control input:checked + .switch-slider{
+      background:#22c55e;
+    }
+    .switch-control input:checked + .switch-slider::before{
+      transform:translateX(24px);
+    }
+    .switch-control input:focus + .switch-slider{
+      box-shadow:0 0 0 4px rgba(34,197,94,.18);
+    }
+
+    @media (max-width:920px){
+      .summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid,.grid-3,.meta,.stats-strip,.tabs{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <div class="hero-top">
+        <div class="brand">
+          <div class="logo">🚛</div>
+          <div>
+            <h1>TruckLog</h1>
+            <div class="sub">osobní jízdní deník</div>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="mini-counter">📝 <span id="miniTrips">0</span></div>
+          <div class="mini-counter">⛽ <span id="miniFuel">0</span></div>
+          <div class="version-chip">V10.4 classic</div>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="summary-card">
+          <div class="k">Jméno řidiče</div>
+          <div class="v" id="sumDriver">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="k">SPZ tahače</div>
+          <div class="v" id="sumTruck">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="k">SPZ návěsu</div>
+          <div class="v" id="sumTrailer">—</div>
+        </div>
+        <div class="summary-card">
+          <div class="k">Aktuální stav km</div>
+          <div class="v" id="sumKm">0 km</div>
+        </div>
+        <div class="summary-card">
+          <div class="k">Průměrná spotřeba</div>
+          <div class="v" id="sumAvg">0 l / 100 km</div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="profile">Profil</button>
+      <button class="tab-btn" data-tab="trip">Nová jízda</button>
+      <button class="tab-btn" data-tab="fuel">Tankování</button>
+      <button class="tab-btn" data-tab="tech">Technika</button>
+      <button class="tab-btn" data-tab="history">Historie</button>
+    </nav>
+
+    <section class="panel active" id="panel-profile">
+      <h2 class="section-title">Profil</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="driverName">Jméno řidiče</label>
+          <input id="driverName" placeholder="např. Martin Novák">
+        </div>
+        <div class="field">
+          <label for="truckPlate">SPZ tahače</label>
+          <input id="truckPlate" placeholder="např. 1AB 2345">
+        </div>
+        <div class="field">
+          <label for="trailerPlate">SPZ návěsu</label>
+          <input id="trailerPlate" placeholder="např. 2CD 6789">
+        </div>
+        <div class="field">
+          <label for="truckModel">Tahač / model</label>
+          <input id="truckModel" placeholder="např. Volvo FH">
+        </div>
+        <div class="field">
+          <label for="trailerType">Typ návěsu</label>
+          <input id="trailerType" value="silo cisterna">
+        </div>
+        <div class="field">
+          <label for="cisternVolume">Objem cisterny</label>
+          <input id="cisternVolume" placeholder="např. 60 m³">
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn btn-primary" id="saveProfileBtn">Uložit profil</button>
+        <button class="btn btn-secondary" id="fillDemoBtn">Vyplnit demo</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-trip">
+      <h2 class="section-title">Nová jízda</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="tripDate">Datum</label>
+          <input type="date" id="tripDate">
+        </div>
+        <div class="field">
+          <label for="tripDepartureTime">Odjezd</label>
+          <input type="time" id="tripDepartureTime">
+        </div>
+        <div class="field">
+          <label for="tripArrivalTime">Příjezd</label>
+          <input type="time" id="tripArrivalTime">
+        </div>
+
+        <div class="field full">
+          <label class="switch-row" for="tripEmptyDrive">
+            <span class="switch-text">
+              <span class="switch-label">Jízda po prázdnu</span>
+              <span class="switch-sub">Moderní přepínač zapnuto / vypnuto</span>
+            </span>
+            <span class="switch-control">
+              <input type="checkbox" id="tripEmptyDrive">
+              <span class="switch-slider"></span>
+            </span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="tripKmStart">Počáteční km</label>
+          <input type="number" id="tripKmStart" placeholder="např. 248550">
+        </div>
+        <div class="field">
+          <label for="tripKmEnd">Koncové km</label>
+          <input type="number" id="tripKmEnd" placeholder="např. 248890">
+        </div>
+        <div class="field full">
+          <label>Vzdálenost</label>
+          <div class="preview" id="tripDistancePreview">0 km</div>
+        </div>
+
+        <div class="field">
+          <label for="tripFromPlace">Odkud</label>
+          <input list="placesList" id="tripFromPlace" placeholder="např. Českomoravský cement">
+        </div>
+        <div class="field">
+          <label for="tripFromAddress">Adresa odkud</label>
+          <input id="tripFromAddress" placeholder="ulice / město">
+        </div>
+        <div class="field">
+          <label for="tripToPlace">Kam</label>
+          <input list="placesList" id="tripToPlace" placeholder="např. Stavba Ostrava">
+        </div>
+        <div class="field">
+          <label for="tripToAddress">Adresa kam</label>
+          <input id="tripToAddress" placeholder="ulice / město">
+        </div>
+
+        <div class="field">
+          <label for="tripCommodityPreset">Komodita</label>
+          <select id="tripCommodityPreset">
+            <option value="">Vyber komoditu</option>
+            <option>Cement</option>
+            <option>Popílek</option>
+            <option>Granulát</option>
+            <option>Vápno</option>
+            <option>Moučka</option>
+            <option>Sádra</option>
+            <option>Písek</option>
+            <option>Kamenivo</option>
+            <option>Jiná</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tripCommodityCustom">Vlastní komodita</label>
+          <input id="tripCommodityCustom" placeholder="vyplň jen pokud je Jiná">
+        </div>
+        <div class="field full">
+          <label for="tripWeightKg">Množství v kg</label>
+          <input type="number" id="tripWeightKg" placeholder="např. 25450">
+          <div class="hint">Zadávej přesnou hmotnost nákladu v kilogramech.</div>
+        </div>
+      </div>
+
+      <datalist id="placesList"></datalist>
+
+      <div class="row-actions">
+        <button class="btn btn-primary" id="saveTripBtn">Uložit jízdu</button>
+        <button class="btn btn-secondary" id="resetTripBtn">Vyčistit formulář</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-fuel">
+      <h2 class="section-title">Tankování</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="fuelDate">Datum</label>
+          <input type="date" id="fuelDate">
+        </div>
+        <div class="field">
+          <label for="fuelPlace">Místo</label>
+          <input id="fuelPlace" placeholder="např. MOL Ostrava">
+        </div>
+        <div class="field">
+          <label for="fuelLiters">Počet litrů</label>
+          <input type="number" step="0.01" id="fuelLiters" placeholder="např. 325">
+        </div>
+        <div class="field">
+          <label for="fuelPricePerLiter">Cena za litr</label>
+          <input type="number" step="0.01" id="fuelPricePerLiter" placeholder="např. 35.90">
+        </div>
+        <div class="field">
+          <label for="fuelKm">Stav km při tankování</label>
+          <input type="number" id="fuelKm" placeholder="např. 248890">
+        </div>
+        <div class="field">
+          <label>Celkem</label>
+          <div class="preview" id="fuelTotalPreview">0 Kč</div>
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn btn-primary" id="saveFuelBtn">Uložit tankování</button>
+        <button class="btn btn-secondary" id="resetFuelBtn">Vyčistit formulář</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-tech">
+      <h2 class="section-title">Technika</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="techTruckStk">STK tahače</label>
+          <input type="date" id="techTruckStk">
+        </div>
+        <div class="field">
+          <label for="techTrailerStk">STK návěsu</label>
+          <input type="date" id="techTrailerStk">
+        </div>
+        <div class="field full">
+          <label for="techNote">Poznámka / servis</label>
+          <textarea id="techNote" placeholder="např. výměna hadice, plán servisu, tlakové zkoušky..."></textarea>
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn btn-primary" id="saveTechBtn">Uložit techniku</button>
+      </div>
+
+      <div id="techWarnings"></div>
+    </section>
+
+    <section class="panel" id="panel-history">
+      <h2 class="section-title">Historie</h2>
+
+      <div class="stats-strip">
+        <div class="stats-card">
+          <div class="k">Počet jízd</div>
+          <div class="v" id="statTrips">0</div>
+        </div>
+        <div class="stats-card">
+          <div class="k">Počet tankování</div>
+          <div class="v" id="statFuel">0</div>
+        </div>
+        <div class="stats-card">
+          <div class="k">Najeto celkem</div>
+          <div class="v" id="statKm">0 km</div>
+        </div>
+        <div class="stats-card">
+          <div class="k">Natankováno celkem</div>
+          <div class="v" id="statLiters">0 l</div>
+        </div>
+      </div>
+
+      <h3>Jízdy</h3>
+      <div id="tripHistory" class="cards"></div>
+
+      <h3 style="margin-top:18px">Tankování</h3>
+      <div id="fuelHistory" class="cards"></div>
+
+      <div class="row-actions" style="margin-top:18px">
+        <button class="btn btn-danger" id="clearAllBtn">Smazat všechna data</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const storageKeys = {
+      profile: 'trucklog_profile_v104',
+      trips: 'trucklog_trips_v104',
+      fuel: 'trucklog_fuel_v104',
+      tech: 'trucklog_tech_v104',
+      places: 'trucklog_places_v104'
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      profile: load(storageKeys.profile, {
+        driverName:'',
+        truckPlate:'',
+        trailerPlate:'',
+        truckModel:'',
+        trailerType:'silo cisterna',
+        cisternVolume:''
+      }),
+      trips: load(storageKeys.trips, []),
+      fuel: load(storageKeys.fuel, []),
+      tech: load(storageKeys.tech, {
+        techTruckStk:'',
+        techTrailerStk:'',
+        techNote:''
+      }),
+      places: load(storageKeys.places, [])
+    };
+
+    function load(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(e){
+        return fallback;
+      }
+    }
+
+    function save(key, value){
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function formatNumber(val){
+      return new Intl.NumberFormat('cs-CZ').format(Number(val || 0));
+    }
+
+    function formatDate(val){
+      if(!val) return '—';
+      const d = new Date(val);
+      if (isNaN(d)) return val;
+      return new Intl.DateTimeFormat('cs-CZ').format(d);
+    }
+
+    function activeTab(tab){
+      document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.panel').forEach(panel=>{
+        panel.classList.toggle('active', panel.id === `panel-${tab}`);
+      });
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> activeTab(btn.dataset.tab));
+    });
+
+    function fillProfile(){
+      $('driverName').value = state.profile.driverName || '';
+      $('truckPlate').value = state.profile.truckPlate || '';
+      $('trailerPlate').value = state.profile.trailerPlate || '';
+      $('truckModel').value = state.profile.truckModel || '';
+      $('trailerType').value = state.profile.trailerType || 'silo cisterna';
+      $('cisternVolume').value = state.profile.cisternVolume || '';
+    }
+
+    function saveProfile(){
+      state.profile = {
+        driverName: $('driverName').value.trim(),
+        truckPlate: $('truckPlate').value.trim(),
+        trailerPlate: $('trailerPlate').value.trim(),
+        truckModel: $('truckModel').value.trim(),
+        trailerType: $('trailerType').value.trim(),
+        cisternVolume: $('cisternVolume').value.trim()
+      };
+      save(storageKeys.profile, state.profile);
+      updateSummary();
+      alert('Profil uložen.');
+    }
+
+    function updateDistancePreview(){
+      const start = Number($('tripKmStart').value || 0);
+      const end = Number($('tripKmEnd').value || 0);
+      const distance = Math.max(0, end - start);
+      $('tripDistancePreview').textContent = `${formatNumber(distance)} km`;
+      return distance;
+    }
+
+    function updateFuelPreview(){
+      const liters = Number($('fuelLiters').value || 0);
+      const price = Number($('fuelPricePerLiter').value || 0);
+      const total = liters * price;
+      $('fuelTotalPreview').textContent = `${formatNumber(total.toFixed(2))} Kč`;
+      return total;
+    }
+
+    function resetTripForm(){
+      $('tripDate').valueAsDate = new Date();
+      $('tripDepartureTime').value = '';
+      $('tripArrivalTime').value = '';
+      $('tripEmptyDrive').checked = false;
+      $('tripKmStart').value = '';
+      $('tripKmEnd').value = '';
+      $('tripFromPlace').value = '';
+      $('tripFromAddress').value = '';
+      $('tripToPlace').value = '';
+      $('tripToAddress').value = '';
+      $('tripCommodityPreset').value = '';
+      $('tripCommodityCustom').value = '';
+      $('tripWeightKg').value = '';
+      updateDistancePreview();
+    }
+
+    function resetFuelForm(){
+      $('fuelDate').valueAsDate = new Date();
+      $('fuelPlace').value = '';
+      $('fuelLiters').value = '';
+      $('fuelPricePerLiter').value = '';
+      $('fuelKm').value = '';
+      updateFuelPreview();
+    }
+
+    function collectPlace(place){
+      const clean = (place || '').trim();
+      if(!clean) return;
+      if(!state.places.includes(clean)){
+        state.places.push(clean);
+        state.places.sort((a,b)=>a.localeCompare(b,'cs'));
+        save(storageKeys.places, state.places);
+        renderPlaces();
+      }
+    }
+
+    function renderPlaces(){
+      $('placesList').innerHTML = state.places.map(p => `<option value="${escapeHtml(p)}"></option>`).join('');
+    }
+
+    function saveTrip(){
+      const distance = updateDistancePreview();
+      const trip = {
+        id: crypto.randomUUID(),
+        tripDate: $('tripDate').value,
+        tripDepartureTime: $('tripDepartureTime').value,
+        tripArrivalTime: $('tripArrivalTime').value,
+        tripEmptyDrive: $('tripEmptyDrive').checked,
+        tripKmStart: Number($('tripKmStart').value || 0),
+        tripKmEnd: Number($('tripKmEnd').value || 0),
+        tripDistance: distance,
+        tripFromPlace: $('tripFromPlace').value.trim(),
+        tripFromAddress: $('tripFromAddress').value.trim(),
+        tripToPlace: $('tripToPlace').value.trim(),
+        tripToAddress: $('tripToAddress').value.trim(),
+        tripCommodityPreset: $('tripCommodityPreset').value,
+        tripCommodityCustom: $('tripCommodityCustom').value.trim(),
+        tripWeightKg: Number($('tripWeightKg').value || 0),
+        createdAt: Date.now()
+      };
+
+      if(!trip.tripDate){
+        alert('Vyplň datum jízdy.');
+        return;
+      }
+      if(!trip.tripFromPlace || !trip.tripToPlace){
+        alert('Vyplň odkud a kam.');
+        return;
+      }
+      if(trip.tripKmEnd && trip.tripKmEnd < trip.tripKmStart){
+        alert('Koncové km nemohou být menší než počáteční km.');
+        return;
+      }
+
+      state.trips.unshift(trip);
+      save(storageKeys.trips, state.trips);
+
+      collectPlace(trip.tripFromPlace);
+      collectPlace(trip.tripToPlace);
+
+      renderAll();
+      resetTripForm();
+      activeTab('history');
+      alert('Jízda uložena.');
+    }
+
+    function saveFuelEntry(){
+      const total = updateFuelPreview();
+      const entry = {
+        id: crypto.randomUUID(),
+        fuelDate: $('fuelDate').value,
+        fuelPlace: $('fuelPlace').value.trim(),
+        fuelLiters: Number($('fuelLiters').value || 0),
+        fuelPricePerLiter: Number($('fuelPricePerLiter').value || 0),
+        fuelKm: Number($('fuelKm').value || 0),
+        fuelTotal: total,
+        createdAt: Date.now()
+      };
+
+      if(!entry.fuelDate){
+        alert('Vyplň datum tankování.');
+        return;
+      }
+      if(!entry.fuelPlace){
+        alert('Vyplň místo tankování.');
+        return;
+      }
+      if(entry.fuelLiters <= 0){
+        alert('Počet litrů musí být větší než 0.');
+        return;
+      }
+
+      state.fuel.unshift(entry);
+      save(storageKeys.fuel, state.fuel);
+
+      renderAll();
+      resetFuelForm();
+      activeTab('history');
+      alert('Tankování uloženo.');
+    }
+
+    function saveTech(){
+      state.tech = {
+        techTruckStk: $('techTruckStk').value,
+        techTrailerStk: $('techTrailerStk').value,
+        techNote: $('techNote').value.trim()
+      };
+      save(storageKeys.tech, state.tech);
+      renderTechWarnings();
+      alert('Technika uložena.');
+    }
+
+    function deleteTrip(id){
+      state.trips = state.trips.filter(item => item.id !== id);
+      save(storageKeys.trips, state.trips);
+      renderAll();
+    }
+
+    function deleteFuel(id){
+      state.fuel = state.fuel.filter(item => item.id !== id);
+      save(storageKeys.fuel, state.fuel);
+      renderAll();
+    }
+
+    function clearAll(){
+      if(!confirm('Opravdu chceš smazat všechna uložená data?')) return;
+      Object.values(storageKeys).forEach(key => localStorage.removeItem(key));
+      location.reload();
+    }
+
+    function escapeHtml(str){
+      return String(str ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'","&#039;");
+    }
+
+    function renderTrips(){
+      const root = $('tripHistory');
+      if(!state.trips.length){
+        root.innerHTML = `<div class="empty">Zatím tu není žádná uložená jízda.</div>`;
+        return;
+      }
+
+      root.innerHTML = state.trips.map(item => {
+        const commodity = item.tripCommodityPreset === 'Jiná'
+          ? (item.tripCommodityCustom || 'Jiná')
+          : (item.tripCommodityPreset || '—');
+
+        return `
+          <article class="card">
+            <div class="card-top">
+              <div>
+                <div class="card-title">${escapeHtml(item.tripFromPlace || '—')} → ${escapeHtml(item.tripToPlace || '—')}</div>
+                <div class="hint">${formatDate(item.tripDate)} ${item.tripDepartureTime ? '• ' + escapeHtml(item.tripDepartureTime) : ''} ${item.tripArrivalTime ? '– ' + escapeHtml(item.tripArrivalTime) : ''}</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <span class="pill ${item.tripEmptyDrive ? 'ok' : ''}">${item.tripEmptyDrive ? 'Po prázdnu' : 'Naloženo / standard'}</span>
+                <button class="btn btn-danger" onclick="deleteTrip('${item.id}')">Smazat</button>
+              </div>
+            </div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <div class="k">Kilometry</div>
+                <div class="v">${formatNumber(item.tripKmStart)} → ${formatNumber(item.tripKmEnd)}</div>
+              </div>
+              <div class="meta-item">
+                <div class="k">Vzdálenost</div>
+                <div class="v">${formatNumber(item.tripDistance)} km</div>
+              </div>
+              <div class="meta-item">
+                <div class="k">Komodita / kg</div>
+                <div class="v">${escapeHtml(commodity)} / ${formatNumber(item.tripWeightKg)} kg</div>
+              </div>
+              <div class="meta-item">
+                <div class="k">Adresa odkud</div>
+                <div class="v">${escapeHtml(item.tripFromAddress || '—')}</div>
+              </div>
+              <div class="meta-item">
+                <div class="k">Adresa kam</div>
+                <div class="v">${escapeHtml(item.tripToAddress || '—')}</div>
+              </div>
+              <div class="meta-item">
+                <div class="k">Uloženo</div>
+                <div class="v">${new Date(item.createdAt).toLocaleString('cs-CZ')}</div>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderFuel(){
+      const root = $('fuelHistory');
+      if(!state.fuel.length){
+        root.innerHTML = `<div class="empty">Zatím tu není žádné uložené tankování.</div>`;
+        return;
+      }
+
+      root.innerHTML = state.fuel.map(item => `
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-title">${escapeHtml(item.fuelPlace || '—')}</div>
+              <div class="hint">${formatDate(item.fuelDate)}</div>
+            </div>
+            <button class="btn btn-danger" onclick="deleteFuel('${item.id}')">Smazat</button>
+          </div>
+
+          <div class="meta">
+            <div class="meta-item">
+              <div class="k">Litry</div>
+              <div class="v">${formatNumber(item.fuelLiters)} l</div>
+            </div>
+            <div class="meta-item">
+              <div class="k">Cena za litr</div>
+              <div class="v">${formatNumber(item.fuelPricePerLiter)} Kč</div>
+            </div>
+            <div class="meta-item">
+              <div class="k">Celkem</div>
+              <div class="v">${formatNumber(item.fuelTotal.toFixed ? item.fuelTotal.toFixed(2) : item.fuelTotal)} Kč</div>
+            </div>
+            <div class="meta-item">
+              <div class="k">Stav km</div>
+              <div class="v">${formatNumber(item.fuelKm)} km</div>
+            </div>
+            <div class="meta-item">
+              <div class="k">Uloženo</div>
+              <div class="v">${new Date(item.createdAt).toLocaleString('cs-CZ')}</div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function daysUntil(dateStr){
+      if(!dateStr) return null;
+      const now = new Date();
+      const target = new Date(dateStr + 'T00:00:00');
+      if(isNaN(target)) return null;
+      const ms = target - new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return Math.ceil(ms / 86400000);
+    }
+
+    function renderTechWarnings(){
+      $('techTruckStk').value = state.tech.techTruckStk || '';
+      $('techTrailerStk').value = state.tech.techTrailerStk || '';
+      $('techNote').value = state.tech.techNote || '';
+
+      const wrap = $('techWarnings');
+      const truckDays = daysUntil(state.tech.techTruckStk);
+      const trailerDays = daysUntil(state.tech.techTrailerStk);
+
+      let html = '';
+
+      if(state.tech.techTruckStk){
+        html += truckDays < 0
+          ? `<div class="danger-note">STK tahače je po termínu (${formatDate(state.tech.techTruckStk)}).</div>`
+          : truckDays <= 30
+            ? `<div class="danger-note">STK tahače se blíží: ${formatDate(state.tech.techTruckStk)} (${truckDays} dní).</div>`
+            : `<div class="ok-note">STK tahače: ${formatDate(state.tech.techTruckStk)} (${truckDays} dní).</div>`;
+      }
+
+      if(state.tech.techTrailerStk){
+        html += trailerDays < 0
+          ? `<div class="danger-note">STK návěsu je po termínu (${formatDate(state.tech.techTrailerStk)}).</div>`
+          : trailerDays <= 30
+            ? `<div class="danger-note">STK návěsu se blíží: ${formatDate(state.tech.techTrailerStk)} (${trailerDays} dní).</div>`
+            : `<div class="ok-note">STK návěsu: ${formatDate(state.tech.techTrailerStk)} (${trailerDays} dní).</div>`;
+      }
+
+      if(state.tech.techNote){
+        html += `<div class="ok-note">Poznámka: ${escapeHtml(state.tech.techNote)}</div>`;
+      }
+
+      wrap.innerHTML = html || `<div class="empty">Zatím nejsou uložené žádné technické termíny.</div>`;
+    }
+
+    function computeTotalKm(){
+      return state.trips.reduce((sum, item)=> sum + Number(item.tripDistance || 0), 0);
+    }
+
+    function computeTotalLiters(){
+      return state.fuel.reduce((sum, item)=> sum + Number(item.fuelLiters || 0), 0);
+    }
+
+    function computeCurrentKm(){
+      const maxTrip = state.trips.reduce((max, item)=> Math.max(max, Number(item.tripKmEnd || 0)), 0);
+      const maxFuel = state.fuel.reduce((max, item)=> Math.max(max, Number(item.fuelKm || 0)), 0);
+      return Math.max(maxTrip, maxFuel, 0);
+    }
+
+    function updateSummary(){
+      const totalKm = computeTotalKm();
+      const totalLiters = computeTotalLiters();
+      const avg = totalKm > 0 ? (totalLiters / totalKm * 100) : 0;
+      const currentKm = computeCurrentKm();
+
+      $('sumDriver').textContent = state.profile.driverName || '—';
+      $('sumTruck').textContent = state.profile.truckPlate || '—';
+      $('sumTrailer').textContent = state.profile.trailerPlate || '—';
+      $('sumKm').textContent = `${formatNumber(currentKm)} km`;
+      $('sumAvg').textContent = `${formatNumber(avg.toFixed(1))} l / 100 km`;
+
+      $('miniTrips').textContent = state.trips.length;
+      $('miniFuel').textContent = state.fuel.length;
+
+      $('statTrips').textContent = state.trips.length;
+      $('statFuel').textContent = state.fuel.length;
+      $('statKm').textContent = `${formatNumber(totalKm)} km`;
+      $('statLiters').textContent = `${formatNumber(totalLiters.toFixed(1))} l`;
+    }
+
+    function renderAll(){
+      renderTrips();
+      renderFuel();
+      renderPlaces();
+      renderTechWarnings();
+      updateSummary();
+    }
+
+    $('tripKmStart').addEventListener('input', updateDistancePreview);
+    $('tripKmEnd').addEventListener('input', updateDistancePreview);
+    $('fuelLiters').addEventListener('input', updateFuelPreview);
+    $('fuelPricePerLiter').addEventListener('input', updateFuelPreview);
+
+    $('saveProfileBtn').addEventListener('click', saveProfile);
+    $('saveTripBtn').addEventListener('click', saveTrip);
+    $('saveFuelBtn').addEventListener('click', saveFuelEntry);
+    $('saveTechBtn').addEventListener('click', saveTech);
+    $('resetTripBtn').addEventListener('click', resetTripForm);
+    $('resetFuelBtn').addEventListener('click', resetFuelForm);
+    $('clearAllBtn').addEventListener('click', clearAll);
+
+    $('fillDemoBtn').addEventListener('click', ()=>{
+      $('driverName').value = 'Misutsonn28';
+      $('truckPlate').value = '1AB 2345';
+      $('trailerPlate').value = '2CD 6789';
+      $('truckModel').value = 'Volvo FH';
+      $('trailerType').value = 'silo cisterna';
+      $('cisternVolume').value = '60 m³';
+    });
+
+    fillProfile();
+    resetTripForm();
+    resetFuelForm();
+    renderAll();
+
+    window.deleteTrip = deleteTrip;
+    window.deleteFuel = deleteFuel;
+  </script>
+</body>
+</html>
