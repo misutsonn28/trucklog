@@ -1,1 +1,1277 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>TruckLog PRO V12.8.6</title>
+  <meta name="theme-color" content="#040c18"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="TruckLog"/>
+  <link rel="manifest" href="manifest.json?v=12860"/>
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=12860"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=12860"/>
 
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth;height:100%}
+
+    :root{
+      --bg:#040c18;
+      --card:rgba(255,255,255,.04);
+      --card2:rgba(8,18,36,.97);
+      --line:rgba(255,255,255,.08);
+      --line2:rgba(255,255,255,.16);
+      --txt:#eef4ff;
+      --muted:#7a9cc4;
+      --muted2:#4e6c90;
+      --acc:#f97316;
+      --acc2:#3b82f6;
+      --warn:#f59e0b;
+      --danger:#fb7185;
+      --ok:#22c55e;
+      --shadow:0 24px 64px rgba(0,0,0,.5);
+      --max:1180px;
+      --radius-xl:28px;
+      --radius-lg:22px;
+      --radius-md:16px;
+      --input:56px;
+    }
+
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--txt);
+      min-height:100vh;
+      height:100dvh;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      position:relative;
+    }
+
+    /* Animated ambient blobs */
+    body::before,body::after{
+      content:'';position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    }
+    body::before{
+      width:700px;height:700px;
+      background:radial-gradient(circle,rgba(59,130,246,.14),transparent 70%);
+      top:-250px;left:-150px;
+      animation:blob1 14s ease-in-out infinite;
+      filter:blur(60px);
+    }
+    body::after{
+      width:550px;height:550px;
+      background:radial-gradient(circle,rgba(249,115,22,.11),transparent 70%);
+      bottom:-180px;right:-120px;
+      animation:blob2 18s ease-in-out infinite;
+      filter:blur(60px);
+    }
+    @keyframes blob1{
+      0%,100%{transform:translate(0,0) scale(1)}
+      33%{transform:translate(70px,40px) scale(1.12)}
+      66%{transform:translate(-40px,70px) scale(.94)}
+    }
+    @keyframes blob2{
+      0%,100%{transform:translate(0,0) scale(1)}
+      40%{transform:translate(-60px,-50px) scale(1.08)}
+      70%{transform:translate(40px,-70px) scale(.93)}
+    }
+
+    button,input,select,textarea{font:inherit;-webkit-tap-highlight-color:transparent}
+    button{cursor:pointer;border:0}
+
+    /* === INPUTS === */
+    input,select,textarea{
+      width:100%;min-height:var(--input);
+      background:rgba(255,255,255,.05);
+      color:var(--txt);
+      border:1px solid var(--line);
+      border-radius:var(--radius-md);
+      padding:14px 16px;font-size:16px;outline:none;
+      transition:.2s border-color,.2s box-shadow,.2s background;
+      -webkit-appearance:none;appearance:none;
+    }
+    textarea{min-height:110px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(59,130,246,.65);
+      box-shadow:0 0 0 4px rgba(59,130,246,.12),0 0 24px rgba(59,130,246,.08);
+      background:rgba(59,130,246,.05);
+    }
+    input[type="checkbox"]{width:auto;min-height:auto;accent-color:var(--acc);transform:scale(1.15)}
+    select option{background:#0a1a2e}
+
+    /* === APP SHELL === */
+    .app{
+      position:relative;z-index:1;
+      max-width:var(--max);margin:0 auto;
+      padding:max(18px,calc(10px + env(safe-area-inset-top,0px))) 16px 24px;
+      padding-left:calc(16px + env(safe-area-inset-left,0px));
+      padding-right:calc(16px + env(safe-area-inset-right,0px));
+      flex:1 1 auto;min-height:0;
+      overflow-y:auto;-webkit-overflow-scrolling:touch;
+      scroll-behavior:smooth;overscroll-behavior:contain;width:100%;
+    }
+
+    /* === HERO === */
+    .hero{
+      position:relative;padding:28px 24px 24px;
+      border-radius:36px;margin-bottom:20px;overflow:hidden;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .hero::before{
+      content:'';position:absolute;inset:0;pointer-events:none;
+      background:
+        radial-gradient(circle at 18% 25%,rgba(59,130,246,.2) 0%,transparent 50%),
+        radial-gradient(circle at 85% 75%,rgba(249,115,22,.16) 0%,transparent 45%);
+    }
+    .hero-version{
+      position:absolute;top:16px;right:16px;z-index:10;
+      padding:8px 14px;border-radius:999px;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+      color:var(--muted);font-size:.8rem;font-weight:900;letter-spacing:.08em;
+      backdrop-filter:blur(10px);
+    }
+    .hero-main{
+      position:relative;z-index:1;
+      display:flex;flex-direction:column;align-items:center;
+      text-align:center;gap:14px;padding-top:6px;
+    }
+    .hero-logo-panel{
+      width:min(100%,520px);padding:20px;border-radius:28px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+    }
+    .hero-logo-image{
+      width:100%;max-width:440px;display:block;margin:0 auto;
+      filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));
+    }
+    .hero-wordmark{
+      font-size:clamp(2.2rem,5vw,3.2rem);font-weight:900;letter-spacing:-.06em;
+      background:linear-gradient(135deg,#fff 0%,#93c5fd 45%,#fb923c 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      line-height:1;
+    }
+    .hero h1{
+      font-size:clamp(2.6rem,5vw,3.8rem);font-weight:900;line-height:1;letter-spacing:-.06em;
+      background:linear-gradient(135deg,#fff 0%,#93c5fd 45%,#fb923c 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .hero-tagline{font-size:1rem;font-weight:700;color:var(--muted);letter-spacing:-.01em}
+    .hero-accent-line{
+      width:min(200px,50%);height:3px;border-radius:999px;
+      background:linear-gradient(90deg,var(--acc2),var(--acc));
+      box-shadow:0 0 20px rgba(59,130,246,.45);
+    }
+
+    /* === GRIDS === */
+    .grid{display:grid;gap:14px}
+    .split{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .triple{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .stats-grid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .metrics{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}
+    .icon-stats{
+      display:grid;gap:12px;grid-template-columns:repeat(2,minmax(110px,1fr));
+      width:100%;max-width:380px;margin:16px auto 0;
+    }
+
+    /* === SECTIONS & CARDS === */
+    .section{
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+      border-radius:var(--radius-xl);padding:22px;margin-bottom:18px;
+      box-shadow:0 8px 32px rgba(0,0,0,.25);
+    }
+    .card,.summary,.history-card,.metric,.icon-stat,.block{
+      background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;
+    }
+    .card,.summary,.history-card,.icon-stat,.block{padding:16px}
+    .metric{padding:12px}
+
+    /* big gradient numbers */
+    .big{
+      font-size:1.9rem;font-weight:900;margin-top:10px;
+      line-height:1.05;letter-spacing:-.05em;
+      background:linear-gradient(135deg,#60a5fa,#c4b5fd);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .icon-stat .value{
+      font-size:1.8rem;font-weight:900;line-height:1;
+      background:linear-gradient(135deg,#60a5fa,#fb923c);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .tiny,.metric .l{
+      text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--muted2);font-weight:700;
+    }
+    .hint{margin-top:8px;color:var(--muted);font-size:.9rem;line-height:1.5}
+    .icon-stat{display:flex;align-items:center;justify-content:center;gap:14px;min-height:78px}
+    .icon-bubble{
+      width:48px;height:48px;border-radius:16px;display:grid;place-items:center;
+      font-size:22px;flex:0 0 auto;
+      background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.22);
+    }
+
+    /* === PROFILE COMPONENTS === */
+    .profile-overview{display:grid;gap:14px}
+    .profile-main-card{
+      padding:20px;background:rgba(255,255,255,.04);
+      border:1px solid var(--line);border-radius:24px;
+    }
+    .profile-name{
+      font-size:2rem;font-weight:900;line-height:1.05;letter-spacing:-.04em;
+      background:linear-gradient(135deg,#fff,#93c5fd);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .profile-plates{margin-top:8px;color:var(--muted);font-size:1rem;font-weight:700}
+    .profile-stats-grid{
+      display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:18px;
+    }
+    .profile-stat-box{
+      padding:14px;border-radius:16px;background:rgba(0,0,0,.35);border:1px solid var(--line);
+    }
+    .profile-stat-box .v{margin-top:6px;font-size:1.2rem;font-weight:900;line-height:1.1;color:var(--txt)}
+
+    /* === BLOCKS & FORMS === */
+    .block{border-radius:24px}
+    .block h3{font-size:1rem;font-weight:800;margin-bottom:14px}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .field label{font-size:.92rem;font-weight:700;color:var(--muted)}
+    .toggle-line{
+      display:flex;align-items:center;gap:12px;min-height:56px;padding:12px 14px;
+      background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:16px;
+    }
+
+    /* === TRIP SWITCH === */
+    .trip-switch{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;min-height:56px;padding:12px 14px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(59,130,246,.22);
+      border-radius:16px;cursor:pointer;
+      transition:.18s border-color,.18s transform,.18s box-shadow;
+    }
+    .trip-switch:hover{
+      transform:translateY(-1px);
+      border-color:rgba(249,115,22,.45);
+      box-shadow:0 8px 24px rgba(0,0,0,.25);
+    }
+    .trip-switch-title{font-size:.85rem;font-weight:800;color:var(--txt);line-height:1.2;min-width:0}
+    .trip-switch-control{position:relative;width:62px;height:36px;flex:0 0 auto}
+    .trip-switch-control input{
+      position:absolute;inset:0;width:100%;height:100%;
+      margin:0;opacity:0;z-index:3;cursor:pointer;transform:none;
+    }
+    .trip-switch-slider{
+      position:absolute;inset:0;border-radius:999px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+      transition:.22s background,.22s border-color;
+    }
+    .trip-switch-slider::before{
+      content:'';position:absolute;top:3px;left:3px;
+      width:28px;height:28px;border-radius:50%;
+      background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.35);
+      transition:.22s transform;
+    }
+    .trip-switch-control input:checked+.trip-switch-slider{
+      background:linear-gradient(135deg,#fb923c,#f97316);
+      border-color:rgba(253,186,116,.42);
+      box-shadow:0 0 0 4px rgba(249,115,22,.15);
+    }
+    .trip-switch-control input:checked+.trip-switch-slider::before{transform:translateX(26px)}
+    .trip-switch-control input:focus-visible+.trip-switch-slider{box-shadow:0 0 0 4px rgba(249,115,22,.2)}
+
+    /* === TABS === */
+    .tabs,.profile-switcher{
+      display:inline-flex;gap:6px;padding:6px;border-radius:18px;
+      background:rgba(0,0,0,.5);border:1px solid var(--line);flex-wrap:wrap;
+    }
+    .tabs button,.profile-switcher button{
+      background:transparent;color:var(--muted);
+      padding:10px 16px;border-radius:12px;font-weight:800;transition:.18s;
+    }
+    .tabs button.active,.profile-switcher button.active{
+      background:linear-gradient(135deg,var(--acc2),var(--acc));
+      color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.3);
+    }
+
+    /* === BUTTONS === */
+    .btn,.btn2,.btn-danger,.chip{
+      border-radius:16px;min-height:50px;padding:0 18px;font-weight:800;transition:.2s all;
+    }
+    .btn:hover,.btn2:hover,.btn-danger:hover,.chip:hover{transform:translateY(-2px)}
+    .btn{
+      background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;
+      box-shadow:0 4px 20px rgba(59,130,246,.3);
+    }
+    .btn:hover{box-shadow:0 8px 30px rgba(59,130,246,.45)}
+    .btn2{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--line)}
+    .btn2:hover{background:rgba(255,255,255,.1);border-color:var(--line2)}
+    .btn-ok{background:rgba(34,197,94,.1);color:#86efac;border:1px solid rgba(34,197,94,.25)}
+    .btn-danger{background:rgba(251,113,133,.1);color:#fecdd3;border:1px solid rgba(251,113,133,.25)}
+    .chip{
+      min-height:40px;background:rgba(255,255,255,.06);color:var(--txt);
+      border:1px solid var(--line);padding:0 14px;white-space:nowrap;
+    }
+    .chip:hover{background:rgba(255,255,255,.1)}
+
+    /* === STICKY BAR === */
+    .sticky-bar{
+      position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:15;
+      background:rgba(4,12,24,.88);backdrop-filter:blur(16px);
+      border:1px solid var(--line);border-radius:24px;padding:12px;
+      box-shadow:var(--shadow);
+    }
+    #screen-trip .sticky-bar,#screen-fuel .sticky-bar{
+      position:static;bottom:auto;margin-top:16px;
+      background:transparent;backdrop-filter:none;border:0;box-shadow:none;padding:0;
+    }
+
+    /* === SECTION HEAD === */
+    .section-head,.actions,.history-top{
+      display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;
+    }
+    h1,h2,h3,h4,p{margin:0}
+    .title{font-size:clamp(1.25rem,2vw,1.7rem);font-weight:900;letter-spacing:-.03em}
+    .desc{margin-top:4px;color:var(--muted);font-size:.9rem;line-height:1.5}
+
+    /* === METRIC === */
+    .metric .v{margin-top:4px;font-weight:800;font-size:1.05rem}
+
+    /* === BADGES === */
+    .badge{
+      display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;
+      font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;
+      border:1px solid transparent;
+    }
+    .badge-ok{background:rgba(34,197,94,.12);color:#86efac;border-color:rgba(34,197,94,.22)}
+    .badge-warn{background:rgba(245,158,11,.12);color:#fcd34d;border-color:rgba(245,158,11,.22)}
+    .badge-danger{background:rgba(251,113,133,.12);color:#fecdd3;border-color:rgba(251,113,133,.25)}
+    .badge-info{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.22)}
+
+    /* === SUMMARY === */
+    .summary strong{display:block;font-weight:800}
+    .summary span{display:block;color:var(--muted);margin-top:6px;font-size:.9rem;line-height:1.5}
+    .history-card h3{font-size:1.05rem;line-height:1.3}
+    .history-header{display:grid;gap:10px;grid-template-columns:1fr}
+    .history-sub{color:var(--muted);font-size:.9rem;line-height:1.45}
+    .history-actions{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}
+
+    /* === VEHICLE === */
+    .vehicle-active-line{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .vehicle-overview-section{padding:14px 16px}
+    .vehicle-quick-grid{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .vehicle-mini-card{
+      padding:14px 16px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:18px;
+    }
+    .vehicle-mini-card .tiny{font-size:.7rem}
+    .vehicle-mini-card .big{margin-top:6px;font-size:1.4rem}
+    .vehicle-list-stack{display:grid;gap:12px}
+    .vehicle-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .vehicle-card{
+      padding:16px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+      border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+      transition:.2s border-color,.2s transform;
+    }
+    .vehicle-card:hover{transform:translateY(-2px);border-color:var(--line2)}
+    .vehicle-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .vehicle-card-main{min-width:0;display:grid;gap:8px}
+    .vehicle-card-title{font-size:1rem;font-weight:900;line-height:1.2}
+    .vehicle-card-meta{color:var(--muted);font-size:.88rem;line-height:1.4;word-break:break-word}
+    .vehicle-card-note{
+      margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
+      color:var(--muted);font-size:.86rem;line-height:1.4;
+    }
+    .vehicle-card-actions{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+    .vehicle-card-actions .btn2,.vehicle-card-actions .btn-ok,
+    .vehicle-card-actions .btn-danger,.vehicle-card-actions .chip{
+      min-height:42px;padding:0 10px;font-size:.82rem;border-radius:14px;
+    }
+    .vehicle-compact-badges{display:flex;gap:8px;flex-wrap:wrap}
+    .vehicle-form-section{padding:14px 16px}
+    .vehicle-form-link-wrap{display:flex;justify-content:center;margin-top:14px}
+    .vehicle-form-link{
+      min-height:44px;padding:0 18px;border-radius:999px;
+      background:transparent;color:var(--muted);border:1px dashed var(--line2);font-weight:800;
+      transition:.18s;
+    }
+    .vehicle-form-link:hover{color:var(--txt);border-color:var(--line);transform:translateY(-1px)}
+
+    /* === PROFILE CARDS === */
+    .profile-active-line{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .profile-live-dot{
+      width:10px;height:10px;border-radius:50%;
+      background:var(--ok);box-shadow:0 0 0 4px rgba(34,197,94,.2);
+    }
+    .profile-list-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+    .profile-card{
+      padding:16px;background:rgba(255,255,255,.04);border:1px solid var(--line);
+      border-radius:20px;box-shadow:0 8px 24px rgba(0,0,0,.25);
+      transition:.2s border-color,.2s transform;
+    }
+    .profile-card:hover{transform:translateY(-2px);border-color:var(--line2)}
+    .profile-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .profile-card-main{min-width:0;display:grid;gap:8px}
+    .profile-card-title{font-size:1rem;font-weight:900}
+    .profile-card-meta{color:var(--muted);font-size:.88rem;line-height:1.4;word-break:break-word}
+    .profile-card-note{
+      margin-top:10px;padding-top:10px;border-top:1px solid var(--line);
+      color:var(--muted);font-size:.86rem;line-height:1.4;
+    }
+    .profile-card-actions{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+    .profile-card-actions .btn2,.profile-card-actions .btn-ok,.profile-card-actions .btn-danger{
+      min-height:40px;padding:0 10px;font-size:.82rem;border-radius:14px;
+    }
+
+    /* === EMPTY === */
+    .empty{
+      padding:32px;border-radius:20px;
+      border:1px dashed var(--line2);background:rgba(255,255,255,.02);
+      text-align:center;color:var(--muted);
+    }
+
+    /* === HISTORY DAY LIST === */
+    .history-day-list{display:grid;gap:12px}
+    .history-day-group{
+      background:rgba(255,255,255,.03);border:1px solid var(--line);
+      border-radius:22px;overflow:hidden;
+    }
+    .history-day-btn{
+      width:100%;background:transparent;color:var(--txt);
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;padding:16px;text-align:left;
+    }
+    .history-day-main{display:grid;gap:6px;min-width:0;flex:1}
+    .history-day-title{font-size:1rem;font-weight:900;letter-spacing:-.02em}
+    .history-day-sub{font-size:.9rem;color:var(--muted);line-height:1.35}
+    .history-day-side{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+    .history-day-count{
+      padding:8px 12px;border-radius:14px;
+      background:rgba(0,0,0,.45);border:1px solid var(--line);
+      font-size:.86rem;font-weight:900;white-space:nowrap;
+    }
+    .history-day-arrow{font-size:1.2rem;color:var(--muted);transition:transform .18s;line-height:1}
+    .history-day-group.open .history-day-arrow{transform:rotate(180deg)}
+    .history-day-body{
+      display:none;padding:0 12px 12px;border-top:1px solid var(--line);
+      background:rgba(0,0,0,.18);
+    }
+    .history-day-group.open .history-day-body{display:block}
+
+    /* === TRIP ROWS === */
+    .history-trip-list{display:grid;gap:10px;margin-top:12px}
+    .trip-row{
+      background:rgba(0,0,0,.3);border:1px solid var(--line);
+      border-radius:18px;overflow:hidden;transition:.18s border-color;
+    }
+    .trip-row:hover{border-color:var(--line2)}
+    .trip-row-btn{
+      width:100%;background:transparent;color:var(--txt);
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;padding:14px;text-align:left;
+    }
+    .trip-row-main{display:grid;gap:6px;min-width:0;flex:1}
+    .trip-row-time{font-size:.92rem;font-weight:900;letter-spacing:-.01em}
+    .trip-row-route{
+      font-size:1rem;font-weight:800;line-height:1.3;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .trip-row-meta{
+      color:var(--muted);font-size:.86rem;line-height:1.35;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .trip-row-side{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+    .trip-row-km{
+      padding:8px 12px;border-radius:14px;
+      background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.22);
+      font-size:.86rem;font-weight:900;white-space:nowrap;color:#93c5fd;
+    }
+    .trip-row-arrow{font-size:1.2rem;color:var(--muted);transition:transform .18s;line-height:1}
+    .trip-row.open .trip-row-arrow{transform:rotate(180deg)}
+    .trip-row-detail{
+      display:none;padding:0 14px 14px;
+      border-top:1px solid var(--line);background:rgba(0,0,0,.2);
+    }
+    .trip-row.open .trip-row-detail{display:block}
+    .trip-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+    .trip-detail-box{
+      padding:12px;border-radius:16px;background:rgba(0,0,0,.35);border:1px solid var(--line);
+    }
+    .trip-detail-box .l{
+      text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;color:var(--muted2);font-weight:700;
+    }
+    .trip-detail-box .v{margin-top:6px;font-size:.98rem;font-weight:800;line-height:1.35;word-break:break-word}
+
+    /* === HISTORY CALENDAR === */
+    .history-calendar-card{
+      background:rgba(255,255,255,.03);border:1px solid var(--line);
+      border-radius:26px;padding:18px;
+    }
+    .history-calendar-toolbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .history-calendar-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .history-calendar-month{font-size:1.4rem;font-weight:900;letter-spacing:-.04em}
+    .history-calendar-mini{color:var(--muted);font-size:.9rem;font-weight:700}
+    .history-calendar-grid{
+      display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:16px;
+    }
+    .history-calendar-weekday{
+      text-align:center;color:var(--muted2);font-size:.76rem;font-weight:800;
+      letter-spacing:.08em;text-transform:uppercase;padding:6px 0;
+    }
+    .history-calendar-day{
+      position:relative;min-height:88px;border-radius:18px;
+      border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--txt);
+      padding:10px 8px 8px;display:flex;flex-direction:column;
+      align-items:center;justify-content:flex-start;gap:8px;cursor:pointer;
+      transition:.18s transform,.18s border-color,.18s background;
+    }
+    .history-calendar-day:hover{transform:translateY(-1px);border-color:var(--line2)}
+    .history-calendar-day.outside{opacity:.32;background:rgba(0,0,0,.1)}
+    .history-calendar-day.selected{
+      border-color:rgba(59,130,246,.65);background:rgba(59,130,246,.08);
+      box-shadow:0 0 0 3px rgba(59,130,246,.14);
+    }
+    .history-calendar-day.today .history-calendar-date{
+      color:#93c5fd;text-decoration:underline;text-underline-offset:3px;
+    }
+    .history-calendar-date{font-size:1.05rem;font-weight:900;line-height:1}
+    .history-calendar-marker-wrap{
+      margin-top:auto;width:100%;display:grid;gap:5px;min-height:28px;
+      align-items:end;justify-items:center;
+    }
+    .history-calendar-marker-row{
+      width:100%;display:flex;align-items:center;justify-content:center;gap:5px;min-height:8px;
+    }
+    .history-calendar-marker{
+      height:7px;border-radius:999px;background:var(--acc2);
+      box-shadow:0 0 10px rgba(59,130,246,.4);
+    }
+    .history-calendar-marker.fuel{background:var(--acc);box-shadow:0 0 10px rgba(249,115,22,.38)}
+    .history-calendar-marker.count-1{width:24px}
+    .history-calendar-marker.count-2{width:38px}
+    .history-calendar-marker.count-3{width:54px}
+    .history-calendar-counts{
+      display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;min-height:14px;
+    }
+    .history-calendar-count-badge{
+      padding:2px 6px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(0,0,0,.55);color:var(--muted);font-size:.64rem;font-weight:900;line-height:1;
+    }
+    .history-calendar-count-badge.fuel{color:#fed7aa;border-color:rgba(249,115,22,.32)}
+    .history-calendar-count-badge.trip{color:#bfdbfe;border-color:rgba(59,130,246,.32)}
+    .history-calendar-legend{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+      margin-top:14px;color:var(--muted);font-size:.88rem;font-weight:700;
+    }
+    .history-calendar-legend-line{
+      width:24px;height:7px;border-radius:999px;background:var(--acc2);display:inline-block;
+    }
+    .history-calendar-legend-line.fuel{background:var(--acc)}
+    .history-selected-head{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .history-selected-sub{margin-top:6px;color:var(--muted);font-size:.92rem;line-height:1.45}
+    .history-selected-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .history-selected-chip{
+      padding:8px 12px;border-radius:999px;
+      background:rgba(255,255,255,.05);border:1px solid var(--line);
+      font-size:.8rem;font-weight:800;
+    }
+
+    /* === UTILITY === */
+    .hidden{display:none !important}
+    .mt-12{margin-top:12px}
+    .mt-16{margin-top:16px}
+    .list-gap{display:grid;gap:12px}
+
+    /* === NAVIGATION === */
+    .nav{
+      position:relative;z-index:30;
+      background:rgba(4,12,24,.92);backdrop-filter:blur(20px) saturate(160%);
+      border-top:1px solid rgba(255,255,255,.07);
+      flex:0 0 auto;
+      padding-bottom:calc(6px + env(safe-area-inset-bottom,0px));
+      box-shadow:0 -20px 40px rgba(0,0,0,.35);
+    }
+    .nav-in{
+      max-width:var(--max);margin:0 auto;padding:10px 12px;
+      display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;
+    }
+    .nav button{
+      min-height:60px;border-radius:18px;background:transparent;color:var(--muted2);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;padding:8px 6px;transition:.2s all;
+    }
+    .nav button.active{
+      background:rgba(59,130,246,.12);color:var(--txt);
+      border:1px solid rgba(59,130,246,.22);
+      box-shadow:0 0 24px rgba(59,130,246,.18);
+    }
+    .nav .i{font-size:1.1rem}
+    .nav .t{font-size:.72rem;font-weight:800;text-align:center;line-height:1.05}
+
+    /* === SCREEN ENTER ANIMATION === */
+    .screen{animation:screenIn .22s ease}
+    @keyframes screenIn{
+      from{opacity:0;transform:translateY(8px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* === RESPONSIVE === */
+    @media(max-width:1100px){
+      .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .split,.triple{grid-template-columns:1fr}
+    }
+    @media(max-width:820px){.nav-in{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:740px){
+      .icon-stats,.stats-grid,.split,.triple,.metrics,
+      .profile-stats-grid,.trip-detail-grid{grid-template-columns:1fr}
+      .history-calendar-day{min-height:72px;padding:8px 6px 6px;border-radius:14px}
+      .history-calendar-month{font-size:1.2rem}
+      .hero,.section{padding:16px;border-radius:24px}
+      .block{padding:14px;border-radius:20px}
+      .btn,.btn2,.btn-danger{width:100%}
+      .history-actions{grid-template-columns:1fr}
+      .vehicle-quick-grid,.vehicle-card-actions,.profile-card-actions{grid-template-columns:1fr}
+      .profile-name{font-size:1.65rem}
+      .history-day-btn,.trip-row-btn{align-items:flex-start}
+      .history-day-side,.trip-row-side{flex-direction:column;align-items:flex-end;gap:6px}
+      .trip-row-route,.trip-row-meta{white-space:normal}
+    }
+    @media(min-width:760px) and (orientation:landscape){
+      .split{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .triple{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .profile-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .history-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- OVERVIEW -->
+    <section id="screen-overview" class="screen">
+      <header class="hero">
+        <div class="hero-version">V12.8.6</div>
+        <div class="hero-main">
+          <div class="hero-logo-panel">
+            <img class="hero-logo-image" src="brand-logo.png" alt="TruckLog"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+            <div class="hero-wordmark" style="display:none">Truck<span style="background:linear-gradient(135deg,#fb923c,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Log</span></div>
+          </div>
+          <div class="hero-accent-line"></div>
+          <h1>TruckLog</h1>
+          <p class="hero-tagline">digitální deník řidiče pro nákladní dopravu</p>
+        </div>
+        <div class="icon-stats">
+          <div class="icon-stat"><div class="icon-bubble">📝</div><div class="value" id="miniTrips">0</div></div>
+          <div class="icon-stat"><div class="icon-bubble">⛽</div><div class="value" id="miniFuel">0</div></div>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="section-head">
+          <div><h2 class="title">Profil</h2></div>
+          <div class="profile-switcher" id="profileSwitcher"></div>
+        </div>
+        <div id="overviewStats"></div>
+        <div id="overviewPilotStats" class="mt-16"></div>
+      </section>
+    </section>
+
+    <!-- TRIP FORM -->
+    <section id="screen-trip" class="screen hidden">
+      <form id="tripForm">
+        <section class="section">
+          <div class="section-head"><div><h2 class="title" id="tripFormTitle">Nová jízda</h2></div></div>
+          <div class="split">
+            <div class="block">
+              <h3>Jízda</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="tripDate">Datum</label>
+                  <input id="tripDate" type="date"/>
+                </div>
+                <div class="triple">
+                  <div class="field">
+                    <label for="tripDepartureTime">Čas odjezdu</label>
+                    <input id="tripDepartureTime" type="time"/>
+                  </div>
+                  <div class="field">
+                    <label for="tripArrivalTime">Čas příjezdu</label>
+                    <input id="tripArrivalTime" type="time"/>
+                  </div>
+                  <div class="field">
+                    <label for="tripEmptyDrive">Typ jízdy</label>
+                    <label class="trip-switch" for="tripEmptyDrive">
+                      <span class="trip-switch-title">Jízda po prázdnu</span>
+                      <span class="trip-switch-control">
+                        <input id="tripEmptyDrive" type="checkbox"/>
+                        <span class="trip-switch-slider"></span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+                <div class="triple">
+                  <div class="field">
+                    <label for="tripKmStart">Km start</label>
+                    <input id="tripKmStart" inputmode="numeric"/>
+                  </div>
+                  <div class="field">
+                    <label for="tripKmEnd">Km konec</label>
+                    <input id="tripKmEnd" inputmode="numeric"/>
+                  </div>
+                  <div class="field">
+                    <label for="tripDistancePreview">Ujeto km</label>
+                    <input id="tripDistancePreview" disabled placeholder="Počítá se automaticky"/>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="tripFromPlace">Odkud firma / místo</label>
+                  <input id="tripFromPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off"/>
+                </div>
+                <div class="field">
+                  <label for="tripFromAddress">Odkud adresa</label>
+                  <input id="tripFromAddress" placeholder="Adresa místa odkud"/>
+                </div>
+                <div class="field">
+                  <label for="tripToPlace">Kam firma / místo</label>
+                  <input id="tripToPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off"/>
+                </div>
+                <div class="field">
+                  <label for="tripToAddress">Kam adresa</label>
+                  <input id="tripToAddress" placeholder="Adresa místa kam"/>
+                </div>
+                <datalist id="placesList"></datalist>
+              </div>
+            </div>
+
+            <div class="block">
+              <h3>Náklad</h3>
+              <div class="grid">
+                <div class="field" id="tripCommodityField">
+                  <select id="tripCommodityPreset" aria-label="Komodita">
+                    <option value="">Vyber komoditu</option>
+                    <option>Cement</option><option>Popílek</option><option>Granulát</option>
+                    <option>Vápno</option><option>Moučka</option><option>Sádra</option>
+                    <option>Písek</option><option>Kamenivo</option><option>Jiná</option>
+                  </select>
+                </div>
+                <div class="field hidden" id="tripCommodityCustomWrap">
+                  <input id="tripCommodityCustom" aria-label="Jiná komodita" placeholder="Jiná komodita"/>
+                </div>
+                <div class="field" id="tripQuantityField">
+                  <label for="tripQuantityKg">Naložené množství (kg)</label>
+                  <input id="tripQuantityKg" inputmode="numeric" placeholder="Např. 25450"/>
+                </div>
+                <div class="field hidden" id="tripContainerWrap">
+                  <label for="tripContainerNumber">Číslo kontejneru</label>
+                  <input id="tripContainerNumber" placeholder="Např. TGHU 482915-3"/>
+                  <small id="tripContainerInfo"></small>
+                </div>
+                <div class="field">
+                  <label for="tripNote">Poznámka</label>
+                  <textarea id="tripNote" placeholder="Např. delší čekání, objížďka, zvláštní poznámka"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="sticky-bar">
+          <div class="actions">
+            <button class="btn" type="submit" id="tripSubmitBtn">Uložit jízdu</button>
+            <button class="btn2" type="button" onclick="resetTripForm()">Vyčistit formulář</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- FUEL FORM -->
+    <section id="screen-fuel" class="screen hidden">
+      <form id="fuelForm">
+        <section class="section">
+          <div class="section-head"><div><h2 class="title" id="fuelFormTitle">Tankování / nabíjení</h2></div></div>
+          <div class="split">
+            <div class="block">
+              <div class="grid">
+                <div class="field">
+                  <label for="fuelType">Typ</label>
+                  <select id="fuelType">
+                    <option value="Nafta">Nafta</option>
+                    <option value="AdBlue">AdBlue</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LNG">LNG</option>
+                    <option value="Nabíjení">Nabíjení</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fuelDate">Datum</label>
+                  <input id="fuelDate" type="date"/>
+                </div>
+                <div class="field">
+                  <label for="fuelOdometer">Stav km</label>
+                  <input id="fuelOdometer" inputmode="numeric"/>
+                </div>
+                <div class="field">
+                  <label for="fuelQuantity" id="fuelQuantityLabel">Litry</label>
+                  <input id="fuelQuantity" inputmode="decimal"/>
+                </div>
+                <div class="field hidden" id="fuelDurationWrap">
+                  <label for="fuelDurationMinutes" id="fuelDurationLabel">Doba nabíjení (min)</label>
+                  <input id="fuelDurationMinutes" inputmode="numeric" placeholder="Např. 45"/>
+                </div>
+              </div>
+            </div>
+            <div class="block">
+              <h3>Místo</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="fuelStation" id="fuelStationLabel">Pumpa / místo</label>
+                  <input id="fuelStation"/>
+                </div>
+                <div class="field">
+                  <label for="fuelNote">Poznámka</label>
+                  <textarea id="fuelNote"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="sticky-bar">
+          <div class="actions">
+            <button class="btn" type="submit" id="fuelSubmitBtn">Uložit záznam</button>
+            <button class="btn2" type="button" onclick="resetFuelForm()">Vyčistit formulář</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- VEHICLES -->
+    <section id="screen-tech" class="screen hidden">
+      <section class="section vehicle-overview-section">
+        <div class="section-head"><div><h2 class="title">Přehled</h2></div></div>
+        <div id="vehicleQuickCards" class="vehicle-quick-grid mt-16"></div>
+      </section>
+      <section class="section">
+        <div class="section-head"><div><h2 class="title">Seznam vozidel</h2></div></div>
+        <div id="vehiclesList" class="list-gap"></div>
+        <div id="vehicleFormLinkWrap" class="vehicle-form-link-wrap">
+          <button class="vehicle-form-link" type="button" onclick="openVehicleForm()">+ Přidat nové vozidlo</button>
+        </div>
+      </section>
+      <section id="vehicleFormSection" class="section vehicle-form-section hidden">
+        <form id="vehicleForm">
+          <div class="section-head"><div><h2 class="title">Vozidla</h2></div></div>
+          <div class="block mt-16">
+            <h3 id="vehicleBlockTitle">Nové vozidlo</h3>
+            <div class="grid">
+              <div class="field">
+                <label for="vehicleType">Typ vozidla</label>
+                <select id="vehicleType">
+                  <option value="Tahač">Tahač</option>
+                  <option value="Silo cisterna">Silo cisterna</option>
+                  <option value="Silo šasi">Silo šasi</option>
+                  <option value="Kontejnerové šasi">Kontejnerové šasi</option>
+                  <option value="Kontejnerový návěs">Kontejnerový návěs</option>
+                  <option value="Frigo návěs">Frigo návěs</option>
+                  <option value="Plachtový návěs">Plachtový návěs</option>
+                  <option value="Skříňový návěs">Skříňový návěs</option>
+                  <option value="Walking floor">Walking floor</option>
+                  <option value="Sklápěcí návěs">Sklápěcí návěs</option>
+                  <option value="Sklápěcí šasi">Sklápěcí šasi</option>
+                  <option value="Valník / plato">Valník / plato</option>
+                  <option value="Tandem / přívěs">Tandem / přívěs</option>
+                  <option value="Jiné vozidlo">Jiné vozidlo</option>
+                </select>
+              </div>
+              <div class="field" id="vehicleBrandWrap">
+                <label for="vehicleBrand">Značka tahače</label>
+                <input id="vehicleBrand" placeholder="Např. MAN, VOLVO, SCANIA"/>
+              </div>
+              <div class="field">
+                <label for="vehicleLabel">Označení</label>
+                <input id="vehicleLabel" placeholder="Např. Hlavní tahač, Silo 1, Šasi 2..."/>
+              </div>
+              <div class="field">
+                <label for="vehiclePlate">SPZ</label>
+                <input id="vehiclePlate" placeholder="Např. 6AA4092"/>
+              </div>
+              <div class="field">
+                <label for="vehicleYear">Rok výroby</label>
+                <input id="vehicleYear" inputmode="numeric" placeholder="Např. 2019" maxlength="4"/>
+              </div>
+              <div class="field">
+                <label for="vehicleStk">STK do</label>
+                <input id="vehicleStk" type="date"/>
+              </div>
+              <div class="field">
+                <label for="vehicleNote">Poznámka</label>
+                <textarea id="vehicleNote" placeholder="Např. servis, rezerva, hlídat termín..."></textarea>
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <div class="toggle-line">
+                  <input id="vehiclePrimary" type="checkbox"/>
+                  <span id="vehiclePrimaryText">Použít jako hlavní v profilu</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-16 actions">
+            <button class="btn" type="submit" id="vehicleSubmitBtn">Uložit vozidlo</button>
+            <button class="btn2" type="button" onclick="resetVehicleForm()">Zavřít formulář</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <!-- PROFILES -->
+    <section id="screen-profiles" class="screen hidden">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Profily</h2>
+            <p class="desc">Vytvoř více profilů řidičů a mezi nimi přepínej aktivní profil</p>
+          </div>
+        </div>
+        <div class="mt-16">
+          <div class="profile-switcher" id="profilesQuickSwitch"></div>
+        </div>
+        <div id="profilesSummary" class="mt-16"></div>
+      </section>
+
+      <form id="profileForm">
+        <section class="section">
+          <div class="section-head">
+            <div>
+              <h2 class="title" id="profileFormTitle">Nový profil</h2>
+              <p class="desc">Vozidla a SPZ se berou ze sekce Vozidla</p>
+            </div>
+          </div>
+          <div class="split">
+            <div class="block">
+              <h3>Řidič</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="profileDriverName">Jméno řidiče</label>
+                  <input id="profileDriverName"/>
+                </div>
+              </div>
+            </div>
+            <div class="block">
+              <h3>Poznámka</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="profileNote">Poznámka k profilu</label>
+                  <textarea id="profileNote"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-16 actions">
+            <button class="btn" type="submit" id="profileSubmitBtn">Uložit profil</button>
+            <button class="btn2" type="button" onclick="resetProfileForm()">Zrušit editaci</button>
+          </div>
+        </section>
+      </form>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Seznam profilů</h2>
+            <p class="desc">Přepnutí aktivního profilu a správa řidičů</p>
+          </div>
+        </div>
+        <div id="profilesList" class="list-gap"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Záloha a obnova dat</h2>
+            <p class="desc">Ulož všechna data do souboru JSON a kdykoli je obnov zpět</p>
+          </div>
+        </div>
+        <div class="split mt-16">
+          <div class="summary" id="backupSummary"></div>
+          <div class="block">
+            <div class="grid">
+              <button class="btn" type="button" onclick="downloadBackup()">Stáhnout zálohu</button>
+              <button class="btn2" type="button" onclick="promptRestoreBackup()">Obnovit ze souboru</button>
+            </div>
+            <input id="backupRestoreInput" type="file" accept=".json,application/json" class="hidden"/>
+            <p class="hint">Záloha obsahuje profily, vozidla, jízdy, doplnění i uložená místa.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Pilot a export</h2>
+            <p class="desc">Praktické podklady pro vlastní provoz i firemní pilotní test</p>
+          </div>
+        </div>
+        <div class="split mt-16">
+          <div class="summary" id="pilotSummary"></div>
+          <div class="block">
+            <div class="grid">
+              <button class="btn" type="button" onclick="exportTripsCsv()">Export jízd CSV</button>
+              <button class="btn2" type="button" onclick="exportFuelingsCsv()">Export tankování CSV</button>
+              <button class="btn2" type="button" onclick="shareBackup()">Sdílet zálohu</button>
+            </div>
+            <p class="hint">CSV otevřeš v Excelu nebo Google Sheets. Sdílení zálohy je ideální pro rychlé poslání do e-mailu, WhatsAppu nebo do cloudu.</p>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="screen-history" class="screen hidden">
+      <section class="section">
+        <div class="history-top">
+          <div>
+            <h2 class="title">HISTORIE JÍZD A TANKOVÁNÍ</h2>
+          </div>
+          <div class="tabs">
+            <button id="historyTripsBtn" class="active" type="button" onclick="setHistoryMode('trips')">Jízdy</button>
+            <button id="historyFuelBtn" type="button" onclick="setHistoryMode('fuel')">Tankování / nabíjení</button>
+          </div>
+        </div>
+        <div class="triple mt-16" id="historyFilters">
+          <div class="field">
+            <label for="historySearch">Hledat</label>
+            <input id="historySearch" type="search" placeholder="Trasa, profil, komodita..." oninput="renderHistory()"/>
+          </div>
+          <div class="field">
+            <label for="historyProfileFilter">Profil</label>
+            <select id="historyProfileFilter" onchange="renderHistory()"></select>
+          </div>
+          <div class="field">
+            <label for="historyCommodityFilter">Komodita</label>
+            <select id="historyCommodityFilter" onchange="renderHistory()">
+              <option value="">Vše</option>
+              <option>Cement</option><option>Popílek</option><option>Granulát</option>
+              <option>Vápno</option><option>Moučka</option><option>Sádra</option>
+              <option>Písek</option><option>Kamenivo</option>
+            </select>
+          </div>
+        </div>
+      </section>
+      <div id="historyList"></div>
+    </section>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-in">
+      <button id="nav-overview" class="active" type="button" onclick="openScreen('overview')"><span class="i">🧭</span><span class="t">Přehled</span></button>
+      <button id="nav-trip" type="button" onclick="openScreen('trip')"><span class="i">📝</span><span class="t">Jízda</span></button>
+      <button id="nav-fuel" type="button" onclick="openScreen('fuel')"><span class="i">⛽</span><span class="t">Tankování</span></button>
+      <button id="nav-tech" type="button" onclick="openScreen('tech')"><span class="i">🚚</span><span class="t">Vozidla</span></button>
+      <button id="nav-profiles" type="button" onclick="openScreen('profiles')"><span class="i">👤</span><span class="t">Profily</span></button>
+      <button id="nav-history" type="button" onclick="openScreen('history')"><span class="i">📁</span><span class="t">Historie</span></button>
+    </div>
+  </nav>
+
+  <script>
+    const STORAGE={
+      profiles:'trucklog_profiles_v105',
+      activeProfileId:'trucklog_active_profile_id_v105',
+      trips:'trucklog_trips_v105',
+      fuelings:'trucklog_fuelings_v105',
+      places:'trucklog_places_v105'
+    };
+    const COMMODITIES=['Cement','Popílek','Granulát','Vápno','Moučka','Sádra','Písek','Kamenivo'];
+    const VEHICLE_TYPES=['Tahač','Silo cisterna','Silo šasi','Kontejnerové šasi','Kontejnerový návěs','Frigo návěs','Plachtový návěs','Skříňový návěs','Walking floor','Sklápěcí návěs','Sklápěcí šasi','Valník / plato','Tandem / přívěs','Jiné vozidlo'];
+    const ENERGY_TYPE_CONFIG={
+      'Nafta':{icon:'⛽',unit:'l',quantityLabel:'Litry',stationLabel:'Pumpa / místo',defaultPlace:'Čerpací stanice'},
+      'AdBlue':{icon:'💧',unit:'l',quantityLabel:'Litry AdBlue',stationLabel:'Pumpa / místo',defaultPlace:'Místo doplnění AdBlue'},
+      'CNG':{icon:'🟢',unit:'kg',quantityLabel:'Množství CNG (kg)',stationLabel:'Stanice / místo',defaultPlace:'CNG stanice'},
+      'LNG':{icon:'🔵',unit:'kg',quantityLabel:'Množství LNG (kg)',stationLabel:'Stanice / místo',defaultPlace:'LNG stanice'},
+      'Nabíjení':{icon:'⚡',unit:'kWh',quantityLabel:'Nabitá energie (kWh)',stationLabel:'Nabíječka / místo',defaultPlace:'Nabíjecí místo'}
+    };
+    const MONTH_NAMES=['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+    const WEEKDAY_NAMES=['Po','Út','St','Čt','Pá','So','Ne'];
+    const DEFAULT_PLACES=[
+      {name:'Karl Schmidt SpeditionsgesmbH',address:'Industrie Strasse 7, 2431 Enzersdorf an der Fischa, Rakousko'},
+      {name:'Borealis Polyolefine GmbH',address:'Danubiastraße 21/25, 2320 Schwechat, Rakousko'},
+      {name:'Logistik Werfring GmbH',address:'Petrochemie Danubia, Danubiastraße 21-25, 2320 Schwechat, Rakousko'},
+      {name:'NKT s.r.o.',address:'U Tržiště 685/1, 594 01 Velké Meziříčí, Česká republika'},
+      {name:'Strojírna Slavíček s.r.o.',address:'Vlkovská 107, 595 01 Velká Bíteš, Česká republika'}
+    ];
+    const state={
+      screen:'overview',historyMode:'trips',
+      calendarYear:new Date().getFullYear(),calendarMonth:new Date().getMonth(),
+      selectedCalendarDate:today(),
+      editingProfileId:null,editingTripId:null,editingFuelId:null,editingVehicleId:null,
+      profiles:readStorage(STORAGE.profiles,[]),
+      activeProfileId:localStorage.getItem(STORAGE.activeProfileId)||'',
+      trips:readStorage(STORAGE.trips,[]),
+      fuelings:readStorage(STORAGE.fuelings,[]),
+      places:readStorage(STORAGE.places,[])
+    };
+    function qs(id){return document.getElementById(id)}
+    function qsa(sel){return Array.from(document.querySelectorAll(sel))}
+    function readStorage(key,fallback){try{const r=localStorage.getItem(key);return r?JSON.parse(r):fallback}catch(e){console.error('Storage read error',key,e);return fallback}}
+    function saveState(){try{localStorage.setItem(STORAGE.profiles,JSON.stringify(state.profiles));localStorage.setItem(STORAGE.activeProfileId,state.activeProfileId||'');localStorage.setItem(STORAGE.trips,JSON.stringify(state.trips));localStorage.setItem(STORAGE.fuelings,JSON.stringify(state.fuelings));localStorage.setItem(STORAGE.places,JSON.stringify(state.places))}catch(e){console.error('Storage save error',e);alert('Nepodařilo se uložit data do prohlížeče.')}}
+    function backupFileName(){const n=new Date(),p=v=>String(v).padStart(2,'0');return'trucklog-backup-'+n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'_'+p(n.getHours())+'-'+p(n.getMinutes())+'.json'}
+    function buildBackupPayload(){return{schema:'trucklog-backup',appVersion:'V12.6',exportedAt:new Date().toISOString(),data:{activeProfileId:state.activeProfileId||'',profiles:state.profiles,trips:state.trips,fuelings:state.fuelings,places:state.places}}}
+    function downloadBackup(){try{const p=buildBackupPayload(),j=JSON.stringify(p,null,2),b=new Blob([j],{type:'application/json;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=backupFileName();document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),1000)}catch(e){console.error('Backup export error',e);alert('Nepodařilo se vytvořit zálohu.')}}
+    function promptRestoreBackup(){const i=qs('backupRestoreInput');if(!i)return;i.value='';i.click()}
+    function applyBackupData(data){state.profiles=Array.isArray(data?.profiles)?data.profiles:[];state.activeProfileId=trim(data?.activeProfileId);state.trips=Array.isArray(data?.trips)?data.trips:[];state.fuelings=Array.isArray(data?.fuelings)?data.fuelings:[];state.places=Array.isArray(data?.places)?data.places:[];state.editingProfileId=null;state.editingTripId=null;state.editingFuelId=null;state.editingVehicleId=null;state.selectedCalendarDate=today();state.calendarYear=new Date().getFullYear();state.calendarMonth=new Date().getMonth();ensureDataShape();saveState();resetProfileForm();resetTripForm();resetFuelForm();resetVehicleForm();renderAll()}
+    function handleBackupImport(event){const f=event.target.files&&event.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(e){try{const p=JSON.parse(String(e.target?.result||'{}'));const d=p&&typeof p==='object'&&p.data&&typeof p.data==='object'?p.data:p;if(!d||typeof d!=='object')throw new Error('Neplatný obsah souboru.');if(!Array.isArray(d.profiles)||!Array.isArray(d.trips)||!Array.isArray(d.fuelings)||!Array.isArray(d.places))throw new Error('Soubor neobsahuje platná data TruckLogu.');applyBackupData(d);alert('Záloha byla úspěšně obnovena.')}catch(e){console.error('Backup import error',e);alert('Soubor se nepodařilo obnovit. Zkontroluj, že jde o správnou zálohu TruckLogu.')}};r.onerror=function(){alert('Soubor se nepodařilo načíst.')};r.readAsText(f,'utf-8')}
+    function downloadTextFile(filename,content,mimeType='text/plain;charset=utf-8'){const b=new Blob([content],{type:mimeType}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),1000)}
+    function csvEscape(v){const t=String(v??'');return/[";\n\r]/.test(t)?'"'+t.replaceAll('"','""')+'"':t}
+    function buildCsv(rows){return rows.map(r=>r.map(csvEscape).join(';')).join('\r\n')}
+    function exportFileName(prefix,ext){const n=new Date(),p=v=>String(v).padStart(2,'0');return'trucklog-'+prefix+'-'+n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate())+'_'+p(n.getHours())+'-'+p(n.getMinutes())+'.'+ext}
+    function exportTripsCsv(){try{const active=activeProfile();const list=sortTripsByCalendar(state.trips.filter(i=>!active||i.profileId===active.id));const rows=[['Datum','Čas odjezdu','Čas příjezdu','Profil','Řidič','Odkud','Kam','Km start','Km konec','Ujeto km','Komodita','Množství kg','Přípojné vozidlo','SPZ přípojného vozidla','Kontejner','Poznámka']];list.forEach(i=>{const p=state.profiles.find(x=>x.id===i.profileId);rows.push([i.date||'',i.departureTime||'',i.arrivalTime||'',profileLabel(p),p?.driverName||'',i.fromPlace||i.fromAddress||'',i.toPlace||i.toAddress||'',i.kmStart||'',i.kmEnd||'',String(kmDiff(i.kmStart,i.kmEnd)||''),i.emptyDrive?'Po prázdnu':(i.commodity||''),i.emptyDrive?'0':(i.quantityKg||''),i.trailerType||'',i.trailerPlate||'',i.containerNumber||'',i.note||''])});downloadTextFile(exportFileName('jizdy','csv'),buildCsv(rows),'text/csv;charset=utf-8')}catch(e){console.error('Trips CSV export error',e);alert('Nepodařilo se vytvořit export jízd.')}}
+    function exportFuelingsCsv(){try{const active=activeProfile();const list=state.fuelings.filter(i=>!active||i.profileId===active.id).slice().sort(sortByCreated);const rows=[['Datum','Profil','Řidič','Typ','Množství','Jednotka','Stav km','Místo','Doba nabíjení min','Poznámka']];list.forEach(i=>{const p=state.profiles.find(x=>x.id===i.profileId);const c=energyTypeConfig(i.energyType);rows.push([i.date||'',profileLabel(p),p?.driverName||'',i.energyType||'Nafta',i.quantity||'',c.unit,i.odometer||'',i.station||'',i.durationMinutes||'',i.note||''])});downloadTextFile(exportFileName('tankovani','csv'),buildCsv(rows),'text/csv;charset=utf-8')}catch(e){console.error('Fuel CSV export error',e);alert('Nepodařilo se vytvořit export tankování / nabíjení.')}}
+    async function shareBackup(){try{const p=buildBackupPayload();const j=JSON.stringify(p,null,2);if(typeof File!=='undefined'&&navigator.share){const f=new File([j],backupFileName(),{type:'application/json'});if(!navigator.canShare||navigator.canShare({files:[f]})){await navigator.share({title:'TruckLog záloha',text:'Záloha dat z TruckLogu',files:[f]});return}}downloadTextFile(backupFileName(),j,'application/json;charset=utf-8');alert('Sdílení není na tomto zařízení dostupné. Záloha byla místo toho stažena do souboru.')}catch(e){if(e&&e.name==='AbortError')return;console.error('Backup share error',e);alert('Nepodařilo se sdílet zálohu.')}}
+    function trim(v){return String(v??'').trim()}
+    function digitsOnly(v){return String(v||'').replace(/\D/g,'')}
+    function decimalOnly(v){return String(v||'').replace(/[^\d,.]/g,'').replace(',','.')}
+    function normalizeText(v){return String(v??'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+    function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+    function generateId(prefix){return prefix+'-'+Date.now()+'-'+Math.floor(Math.random()*100000)}
+    function today(){const n=new Date(),o=n.getTimezoneOffset()*60000;return new Date(n.getTime()-o).toISOString().slice(0,10)}
+    function formatDate(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?v:new Intl.DateTimeFormat('cs-CZ').format(d)}
+    function sortByCreated(a,b){return new Date(b.updatedAt||b.createdAt||b.date||0)-new Date(a.updatedAt||a.createdAt||a.date||0)}
+    function tripSortValue(i){const d=trim(i?.date);if(!d)return 0;const t=trim(i?.departureTime)||'00:00';const s=new Date(d+'T'+(t.length===5?t:'00:00')+':00').getTime();return Number.isNaN(s)?0:s}
+    function sortTripsByCalendar(list){return list.slice().sort((a,b)=>{const d=tripSortValue(b)-tripSortValue(a);if(d!==0)return d;return new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0)})}
+    function dateGroupKey(v){return trim(v)||'bez-data'}
+    function parseDateParts(v){const c=trim(v);if(!/^\d{4}-\d{2}-\d{2}$/.test(c))return null;const[y,m,d]=c.split('-').map(Number);const dt=new Date(y,m-1,d);if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d)return null;return dt}
+    function dateKeyFromParts(y,m,d){return String(y)+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+    function dateKeyFromDate(d){return dateKeyFromParts(d.getFullYear(),d.getMonth(),d.getDate())}
+    function monthLabel(y,m){return MONTH_NAMES[m]+' '+y}
+    function energyTypeConfig(type){return ENERGY_TYPE_CONFIG[trim(type)]||ENERGY_TYPE_CONFIG['Nafta']}
+    function formatEnergyQuantity(i){const c=energyTypeConfig(i?.energyType);const q=trim(i?.quantity);return q?q+' '+c.unit:'—'}
+    function energyRateUnit(type){return energyTypeConfig(type).unit}
+    function monthItemLabel(count,mode){if(mode==='fuel'){return count===1?'1 doplnění':count+' doplnění'}return count===1?'1 jízda':count>=2&&count<=4?count+' jízdy':count+' jízd'}
+    function pluralTrips(count){return count===1?'1 jízda':count>=2&&count<=4?count+' jízdy':count+' jízd'}
+    function pluralFuelings(count){return count===1?'1 doplnění':count+' doplnění'}
+    function historyEntries(){return state.historyMode==='fuel'?filteredFuelings():filteredTrips()}
+    function getHistoryCalendarStats(){const trips=filteredTrips();const fuelings=filteredFuelings();const stats={};trips.forEach(i=>{const k=trim(i?.date);if(!k)return;if(!stats[k])stats[k]={tripCount:0,fuelCount:0,tripKm:0};stats[k].tripCount+=1;stats[k].tripKm+=kmDiff(i.kmStart,i.kmEnd)});fuelings.forEach(i=>{const k=trim(i?.date);if(!k)return;if(!stats[k])stats[k]={tripCount:0,fuelCount:0,tripKm:0};stats[k].fuelCount+=1});return stats}
+    function getMonthStatKeys(stats,year=state.calendarYear,month=state.calendarMonth){return Object.keys(stats).filter(k=>{const d=parseDateParts(k);return d&&d.getFullYear()===year&&d.getMonth()===month}).sort((a,b)=>new Date(b)-new Date(a))}
+    function syncSelectedCalendarDate(stats){const c=parseDateParts(state.selectedCalendarDate);const inMonth=c&&c.getFullYear()===state.calendarYear&&c.getMonth()===state.calendarMonth;if(inMonth)return;const mk=getMonthStatKeys(stats);if(mk.length){state.selectedCalendarDate=mk[0];return}state.selectedCalendarDate=dateKeyFromParts(state.calendarYear,state.calendarMonth,1)}
+    function shiftHistoryCalendarMonth(step){const m=new Date(state.calendarYear,state.calendarMonth+step,1);state.calendarYear=m.getFullYear();state.calendarMonth=m.getMonth();state.selectedCalendarDate=dateKeyFromParts(state.calendarYear,state.calendarMonth,1);renderHistory()}
+    function jumpHistoryCalendarToday(){const n=new Date();state.calendarYear=n.getFullYear();state.calendarMonth=n.getMonth();state.selectedCalendarDate=today();renderHistory()}
+    function selectHistoryCalendarDate(key){const d=parseDateParts(key);if(!d)return;state.calendarYear=d.getFullYear();state.calendarMonth=d.getMonth();state.selectedCalendarDate=key;renderHistory()}
+    function kmDiff(start,end){const s=Number(start||0),e=Number(end||0);return e>s?e-s:0}
+    function formatConsumption(v,unit='l'){if(v===null||v===undefined||Number.isNaN(Number(v)))return'—';return Number(v).toFixed(1)+' '+unit+'/100 km'}
+    function minutesBetween(start,end){if(!start||!end)return null;const ps=start.split(':').map(Number),pe=end.split(':').map(Number);if(ps.length<2||pe.length<2)return null;if(ps.some(Number.isNaN)||pe.some(Number.isNaN))return null;const m=(pe[0]*60+pe[1])-(ps[0]*60+ps[1]);return m>=0?m:null}
+    function formatDuration(m){if(m===null||m===undefined)return'—';const h=Math.floor(m/60),mn=m%60;if(h&&mn)return h+' h '+mn+' min';if(h)return h+' h';return mn+' min'}
+    function activeProfile(){return state.profiles.find(p=>p.id===state.activeProfileId)||null}
+    function vehicleGroup(v){return trim(v?.type)==='Tahač'?'truck':'trailer'}
+    function normalizeVehicle(v){const type=VEHICLE_TYPES.includes(trim(v?.type))?trim(v.type):'Jiné vozidlo';const year=digitsOnly(v?.year).slice(0,4);return{id:v?.id||generateId('VEH'),type,brand:type==='Tahač'?trim(v?.brand):'',label:trim(v?.label),plate:trim(v?.plate).toUpperCase(),year,stk:trim(v?.stk),note:trim(v?.note),primaryForProfile:!!v?.primaryForProfile,createdAt:v?.createdAt||new Date().toISOString()}}
+    function normalizeProfile(p){const v=Array.isArray(p?.vehicles)?p.vehicles.map(normalizeVehicle):[];return{id:p?.id||generateId('PROFILE'),driverName:trim(p?.driverName),note:trim(p?.note),vehicles:fixVehiclePrimaries(v),createdAt:p?.createdAt||new Date().toISOString(),updatedAt:p?.updatedAt||new Date().toISOString()}}
+    function fixVehiclePrimaries(vehicles){const n=vehicles.map(normalizeVehicle);['truck','trailer'].forEach(g=>{const items=n.filter(v=>vehicleGroup(v)===g);if(!items.length)return;let seen=false;n.forEach(v=>{if(vehicleGroup(v)!==g)return;if(v.primaryForProfile&&!seen){seen=true;return}if(v.primaryForProfile&&seen)v.primaryForProfile=false});const hasPrimary=n.some(v=>vehicleGroup(v)===g&&v.primaryForProfile);if(!hasPrimary){const first=n.find(v=>vehicleGroup(v)===g);if(first)first.primaryForProfile=true}});return n}
+    function activeVehicles(profile=activeProfile()){return Array.isArray(profile?.vehicles)?fixVehiclePrimaries(profile.vehicles):[]}
+    function primaryTruckVehicle(profile){const v=activeVehicles(profile);return v.find(x=>vehicleGroup(x)==='truck'&&x.primaryForProfile)||v.find(x=>vehicleGroup(x)==='truck')||null}
+    function primaryTrailerVehicle(profile){const v=activeVehicles(profile);return v.find(x=>vehicleGroup(x)==='trailer'&&x.primaryForProfile)||v.find(x=>vehicleGroup(x)==='trailer')||null}
+    function primaryTruckPlate(profile){return primaryTruckVehicle(profile)?.plate||''}
+    function primaryTrailerPlate(profile){return primaryTrailerVehicle(profile)?.plate||''}
+    function profileLabel(profile){if(!profile)return'Bez profilu';return[profile.driverName,primaryTruckPlate(profile)].filter(Boolean).join(' • ')||'Profil'}
+    function renderProfileSwitchers(){const markup=state.profiles.length?state.profiles.map(p=>'<button type="button" class="'+(p.id===state.activeProfileId?'active':'')+'" onclick="activateProfile(\''+esc(p.id)+'\')">'+esc(p.driverName||primaryTruckPlate(p)||'Profil')+'</button>').join(''):'<button type="button" class="active">Bez profilu</button>';if(qs('profileSwitcher'))qs('profileSwitcher').innerHTML=markup;if(qs('profilesQuickSwitch'))qs('profilesQuickSwitch').innerHTML=markup}
+    function renderActiveProfileHints(){const p=activeProfile();const t=p?'Aktivní profil: '+profileLabel(p):'Nejdřív vytvoř profil řidiče v sekci Profily.';if(qs('tripActiveProfileHint'))qs('tripActiveProfileHint').textContent=t;if(qs('fuelActiveProfileHint'))qs('fuelActiveProfileHint').textContent=t;if(qs('vehicleActiveProfileHint'))qs('vehicleActiveProfileHint').textContent=t}
+    function ensureDataShape(){state.profiles=state.profiles.map(normalizeProfile);state.trips=state.trips.map(i=>({id:i?.id||generateId('TRIP'),profileId:trim(i?.profileId),date:trim(i?.date),departureTime:trim(i?.departureTime),arrivalTime:trim(i?.arrivalTime),emptyDrive:!!i?.emptyDrive,kmStart:digitsOnly(i?.kmStart),kmEnd:digitsOnly(i?.kmEnd),fromPlace:trim(i?.fromPlace),fromAddress:trim(i?.fromAddress),toPlace:trim(i?.toPlace),toAddress:trim(i?.toAddress),commodity:trim(i?.commodity),quantityKg:digitsOnly(i?.quantityKg),containerNumber:trim(i?.containerNumber),trailerType:trim(i?.trailerType),trailerPlate:trim(i?.trailerPlate).toUpperCase(),note:trim(i?.note),createdAt:i?.createdAt||new Date().toISOString(),updatedAt:i?.updatedAt||i?.createdAt||new Date().toISOString()}));state.trips=sortTripsByCalendar(state.trips);state.fuelings=state.fuelings.map(i=>{const et=trim(i?.energyType||i?.type||'Nafta')||'Nafta';const c=energyTypeConfig(et);return{id:i?.id||generateId('FUEL'),profileId:trim(i?.profileId),date:trim(i?.date),odometer:digitsOnly(i?.odometer),energyType:et,quantity:decimalOnly(i?.quantity??i?.liters),unit:trim(i?.unit)||c.unit,durationMinutes:digitsOnly(i?.durationMinutes??i?.duration),station:trim(i?.station),note:trim(i?.note),createdAt:i?.createdAt||new Date().toISOString(),updatedAt:i?.updatedAt||i?.createdAt||new Date().toISOString()}});state.places=Array.isArray(state.places)?state.places.map(p=>({id:p?.id||generateId('PLACE'),name:trim(p?.name),address:trim(p?.address),usageCount:Number(p?.usageCount||0),lastUsed:p?.lastUsed||new Date().toISOString()})).filter(p=>p.name):[];DEFAULT_PLACES.forEach(p=>upsertPlace(p.name,p.address,false));if(state.activeProfileId&&!state.profiles.some(p=>p.id===state.activeProfileId))state.activeProfileId='';if(!state.activeProfileId&&state.profiles.length)state.activeProfileId=state.profiles[0].id}
+    function findPlace(name){const n=normalizeText(name);return state.places.find(p=>normalizeText(p.name)===n)||null}
+    function upsertPlace(name,address,countUsage=true){const cn=trim(name),ca=trim(address);if(!cn||!ca)return;const e=findPlace(cn);if(e){e.address=ca;if(countUsage)e.usageCount=(e.usageCount||0)+1;e.lastUsed=new Date().toISOString()}else{state.places.unshift({id:generateId('PLACE'),name:cn,address:ca,usageCount:countUsage?1:0,lastUsed:new Date().toISOString()})}state.places.sort((a,b)=>(b.usageCount||0)-(a.usageCount||0)||new Date(b.lastUsed||0)-new Date(a.lastUsed||0))}
+    function renderPlacesDatalist(){qs('placesList').innerHTML=state.places.slice().sort((a,b)=>(b.usageCount||0)-(a.usageCount||0)||new Date(b.lastUsed||0)-new Date(a.lastUsed||0)).map(p=>'<option value="'+esc(p.name)+'"></option>').join('')}
+    function autoFillPlaceAddress(placeId,addrId){const p=findPlace(qs(placeId).value);if(p)qs(addrId).value=p.address||''}
+    function currentOdometer(profileId=state.activeProfileId){const tm=state.trips.filter(i=>i.profileId===profileId).reduce((m,i)=>Math.max(m,Number(i.kmEnd||0)),0);const fm=state.fuelings.filter(i=>i.profileId===profileId).reduce((m,i)=>Math.max(m,Number(i.odometer||0)),0);return Math.max(tm,fm)}
+    function autofillTripKmStart(force=false){if(state.editingTripId)return;const el=qs('tripKmStart');if(!el)return;if(!force&&digitsOnly(el.value))return;const o=currentOdometer();el.value=o>0?String(o):'';updateTripDistancePreview()}
+    function autofillFuelOdometer(force=false){if(state.editingFuelId)return;const el=qs('fuelOdometer');if(!el)return;if(!force&&digitsOnly(el.value))return;const o=currentOdometer();el.value=o>0?String(o):''}
+    function getSortedFuelings(profileId=state.activeProfileId,energyType='Nafta'){return state.fuelings.filter(i=>i.profileId===profileId&&i.date&&i.odometer&&i.quantity&&trim(i.energyType||'Nafta')===trim(energyType)).sort((a,b)=>{const bd=new Date(a.date)-new Date(b.date);return bd!==0?bd:new Date(a.createdAt||0)-new Date(b.createdAt||0)})}
+    function getEnergyIntervals(profileId=state.activeProfileId,energyType='Nafta'){const fuelings=getSortedFuelings(profileId,energyType);const intervals=[];const unit=energyRateUnit(energyType);for(let i=1;i<fuelings.length;i++){const prev=fuelings[i-1],curr=fuelings[i];const prevOdo=Number(prev.odometer||0),currOdo=Number(curr.odometer||0);const q=Number(String(curr.quantity||'').replace(',','.'));const km=currOdo-prevOdo;if(km>0&&q>0)intervals.push({id:curr.id,intervalKm:km,quantity:q,unit,consumption:(q/km)*100})}return intervals}
+    function getFuelIntervalById(id){const f=state.fuelings.find(i=>i.id===id);if(!f)return null;const et=trim(f.energyType||'Nafta')||'Nafta';return getEnergyIntervals(f.profileId,et).find(i=>i.id===id)||null}
+    function getAverageConsumption(profileId=state.activeProfileId){const intervals=getEnergyIntervals(profileId,'Nafta');if(!intervals.length)return null;const tk=intervals.reduce((s,i)=>s+i.intervalKm,0);const tq=intervals.reduce((s,i)=>s+i.quantity,0);return tk>0?(tq/tk)*100:null}
+    function daysUntil(v){if(!v)return null;const n=new Date(),ts=new Date(n.getFullYear(),n.getMonth(),n.getDate()),t=new Date(v),tt=new Date(t.getFullYear(),t.getMonth(),t.getDate());return Math.round((tt-ts)/86400000)}
+    function statusBadge(days){if(days===null)return{text:'Nenastaveno',cls:'badge-warn'};if(days<0)return{text:'Po termínu '+Math.abs(days)+' dní',cls:'badge-danger'};if(days<=7)return{text:'Do '+days+' dní',cls:'badge-danger'};if(days<=30)return{text:'Do '+days+' dní',cls:'badge-warn'};return{text:'Za '+days+' dní',cls:'badge-ok'}}
+    function sortVehiclesByStk(a,b){if(a.stk&&b.stk)return new Date(a.stk)-new Date(b.stk);if(a.stk)return-1;if(b.stk)return 1;return new Date(b.createdAt||0)-new Date(a.createdAt||0)}
+    function openScreen(screen){state.screen=screen;qsa('.screen').forEach(el=>el.classList.add('hidden'));qs('screen-'+screen).classList.remove('hidden');qsa('.nav button').forEach(b=>b.classList.remove('active'));qs('nav-'+screen).classList.add('active');renderAll();if(screen==='trip'&&!state.editingTripId)autofillTripKmStart(true);if(screen==='fuel'&&!state.editingFuelId)autofillFuelOdometer(true);document.querySelector('.app')?.scrollTo({top:0,behavior:'smooth'})}
+    function setHistoryMode(mode){state.historyMode=mode;qs('historyTripsBtn').classList.toggle('active',mode==='trips');qs('historyFuelBtn').classList.toggle('active',mode==='fuel');qs('historyCommodityFilter').disabled=mode!=='trips';syncSelectedCalendarDate(getHistoryCalendarStats());renderHistory()}
+    function activateProfile(id){state.activeProfileId=id;state.editingVehicleId=null;saveState();renderAll();if(state.screen==='trip'&&!state.editingTripId)autofillTripKmStart(true);if(state.screen==='fuel'&&!state.editingFuelId)autofillFuelOdometer(true)}
+    function resetProfileForm(){state.editingProfileId=null;qs('profileForm').reset();qs('profileFormTitle').textContent='Nový profil';qs('profileSubmitBtn').textContent='Uložit profil'}
+    function editProfile(id){const p=state.profiles.find(i=>i.id===id);if(!p)return;state.editingProfileId=id;qs('profileDriverName').value=p.driverName||'';qs('profileNote').value=p.note||'';qs('profileFormTitle').textContent='Upravit profil';qs('profileSubmitBtn').textContent='Uložit změny';openScreen('profiles')}
+    function removeProfile(id){if(!confirm('Opravdu smazat profil?'))return;const ht=state.trips.some(i=>i.profileId===id),hf=state.fuelings.some(i=>i.profileId===id);if((ht||hf)&&!confirm('K tomuto profilu existují jízdy nebo doplnění. Chceš opravdu smazat profil i s jeho záznamy?'))return;state.trips=state.trips.filter(i=>i.profileId!==id);state.fuelings=state.fuelings.filter(i=>i.profileId!==id);state.profiles=state.profiles.filter(i=>i.id!==id);if(state.activeProfileId===id)state.activeProfileId=state.profiles[0]?.id||'';saveState();renderAll()}
+    function profileValid(p){return!!p.driverName}
+    function getProfileFormData(){const e=state.profiles.find(i=>i.id===state.editingProfileId);return normalizeProfile({id:e?.id||generateId('PROFILE'),driverName:qs('profileDriverName').value,note:qs('profileNote').value,vehicles:e?.vehicles||[],createdAt:e?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()})}
+    function updateTripDistancePreview(){const d=kmDiff(qs('tripKmStart').value,qs('tripKmEnd').value);qs('tripDistancePreview').value=d?String(d):''}
+    function toggleCommodityCustom(){const isOther=qs('tripCommodityPreset').value==='Jiná';qs('tripCommodityCustomWrap').classList.toggle('hidden',!isOther);if(!isOther)qs('tripCommodityCustom').value=''}
+    function toggleEmptyDrive(){const c=qs('tripEmptyDrive').checked;qs('tripCommodityField').classList.toggle('hidden',c);qs('tripCommodityCustomWrap').classList.add('hidden');qs('tripQuantityField').classList.toggle('hidden',c);if(c){qs('tripCommodityPreset').value='';qs('tripCommodityCustom').value='';qs('tripQuantityKg').value='0'}else if(qs('tripQuantityKg').value==='0')qs('tripQuantityKg').value=''}
+    function setCommodityFields(v){const c=trim(v);if(!c){qs('tripCommodityPreset').value='';qs('tripCommodityCustom').value='';toggleCommodityCustom();return}if(COMMODITIES.includes(c)){qs('tripCommodityPreset').value=c;qs('tripCommodityCustom').value=''}else{qs('tripCommodityPreset').value='Jiná';qs('tripCommodityCustom').value=c}toggleCommodityCustom()}
+    function selectedCommodity(){if(qs('tripEmptyDrive').checked)return'';return qs('tripCommodityPreset').value==='Jiná'?trim(qs('tripCommodityCustom').value):trim(qs('tripCommodityPreset').value)}
+    function trailerNeedsContainerField(trailerType){return['Silo šasi','Kontejnerové šasi','Kontejnerový návěs'].includes(trim(trailerType))}
+    function currentTripTrailerSnapshot(){const t=primaryTrailerVehicle(activeProfile());return{type:trim(t?.type),plate:trim(t?.plate).toUpperCase()}}
+    function updateTripContainerField(){const et=state.trips.find(i=>i.id===state.editingTripId)||null;const s=currentTripTrailerSnapshot();const tt=trim(et?.trailerType||s.type),tp=trim(et?.trailerPlate||s.plate).toUpperCase();const show=trailerNeedsContainerField(tt)||!!trim(et?.containerNumber)||!!trim(qs('tripContainerNumber')?.value);qs('tripContainerWrap').classList.toggle('hidden',!show);qs('tripContainerInfo').textContent=show?[tt,tp].filter(Boolean).join(' • '):'';if(!show)qs('tripContainerNumber').value=''}
+    function resetTripForm(){state.editingTripId=null;qs('tripForm').reset();qs('tripFormTitle').textContent='Nová jízda';qs('tripSubmitBtn').textContent='Uložit jízdu';qs('tripDate').value=today();qs('tripDistancePreview').value='';qs('tripEmptyDrive').checked=false;qs('tripContainerNumber').value='';qs('tripContainerInfo').textContent='';setCommodityFields('');toggleEmptyDrive();updateTripContainerField();autofillTripKmStart(true)}
+    function getTripFormData(){const e=state.trips.find(i=>i.id===state.editingTripId);const ed=qs('tripEmptyDrive').checked;const ts=currentTripTrailerSnapshot();const cn=trailerNeedsContainerField(ts.type)||e?.containerNumber?trim(qs('tripContainerNumber').value):'';return{id:e?.id||generateId('TRIP'),profileId:state.activeProfileId,date:qs('tripDate').value,departureTime:qs('tripDepartureTime').value,arrivalTime:qs('tripArrivalTime').value,emptyDrive:ed,kmStart:digitsOnly(qs('tripKmStart').value),kmEnd:digitsOnly(qs('tripKmEnd').value),fromPlace:trim(qs('tripFromPlace').value),fromAddress:trim(qs('tripFromAddress').value),toPlace:trim(qs('tripToPlace').value),toAddress:trim(qs('tripToAddress').value),commodity:ed?'':selectedCommodity(),quantityKg:ed?'0':digitsOnly(qs('tripQuantityKg').value),containerNumber:cn,trailerType:ts.type,trailerPlate:ts.plate,note:trim(qs('tripNote').value),createdAt:e?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()}}
+    function tripValid(t){return!!(t.profileId&&t.date&&t.kmStart&&t.kmEnd&&(t.fromPlace||t.fromAddress)&&(t.toPlace||t.toAddress))}
+    function activateTripTrailerSnapshot(profileId,trailerType,trailerPlate){const ct=trim(trailerType),cp=trim(trailerPlate).toUpperCase();if(!profileId||(!ct&&!cp))return;state.profiles=state.profiles.map(p=>{if(p.id!==profileId)return p;const v=activeVehicles(p);const t=v.find(x=>vehicleGroup(x)==='trailer'&&((cp&&trim(x.plate).toUpperCase()===cp)||(!cp&&ct&&trim(x.type)===ct)));if(!t)return p;const uv=v.map(x=>{if(vehicleGroup(x)!=='trailer')return x;return{...x,primaryForProfile:x.id===t.id}});return{...p,vehicles:fixVehiclePrimaries(uv),updatedAt:new Date().toISOString()}})}
+    function fillTripFormFromRecord(item,mode='edit'){if(!item)return;const isCopy=mode==='copy';state.activeProfileId=item.profileId;if(isCopy){state.editingTripId=null;activateTripTrailerSnapshot(item.profileId,item.trailerType,item.trailerPlate)}else{state.editingTripId=item.id}qs('tripDate').value=isCopy?today():(item.date||today());qs('tripDepartureTime').value=isCopy?'':(item.departureTime||'');qs('tripArrivalTime').value=isCopy?'':(item.arrivalTime||'');qs('tripEmptyDrive').checked=!!item.emptyDrive;qs('tripKmStart').value=isCopy?'':(item.kmStart||'');qs('tripKmEnd').value=isCopy?'':(item.kmEnd||'');qs('tripFromPlace').value=item.fromPlace||'';qs('tripFromAddress').value=item.fromAddress||'';qs('tripToPlace').value=item.toPlace||'';qs('tripToAddress').value=item.toAddress||'';setCommodityFields(item.commodity||'');qs('tripQuantityKg').value=item.quantityKg||'';qs('tripContainerNumber').value=item.containerNumber||'';qs('tripNote').value=item.note||'';qs('tripFormTitle').textContent=isCopy?'Kopie minulé jízdy':'Upravit jízdu';qs('tripSubmitBtn').textContent=isCopy?'Uložit jako novou jízdu':'Uložit změny';toggleEmptyDrive();updateTripContainerField();if(isCopy)autofillTripKmStart(true);updateTripDistancePreview();saveState();openScreen('trip')}
+    function editTrip(id){const i=state.trips.find(t=>t.id===id);if(!i)return;fillTripFormFromRecord(i,'edit')}
+    function copyTrip(id){const i=state.trips.find(t=>t.id===id);if(!i)return;fillTripFormFromRecord(i,'copy')}
+    function removeTrip(id){if(!confirm('Opravdu smazat jízdu?'))return;state.trips=state.trips.filter(i=>i.id!==id);state.trips=sortTripsByCalendar(state.trips);saveState();renderAll()}
+    function updateFuelFormFields(){const type=qs('fuelType')?qs('fuelType').value:'Nafta';const c=energyTypeConfig(type);if(qs('fuelQuantityLabel'))qs('fuelQuantityLabel').textContent=c.quantityLabel;if(qs('fuelStationLabel'))qs('fuelStationLabel').textContent=c.stationLabel;if(qs('fuelDurationWrap'))qs('fuelDurationWrap').classList.toggle('hidden',type!=='Nabíjení');if(type!=='Nabíjení'&&qs('fuelDurationMinutes'))qs('fuelDurationMinutes').value=''}
+    function resetFuelForm(){state.editingFuelId=null;qs('fuelForm').reset();qs('fuelType').value='Nafta';qs('fuelFormTitle').textContent='Tankování / nabíjení';qs('fuelSubmitBtn').textContent='Uložit záznam';qs('fuelDate').value=today();updateFuelFormFields();autofillFuelOdometer(true)}
+    function getFuelFormData(){const e=state.fuelings.find(i=>i.id===state.editingFuelId);const et=qs('fuelType').value;const c=energyTypeConfig(et);return{id:e?.id||generateId('FUEL'),profileId:state.activeProfileId,date:qs('fuelDate').value,odometer:digitsOnly(qs('fuelOdometer').value),energyType:et,quantity:decimalOnly(qs('fuelQuantity').value),unit:c.unit,durationMinutes:digitsOnly(qs('fuelDurationMinutes').value),station:trim(qs('fuelStation').value),note:trim(qs('fuelNote').value),createdAt:e?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()}}
+    function fuelValid(f){return!!(f.profileId&&f.date&&f.odometer&&f.quantity)}
+    function editFuel(id){const i=state.fuelings.find(f=>f.id===id);if(!i)return;state.editingFuelId=id;state.activeProfileId=i.profileId;qs('fuelType').value=i.energyType||'Nafta';qs('fuelDate').value=i.date||today();qs('fuelOdometer').value=i.odometer||'';qs('fuelQuantity').value=i.quantity||'';qs('fuelDurationMinutes').value=i.durationMinutes||'';qs('fuelStation').value=i.station||'';qs('fuelNote').value=i.note||'';updateFuelFormFields();qs('fuelFormTitle').textContent='Upravit tankování / nabíjení';qs('fuelSubmitBtn').textContent='Uložit změny';saveState();openScreen('fuel')}
+    function removeFuel(id){if(!confirm('Opravdu smazat záznam tankování / nabíjení?'))return;state.fuelings=state.fuelings.filter(i=>i.id!==id);saveState();renderAll()}
+    function toggleVehicleBrandField(){const isTruck=qs('vehicleType').value==='Tahač';qs('vehicleBrandWrap').classList.toggle('hidden',!isTruck);if(!isTruck)qs('vehicleBrand').value=''}
+    function updateVehiclePrimaryLabel(){const isTruck=qs('vehicleType').value==='Tahač';qs('vehiclePrimaryText').textContent=isTruck?'Použít jako hlavní tahač v profilu':'Použít jako hlavní vozidlo za tahačem v profilu';toggleVehicleBrandField()}
+    function openVehicleForm(){if(qs('vehicleFormSection'))qs('vehicleFormSection').classList.remove('hidden');if(qs('vehicleFormLinkWrap'))qs('vehicleFormLinkWrap').classList.add('hidden')}
+    function closeVehicleForm(){if(qs('vehicleFormSection'))qs('vehicleFormSection').classList.add('hidden');if(qs('vehicleFormLinkWrap'))qs('vehicleFormLinkWrap').classList.remove('hidden')}
+    function resetVehicleForm(){state.editingVehicleId=null;qs('vehicleForm').reset();qs('vehicleType').value='Tahač';qs('vehicleBrand').value='';qs('vehicleYear').value='';qs('vehiclePrimary').checked=false;qs('vehicleBlockTitle').textContent='Nové vozidlo';qs('vehicleSubmitBtn').textContent='Uložit vozidlo';updateVehiclePrimaryLabel();closeVehicleForm()}
+    function vehicleValid(v){return!!(v.type&&(v.label||v.plate||v.stk))}
+    function getVehicleFormData(){const p=activeProfile();const e=activeVehicles(p).find(i=>i.id===state.editingVehicleId);return normalizeVehicle({id:e?.id||generateId('VEH'),type:qs('vehicleType').value,brand:qs('vehicleBrand').value,label:qs('vehicleLabel').value,plate:qs('vehiclePlate').value,year:qs('vehicleYear').value,stk:qs('vehicleStk').value,note:qs('vehicleNote').value,primaryForProfile:!!qs('vehiclePrimary').checked,createdAt:e?.createdAt||new Date().toISOString()})}
+    function editVehicle(id){const p=activeProfile();if(!p)return;const v=activeVehicles(p).find(i=>i.id===id);if(!v)return;state.editingVehicleId=id;qs('vehicleType').value=v.type||'Tahač';qs('vehicleBrand').value=v.brand||'';qs('vehicleLabel').value=v.label||'';qs('vehiclePlate').value=v.plate||'';qs('vehicleYear').value=v.year||'';qs('vehicleStk').value=v.stk||'';qs('vehicleNote').value=v.note||'';qs('vehiclePrimary').checked=!!v.primaryForProfile;qs('vehicleBlockTitle').textContent='Upravit vozidlo';qs('vehicleSubmitBtn').textContent='Uložit změny';updateVehiclePrimaryLabel();openScreen('tech');openVehicleForm();requestAnimationFrame(()=>qs('vehicleFormSection')?.scrollIntoView({behavior:'smooth',block:'start'}))}
+    function removeVehicle(id){const p=activeProfile();if(!p)return;if(!confirm('Opravdu smazat vozidlo?'))return;state.profiles=state.profiles.map(i=>{if(i.id!==p.id)return i;const f=activeVehicles(i).filter(v=>v.id!==id);return{...i,vehicles:fixVehiclePrimaries(f),updatedAt:new Date().toISOString()}});saveState();renderAll()}
+    function setVehicleAsPrimary(id){const p=activeProfile();if(!p)return;const cv=activeVehicles(p),t=cv.find(v=>v.id===id);if(!t)return;state.profiles=state.profiles.map(i=>{if(i.id!==p.id)return i;const v=activeVehicles(i).map(x=>{if(vehicleGroup(x)!==vehicleGroup(t))return x;return{...x,primaryForProfile:x.id===id}});return{...i,vehicles:fixVehiclePrimaries(v),updatedAt:new Date().toISOString()}});saveState();renderAll()}
+    function currentMonthStats(profileId=state.activeProfileId){const bd=parseDateParts(today())||new Date();const y=bd.getFullYear(),m=bd.getMonth();const pt=state.trips.filter(i=>i.profileId===profileId&&(()=>{const d=parseDateParts(i.date);return d&&d.getFullYear()===y&&d.getMonth()===m})());const pf=state.fuelings.filter(i=>i.profileId===profileId&&(()=>{const d=parseDateParts(i.date);return d&&d.getFullYear()===y&&d.getMonth()===m})());const et={Nafta:0,AdBlue:0,CNG:0,LNG:0,Nabíjení:0};pf.forEach(i=>{const k=trim(i.energyType)||'Nafta';const q=Number(String(i.quantity||'').replace(',','.'));if(!Number.isNaN(q))et[k]=(et[k]||0)+q});return{label:monthLabel(y,m),tripCount:pt.length,tripKm:pt.reduce((s,i)=>s+kmDiff(i.kmStart,i.kmEnd),0),fuelingCount:pf.length,diesel:et.Nafta||0,adblue:et.AdBlue||0,charging:et['Nabíjení']||0}}
+    function renderProfileSwitcher(){qs('profileSwitcher').innerHTML=state.profiles.length?state.profiles.map(p=>'<button type="button" class="'+(p.id===state.activeProfileId?'active':'')+'" onclick="activateProfile(\''+esc(p.id)+'\')">'+esc(p.driverName||primaryTruckPlate(p)||'Profil')+'</button>').join(''):'<button type="button" class="active">Bez profilu</button>'}
+    function renderOverview(){renderProfileSwitcher();qs('miniTrips').textContent=String(state.trips.length);qs('miniFuel').textContent=String(state.fuelings.length);const p=activeProfile();if(!p){qs('overviewStats').innerHTML=`<div class="profile-overview"><div class="profile-main-card"><div class="profile-name">Bez profilu</div><div class="hint">Nejdřív si vytvoř profil.</div><div class="profile-stats-grid"><div class="profile-stat-box"><div class="tiny">Aktuální stav km</div><div class="v">—</div></div><div class="profile-stat-box"><div class="tiny">Průměrná spotřeba nafty</div><div class="v">—</div></div></div></div></div>`;if(qs('overviewPilotStats'))qs('overviewPilotStats').innerHTML=`<div class="summary"><strong>Pilot verze V12.6</strong><span>Appka je připravená hlavně pro vlastní provoz nebo firemní test. Data jsou teď uložená lokálně v zařízení, proto dělej pravidelně zálohu.</span></div>`;return}const plates=[primaryTruckPlate(p),primaryTrailerPlate(p)].filter(Boolean).join(' • ');const odo=currentOdometer(p.id);const avg=getAverageConsumption(p.id);const ms=currentMonthStats(p.id);qs('overviewStats').innerHTML=`<div class="profile-overview"><div class="profile-main-card"><div class="profile-name">${esc(p.driverName||'—')}</div><div class="profile-plates">${esc(plates||'Bez SPZ soupravy')}</div><div class="profile-stats-grid"><div class="profile-stat-box"><div class="tiny">Aktuální stav km</div><div class="v">${esc(odo>0?String(odo):'—')}</div></div><div class="profile-stat-box"><div class="tiny">Průměrná spotřeba nafty</div><div class="v">${esc(formatConsumption(avg))}</div></div></div></div></div>`;if(qs('overviewPilotStats'))qs('overviewPilotStats').innerHTML=`<div class="summary"><strong>Pilot verze V12.6</strong><span>${esc(ms.label)} • ${esc(pluralTrips(ms.tripCount))} • ${esc(pluralFuelings(ms.fuelingCount))} • ${esc(String(ms.tripKm))} km</span></div><div class="stats-grid mt-16"><div class="card"><div class="tiny">Měsíc</div><div class="big">${esc(String(ms.tripKm))}</div><div class="hint">ujetých km</div></div><div class="card"><div class="tiny">Měsíc</div><div class="big">${esc(String(ms.tripCount))}</div><div class="hint">jízd</div></div><div class="card"><div class="tiny">Měsíc</div><div class="big">${esc(String(ms.fuelingCount))}</div><div class="hint">tankování / nabíjení</div></div><div class="card"><div class="tiny">Nafta</div><div class="big">${esc(ms.diesel?ms.diesel.toFixed(1):'0.0')}</div><div class="hint">l v tomto měsíci</div></div><div class="card"><div class="tiny">AdBlue</div><div class="big">${esc(ms.adblue?ms.adblue.toFixed(1):'0.0')}</div><div class="hint">l v tomto měsíci</div></div><div class="card"><div class="tiny">Nabíjení</div><div class="big">${esc(ms.charging?ms.charging.toFixed(1):'0.0')}</div><div class="hint">kWh v tomto měsíci</div></div></div>`}
+    function renderProfiles(){const c=activeProfile();qs('profilesSummary').innerHTML=c?`<div class="summary"><strong><span class="profile-active-line"><span class="profile-live-dot"></span>Aktivní profil</span></strong><span>${esc(profileLabel(c))}</span><span>${esc([primaryTruckPlate(c),primaryTrailerPlate(c)].filter(Boolean).join(' • ')||'Bez hlavních vozidel')}</span></div>`:'<div class="empty">Zatím není vybraný žádný profil.</div>';qs('profilesList').innerHTML=state.profiles.length?'<div class="profile-list-grid">'+state.profiles.map(p=>{const isA=p.id===state.activeProfileId;const tp=primaryTruckPlate(p)||'Bez hlavního tahače';const tp2=primaryTrailerPlate(p)||'Bez hlavního vozidla za tahačem';return`<div class="profile-card"><div class="profile-card-head"><div class="profile-card-main"><div class="profile-active-line"><div class="badge ${isA?'badge-ok':'badge-info'}">${isA?'🟢 Aktivní':'Profil'}</div></div><div class="profile-card-title">${esc(p.driverName||'Řidič')}</div><div class="profile-card-meta">${esc(tp)}</div><div class="profile-card-meta">${esc(tp2)}</div></div></div>${p.note?'<div class="profile-card-note">'+esc(p.note)+'</div>':''}<div class="profile-card-actions"><button class="${isA?'btn-ok':'btn2'}" type="button" onclick="activateProfile('${esc(p.id)}')">${esc(isA?'🟢 Aktivní':'Aktivovat')}</button><button class="btn2" type="button" onclick="editProfile('${esc(p.id)}')">Upravit</button><button class="btn-danger" type="button" onclick="removeProfile('${esc(p.id)}')">Smazat</button></div></div>`}).join('')+'</div>':'<div class="empty">Zatím tu není žádný profil.</div>'}
+    function renderVehicles(){const p=activeProfile();if(!p){qs('vehicleQuickCards').innerHTML='';qs('vehiclesList').innerHTML='<div class="empty">Nejdřív vytvoř profil.</div>';return}const v=activeVehicles(p).slice().sort(sortVehiclesByStk);const exp=v.filter(x=>{const d=daysUntil(x.stk);return d!==null&&d<0}).length;const near=v.filter(x=>{const d=daysUntil(x.stk);return d!==null&&d>=0&&d<=30}).length;const at=primaryTruckVehicle(p),atr=primaryTrailerVehicle(p);qs('vehicleQuickCards').innerHTML=`<div class="vehicle-mini-card"><div class="tiny">Celkem vozidel</div><div class="big">${esc(String(v.length))}</div></div><div class="vehicle-mini-card"><div class="tiny">Po termínu</div><div class="big">${esc(String(exp))}</div></div><div class="vehicle-mini-card"><div class="tiny">Do 30 dní</div><div class="big">${esc(String(near))}</div></div>`;qs('vehiclesList').innerHTML=v.length?`<div class="vehicle-list-stack"><div class="summary"><strong>Aktivní souprava</strong><span>${esc([at?[at.label||at.type,at.plate].filter(Boolean).join(' • '):'Bez aktivního tahače',atr?[atr.label||atr.type,atr.plate].filter(Boolean).join(' • '):'Bez připojeného vozidla'].join(' + '))}</span></div><div class="vehicle-grid">`+v.map(x=>{const b=statusBadge(daysUntil(x.stk));const isA=!!x.primaryForProfile;const isTruck=vehicleGroup(x)==='truck';return`<div class="vehicle-card"><div class="vehicle-card-head"><div class="vehicle-card-main"><div class="vehicle-compact-badges"><span class="badge ${b.cls}">${esc(b.text)}</span>${isA?`<span class="badge badge-ok">${esc(isTruck?'🟢 Aktivní tahač':'🟢 Připojeno')}</span>`:`<span class="badge badge-info">${esc(isTruck?'Tahač':'Přípojné')}</span>`}</div><div class="vehicle-card-title">${esc(x.label||x.type||'Vozidlo')}</div><div class="vehicle-card-meta">${esc([x.type,x.brand,x.plate].filter(Boolean).join(' • ')||'Bez detailu')}</div><div class="vehicle-card-meta">${esc(x.year?'Rok výroby '+x.year:'Rok výroby nenastaven')}</div><div class="vehicle-card-meta">${esc(x.stk?'STK do '+formatDate(x.stk):'STK nenastaveno')}</div></div></div>${x.note?'<div class="vehicle-card-note">'+esc(x.note)+'</div>':''}<div class="vehicle-card-actions"><button class="${isA?'btn-ok':'btn2'}" type="button" onclick="setVehicleAsPrimary('${esc(x.id)}')">${esc(isA?(isTruck?'🟢 Aktivní tahač':'🟢 Připojeno'):(isTruck?'Nastavit tahač':'Připojit'))}</button><button class="chip" type="button" onclick="editVehicle('${esc(x.id)}')">Upravit</button><button class="btn-danger" type="button" onclick="removeVehicle('${esc(x.id)}')">Smazat</button></div></div>`}).join('')+'</div></div>':'<div class="empty">Zatím tu není žádné vozidlo.</div>'}
+    function renderHistoryFilters(){const cv=qs('historyProfileFilter')?qs('historyProfileFilter').value:'';qs('historyProfileFilter').innerHTML='<option value="">Všechny profily</option>'+state.profiles.map(p=>'<option value="'+esc(p.id)+'">'+esc(profileLabel(p))+'</option>').join('');qs('historyProfileFilter').value=state.profiles.some(p=>p.id===cv)?cv:''}
+    function filteredTrips(){const s=normalizeText(qs('historySearch').value);const pid=trim(qs('historyProfileFilter').value);const com=trim(qs('historyCommodityFilter').value);return sortTripsByCalendar(state.trips.filter(i=>{if(pid&&i.profileId!==pid)return false;if(com&&i.commodity!==com)return false;if(!s)return true;const p=state.profiles.find(x=>x.id===i.profileId);const h=[i.fromPlace,i.fromAddress,i.toPlace,i.toAddress,i.commodity,i.containerNumber,i.trailerType,i.trailerPlate,i.note,profileLabel(p)].join(' ');return normalizeText(h).includes(s)}))}
+    function filteredFuelings(){const s=normalizeText(qs('historySearch').value);const pid=trim(qs('historyProfileFilter').value);return state.fuelings.filter(i=>{if(pid&&i.profileId!==pid)return false;if(!s)return true;const p=state.profiles.find(x=>x.id===i.profileId);const h=[i.energyType,i.station,i.note,profileLabel(p),i.odometer,i.quantity,i.unit].join(' ');return normalizeText(h).includes(s)}).slice().sort(sortByCreated)}
+    function renderTripHistoryRow(item){const p=state.profiles.find(x=>x.id===item.profileId);const dur=formatDuration(minutesBetween(item.departureTime,item.arrivalTime));const route=(item.fromPlace||item.fromAddress||'—')+' → '+(item.toPlace||item.toAddress||'—');const ttt=item.emptyDrive?'Bez nákladu':'S nákladem';const qty=item.emptyDrive?'0 kg':(item.quantityKg?item.quantityKg+' kg':'—');const bdg='<div class="badge '+(item.emptyDrive?'badge-warn':'badge-info')+'">'+esc(item.emptyDrive?'Jízda po prázdnu':'Jízda')+'</div>';const ts=[item.trailerType,item.trailerPlate].filter(Boolean).join(' • ')||'Bez připojného vozidla';const pf=[profileLabel(p),ts].filter(Boolean).join(' • ');return`<div class="trip-row" id="trip-history-${esc(item.id)}"><button class="trip-row-btn" type="button" onclick="toggleTripHistoryItem('${esc(item.id)}')"><div class="trip-row-main"><div class="trip-row-time">${esc(item.departureTime||'—')} → ${esc(item.arrivalTime||'—')}</div><div class="trip-row-route">${esc(route)}</div><div class="trip-row-meta">${esc(dur)} • ${esc(pf)}</div></div><div class="trip-row-side"><div class="trip-row-km">${esc(String(kmDiff(item.kmStart,item.kmEnd)))} km</div><div class="trip-row-arrow">⌄</div></div></button><div class="trip-row-detail"><div class="mt-16">${bdg}</div><div class="trip-detail-grid"><div class="trip-detail-box"><div class="l">Profil</div><div class="v">${esc(profileLabel(p))}</div></div><div class="trip-detail-box"><div class="l">Přípojné vozidlo</div><div class="v">${esc(ts)}</div></div><div class="trip-detail-box"><div class="l">Typ jízdy</div><div class="v">${esc(ttt)}</div></div><div class="trip-detail-box"><div class="l">Čas</div><div class="v">${esc(item.departureTime||'—')} → ${esc(item.arrivalTime||'—')}</div></div><div class="trip-detail-box"><div class="l">Doba jízdy</div><div class="v">${esc(dur)}</div></div><div class="trip-detail-box"><div class="l">Km start</div><div class="v">${esc(item.kmStart||'—')}</div></div><div class="trip-detail-box"><div class="l">Km konec</div><div class="v">${esc(item.kmEnd||'—')}</div></div><div class="trip-detail-box"><div class="l">Ujeto km</div><div class="v">${esc(String(kmDiff(item.kmStart,item.kmEnd)))}</div></div><div class="trip-detail-box"><div class="l">Komodita</div><div class="v">${esc(item.emptyDrive?'Po prázdnu':(item.commodity||'—'))}</div></div><div class="trip-detail-box"><div class="l">Množství</div><div class="v">${esc(qty)}</div></div><div class="trip-detail-box"><div class="l">Trasa</div><div class="v">${esc(route)}</div></div>${(item.fromAddress||item.toAddress)?`<div class="trip-detail-box"><div class="l">Adresa odkud</div><div class="v">${esc(item.fromAddress||'—')}</div></div><div class="trip-detail-box"><div class="l">Adresa kam</div><div class="v">${esc(item.toAddress||'—')}</div></div>`:''}${item.containerNumber?`<div class="trip-detail-box"><div class="l">Kontejner</div><div class="v">${esc(item.containerNumber)}</div></div>`:''}</div>${item.note?'<div class="summary mt-16"><strong>Poznámka</strong><span>'+esc(item.note)+'</span></div>':''}<div class="history-actions"><button class="chip" type="button" onclick="copyTrip('${esc(item.id)}')">Kopírovat</button><button class="chip" type="button" onclick="editTrip('${esc(item.id)}')">Upravit</button><button class="btn-danger" type="button" onclick="removeTrip('${esc(item.id)}')">Smazat</button></div></div></div>`}
+    function renderFuelHistoryCard(item){const p=state.profiles.find(x=>x.id===item.profileId);const iv=getFuelIntervalById(item.id);const c=energyTypeConfig(item.energyType);const qt=formatEnergyQuantity(item);const ct=iv?formatConsumption(iv.consumption,iv.unit||c.unit):'—';const dt=item.durationMinutes?formatDuration(Number(item.durationMinutes)):'—';return`<div class="history-card"><div class="history-header"><div><div class="badge badge-info">${esc(c.icon+' '+(item.energyType||'Doplnění'))}</div><h3 class="mt-12">${esc(item.station||c.defaultPlace)}</h3></div><div class="history-sub">${esc(profileLabel(p))}</div><div class="history-sub">${esc(formatDate(item.date))} • stav km ${esc(item.odometer||'—')}</div></div><div class="metrics"><div class="metric"><div class="l">Typ</div><div class="v">${esc(item.energyType||'Nafta')}</div></div><div class="metric"><div class="l">Množství</div><div class="v">${esc(qt)}</div></div><div class="metric"><div class="l">Spotřeba</div><div class="v">${esc(ct)}</div></div><div class="metric"><div class="l">Interval km</div><div class="v">${esc(iv?String(iv.intervalKm):'—')}</div></div><div class="metric"><div class="l">Stav km</div><div class="v">${esc(item.odometer||'—')}</div></div>${trim(item.energyType)==='Nabíjení'?`<div class="metric"><div class="l">Doba nabíjení</div><div class="v">${esc(dt)}</div></div>`:''}</div>${item.note?'<div class="summary mt-16"><strong>Poznámka</strong><span>'+esc(item.note)+'</span></div>':''}<div class="history-actions"><button class="chip" type="button" onclick="editFuel('${esc(item.id)}')">Upravit</button><button class="btn-danger" type="button" onclick="removeFuel('${esc(item.id)}')">Smazat</button></div></div>`}
+    function toggleTripHistoryItem(id){const tid='trip-history-'+id;qsa('.trip-row').forEach(i=>{if(i.id!==tid)i.classList.remove('open')});const t=qs(tid);if(t)t.classList.toggle('open')}
+    function renderHistoryCalendar(cs){const so=(new Date(state.calendarYear,state.calendarMonth,1).getDay()+6)%7;const gs=new Date(state.calendarYear,state.calendarMonth,1-so);const cells=[];for(let i=0;i<42;i++){const cd=new Date(gs.getFullYear(),gs.getMonth(),gs.getDate()+i);const k=dateKeyFromDate(cd);const ds=cs[k]||{tripCount:0,fuelCount:0,tripKm:0};const isSel=k===state.selectedCalendarDate,isT=k===today(),isOut=cd.getMonth()!==state.calendarMonth;cells.push(`<button type="button" class="history-calendar-day ${isSel?'selected':''} ${isT?'today':''} ${isOut?'outside':''}" onclick="selectHistoryCalendarDate('${k}')"><div class="history-calendar-date">${cd.getDate()}</div><div class="history-calendar-marker-wrap"><div class="history-calendar-marker-row">${ds.tripCount?`<div class="history-calendar-marker count-${Math.min(ds.tripCount,3)}"></div>`:''}</div><div class="history-calendar-marker-row">${ds.fuelCount?`<div class="history-calendar-marker fuel count-${Math.min(ds.fuelCount,3)}"></div>`:''}</div><div class="history-calendar-counts">${ds.tripCount?`<span class="history-calendar-count-badge trip">${ds.tripCount}×📝</span>`:''}${ds.fuelCount?`<span class="history-calendar-count-badge fuel">${ds.fuelCount}×⛽</span>`:''}</div></div></button>`)}return`<section class="section"><div class="history-calendar-card"><div class="history-calendar-toolbar"><div><div class="history-calendar-month">${esc(monthLabel(state.calendarYear,state.calendarMonth))}</div></div><div class="history-calendar-nav"><button class="chip" type="button" onclick="shiftHistoryCalendarMonth(-1)">←</button><button class="chip" type="button" onclick="jumpHistoryCalendarToday()">Dnes</button><button class="chip" type="button" onclick="shiftHistoryCalendarMonth(1)">→</button></div></div><div class="history-calendar-grid">${WEEKDAY_NAMES.map(d=>`<div class="history-calendar-weekday">${esc(d)}</div>`).join('')}${cells.join('')}</div><div class="history-calendar-legend"><span class="history-calendar-legend-line"></span><span>Jízdy v daný den</span><span class="history-calendar-legend-line fuel"></span><span>Doplnění v daný den</span></div></div></section>`}
+    function renderHistorySelectedDay(list,cs){const sk=state.selectedCalendarDate;const sd=parseDateParts(sk);const items=list.filter(i=>trim(i.date)===sk);const ds=cs[sk]||{tripCount:0,fuelCount:0,tripKm:0};const title=sd?formatDate(sk):'Vybraný den';const sub=items.length?monthItemLabel(items.length,state.historyMode):(state.historyMode==='fuel'?'V tomto dni není žádné doplnění.':'V tomto dni není žádná jízda.');const st=pluralTrips(ds.tripCount),sf=pluralFuelings(ds.fuelCount),sk2=(ds.tripKm>0?ds.tripKm:0)+' km';const sum=[st,sf,sk2].join(' • ');return`<section class="section"><div class="history-selected-head"><div><h2 class="title">${esc(title)}</h2><div class="history-selected-sub">${esc(sum)}</div><div class="history-selected-stats"><span class="history-selected-chip">${esc(st)}</span><span class="history-selected-chip">${esc(sf)}</span><span class="history-selected-chip">${esc(sk2)}</span><span class="history-selected-chip">Zobrazeno: ${esc(sub)}</span></div></div></div><div class="mt-16 ${state.historyMode==='fuel'?'list-gap':'history-trip-list'}">${items.length?(state.historyMode==='fuel'?items.map(renderFuelHistoryCard).join(''):items.map(renderTripHistoryRow).join('')):`<div class="empty">${esc(state.historyMode==='fuel'?'V tomto dni není žádné doplnění.':'V tomto dni není žádná jízda.')}</div>`}</div></section>`}
+    function renderHistory(){renderHistoryFilters();const root=qs('historyList');const list=historyEntries();const cs=getHistoryCalendarStats();syncSelectedCalendarDate(cs);root.innerHTML=renderHistoryCalendar(cs)+renderHistorySelectedDay(list,cs)}
+    function renderBackupSummary(){const r=qs('backupSummary');if(!r)return;const vc=state.profiles.reduce((s,p)=>s+(Array.isArray(p.vehicles)?p.vehicles.length:0),0);const a=activeProfile();r.innerHTML=`<strong>Co se uloží do zálohy</strong><span>${esc(String(state.profiles.length))} profilů • ${esc(String(vc))} vozidel • ${esc(String(state.trips.length))} jízd • ${esc(String(state.fuelings.length))} doplnění • ${esc(String(state.places.length))} míst</span><span>${esc(a?'Aktivní profil: '+profileLabel(a):'Aktivní profil není vybraný')}</span><span>Soubor je ve formátu JSON a můžeš si ho uložit třeba do telefonu, na disk nebo do cloudu.</span>`}
+    function renderPilotSummary(){const r=qs('pilotSummary');if(!r)return;const a=activeProfile();const ms=a?currentMonthStats(a.id):null;r.innerHTML=`<strong>Pilot provoz a soukromí</strong><span>${esc(a?'Aktivní profil: '+profileLabel(a):'Bez aktivního profilu')}</span><span>${esc(ms?ms.label+' • '+pluralTrips(ms.tripCount)+' • '+pluralFuelings(ms.fuelingCount)+' • '+ms.tripKm+' km':'Nejdřív vytvoř profil a začni zapisovat jízdy.')}</span><span>Data jsou uložená lokálně v prohlížeči tohoto zařízení. Pro firemní pilot doporučeno pravidelně dělat zálohu a exportovat CSV pro sdílení a vyhodnocení.</span>`}
+    function renderAll(){renderPlacesDatalist();renderProfileSwitchers();renderActiveProfileHints();updateTripContainerField();renderOverview();renderProfiles();renderVehicles();renderBackupSummary();renderPilotSummary();renderHistory()}
+
+    qs('profileForm').addEventListener('submit',function(e){e.preventDefault();const p=getProfileFormData();if(!profileValid(p)){alert('Vyplň prosím jméno řidiče.');return}const ex=state.profiles.some(i=>i.id===p.id);state.profiles=ex?state.profiles.map(i=>i.id===p.id?p:i):[p,...state.profiles];if(!state.activeProfileId||state.editingProfileId)state.activeProfileId=p.id;saveState();resetProfileForm();renderAll()});
+    qs('tripForm').addEventListener('submit',function(e){e.preventDefault();if(!state.activeProfileId){alert('Nejdřív si vytvoř a aktivuj profil.');openScreen('profiles');return}const t=getTripFormData();if(!tripValid(t)){alert('Vyplň prosím datum, km start, km konec a odkud/kam.');return}if(Number(t.kmEnd)<Number(t.kmStart)){alert('Km konec nemůže být menší než km start.');return}if(t.fromPlace&&t.fromAddress)upsertPlace(t.fromPlace,t.fromAddress,true);if(t.toPlace&&t.toAddress)upsertPlace(t.toPlace,t.toAddress,true);const ex=state.trips.some(i=>i.id===t.id);state.trips=ex?state.trips.map(i=>i.id===t.id?t:i):[t,...state.trips];state.trips=sortTripsByCalendar(state.trips);saveState();resetTripForm();openScreen('history')});
+    qs('fuelForm').addEventListener('submit',function(e){e.preventDefault();if(!state.activeProfileId){alert('Nejdřív si vytvoř a aktivuj profil.');openScreen('profiles');return}const f=getFuelFormData();if(!fuelValid(f)){alert('Vyplň prosím datum, stav km a množství.');return}const ex=state.fuelings.some(i=>i.id===f.id);state.fuelings=ex?state.fuelings.map(i=>i.id===f.id?f:i):[f,...state.fuelings];saveState();resetFuelForm();openScreen('history')});
+    qs('vehicleForm').addEventListener('submit',function(e){e.preventDefault();const p=activeProfile();if(!p){alert('Nejdřív si vytvoř a aktivuj profil.');openScreen('profiles');return}const v=getVehicleFormData();if(!vehicleValid(v)){alert('Vyplň prosím aspoň typ vozidla a některý z údajů označení, SPZ nebo STK.');return}state.profiles=state.profiles.map(i=>{if(i.id!==p.id)return i;let vs=activeVehicles(i);if(v.primaryForProfile)vs=vs.map(x=>vehicleGroup(x)===vehicleGroup(v)?{...x,primaryForProfile:false}:x);const ex=vs.some(x=>x.id===v.id);const m=ex?vs.map(x=>x.id===v.id?v:x):[v,...vs];return{...i,vehicles:fixVehiclePrimaries(m),updatedAt:new Date().toISOString()}});saveState();resetVehicleForm();renderAll()});
+
+    qs('tripCommodityPreset').addEventListener('change',toggleCommodityCustom);
+    qs('tripEmptyDrive').addEventListener('change',toggleEmptyDrive);
+    qs('tripKmStart').addEventListener('input',e=>{e.target.value=digitsOnly(e.target.value);updateTripDistancePreview()});
+    qs('tripKmEnd').addEventListener('input',e=>{e.target.value=digitsOnly(e.target.value);updateTripDistancePreview()});
+    qs('tripQuantityKg').addEventListener('input',e=>{e.target.value=digitsOnly(e.target.value)});
+    qs('tripContainerNumber').addEventListener('input',updateTripContainerField);
+    qs('fuelOdometer').addEventListener('input',e=>{e.target.value=digitsOnly(e.target.value)});
+    qs('fuelQuantity').addEventListener('input',e=>{e.target.value=decimalOnly(e.target.value)});
+    qs('fuelDurationMinutes').addEventListener('input',e=>{e.target.value=digitsOnly(e.target.value)});
+    qs('fuelType').addEventListener('change',updateFuelFormFields);
+    qs('backupRestoreInput').addEventListener('change',handleBackupImport);
+    qs('vehicleYear').addEventListener('input',e=>{e.target.value=digitsOnly(e.target.value).slice(0,4)});
+    qs('vehiclePlate').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase()});
+    qs('vehicleType').addEventListener('change',updateVehiclePrimaryLabel);
+    qs('tripFromPlace').addEventListener('change',function(){autoFillPlaceAddress('tripFromPlace','tripFromAddress')});
+    qs('tripToPlace').addEventListener('change',function(){autoFillPlaceAddress('tripToPlace','tripToAddress')});
+
+    ensureDataShape();saveState();resetProfileForm();resetTripForm();resetFuelForm();resetVehicleForm();setHistoryMode('trips');renderAll();
+  </script>
+</body>
+</html>
