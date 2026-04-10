@@ -1,0 +1,3127 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>TruckLog PRO V13.4</title>
+  <meta name="theme-color" content="#081a33" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TruckLog" />
+  <style>
+    :root{
+      --bg:#060d18;
+      --card:rgba(9,18,32,.78);
+      --card2:rgba(12,23,40,.92);
+      --line:rgba(148,163,184,.15);
+      --line2:rgba(125,211,252,.26);
+      --txt:#f7fbff;
+      --muted:#a9b7d1;
+      --muted2:#7f91af;
+      --acc:#fb923c;
+      --acc2:#38bdf8;
+      --warn:#fbbf24;
+      --danger:#fb7185;
+      --ok:#34d399;
+      --shadow:0 26px 70px rgba(2,6,23,.42);
+      --radius-xl:30px;
+      --radius-lg:22px;
+      --radius-md:18px;
+      --input:56px;
+      --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;color:var(--txt);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 8% 6%, rgba(56,189,248,.16), transparent 24%),
+        radial-gradient(circle at 92% 0%, rgba(251,146,60,.14), transparent 22%),
+        radial-gradient(circle at 50% 100%, rgba(96,165,250,.12), transparent 28%),
+        linear-gradient(180deg, #030712 0%, #07101d 38%, #091321 100%);
+      overflow:hidden;display:flex;flex-direction:column;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer;border:0}
+    input,select,textarea{
+      width:100%;min-height:var(--input);border-radius:20px;padding:14px 16px;
+      color:var(--txt);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        rgba(7,16,29,.86);
+      border:1px solid rgba(148,163,184,.13);
+      outline:none;
+    }
+    textarea{min-height:110px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color:rgba(56,189,248,.42);
+      box-shadow:0 0 0 4px rgba(56,189,248,.09), 0 14px 28px rgba(2,6,23,.18);
+    }
+    .hidden{display:none !important}
+    .app{
+      max-width:var(--max);margin:0 auto;width:100%;flex:1 1 auto;min-height:0;
+      overflow-y:auto;padding:18px 16px 24px;
+      -webkit-overflow-scrolling:touch;
+    }
+    .hero,.section,.card,.summary,.history-card,.metric,.icon-stat,.block,.vehicle-card,.profile-card,.trip-row{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        var(--card2);
+      border:1px solid rgba(148,163,184,.12);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px) saturate(135%);
+      -webkit-backdrop-filter:blur(18px) saturate(135%);
+    }
+    .hero,.section{padding:22px;margin-bottom:18px}
+    .hero{position:relative;overflow:hidden;border-radius:34px}
+    .hero-version{
+      position:absolute;top:14px;right:14px;z-index:3;
+      padding:8px 12px;border-radius:999px;background:rgba(7,14,26,.78);
+      border:1px solid rgba(255,255,255,.1);font-weight:900;letter-spacing:.05em
+    }
+    .hero-main{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px}
+    .hero-logo-panel{
+      width:min(100%,560px);padding:16px;border-radius:30px;
+      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .hero-logo-image{width:100%;max-width:420px;display:block;margin:0 auto}
+    .hero-accent-line{
+      width:min(220px,55%);height:5px;border-radius:999px;
+      background:linear-gradient(90deg,#38bdf8,#60a5fa,#fb923c);
+    }
+    .title{font-size:clamp(1.3rem,2vw,1.8rem);font-weight:800;letter-spacing:-.04em}
+    .desc,.hint,.history-sub,.hero-tagline{color:var(--muted)}
+    h1,h2,h3,h4,p{margin:0}
+    .section-head,.actions,.history-top{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+    .grid{display:grid;gap:14px}
+    .split{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .triple{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .field{display:flex;flex-direction:column;gap:8px}
+    .field label{font-size:.95rem;font-weight:700}
+    .btn,.btn2,.btn-danger,.btn-ok,.chip{
+      min-height:52px;padding:0 16px;border-radius:18px;font-weight:800;
+      transition:.18s transform,.18s background,.18s border-color,.18s box-shadow;
+    }
+    .btn{background:linear-gradient(135deg,#38bdf8,#fb923c);color:#05121f}
+    .btn2,.chip{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        rgba(7,16,29,.9);
+      border:1px solid rgba(148,163,184,.12);color:var(--txt)
+    }
+    .btn-ok{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.22);color:#b7f7dd}
+    .btn-danger{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:#ffd1da}
+    .btn:hover,.btn2:hover,.btn-danger:hover,.btn-ok:hover,.chip:hover{transform:translateY(-1px)}
+    .tabs,.profile-switcher{
+      display:inline-flex;gap:6px;padding:7px;border-radius:20px;flex-wrap:wrap;
+      background:rgba(5,12,24,.72);border:1px solid rgba(148,163,184,.1);
+    }
+    .tabs button,.profile-switcher button{
+      background:transparent;color:#9db0cd;border-radius:15px;padding:10px 14px;min-height:42px;font-weight:800
+    }
+    .tabs button.active,.profile-switcher button.active{
+      background:linear-gradient(135deg,#38bdf8,#fb923c);color:#04111f;
+    }
+    .summary{padding:16px}
+    .summary strong{display:block}
+    .summary span{display:block;margin-top:6px;color:var(--muted);font-size:.92rem;line-height:1.45}
+    .icon-stats{
+      display:grid;gap:12px;grid-template-columns:repeat(2,minmax(110px,1fr));
+      width:100%;max-width:360px;margin:14px auto 0;
+    }
+    .icon-stat{
+      display:flex;align-items:center;justify-content:center;gap:14px;min-height:84px;padding:16px
+    }
+    .icon-bubble{
+      width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:22px;flex:0 0 auto;
+      background:linear-gradient(135deg, rgba(56,189,248,.2), rgba(251,146,60,.12));
+      border:1px solid rgba(125,211,252,.18);
+    }
+    .icon-stat .value{font-size:1.7rem;font-weight:900}
+    .stats-grid,.profile-stats-grid,.chart-kpi-row,.metrics{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr))}
+    .profile-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .card,.metric,.icon-stat,.block,.vehicle-card,.profile-card,.trip-row{padding:16px}
+    .metric .l,.tiny{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);font-weight:700}
+    .metric .v,.big{margin-top:6px;font-weight:900}
+    .big{font-size:1.55rem}
+    .toggle-line{
+      display:flex;align-items:center;gap:12px;min-height:56px;padding:12px 14px;border-radius:18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        rgba(8,17,30,.86);
+      border:1px solid rgba(148,163,184,.12);
+    }
+    .trip-switch{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:58px;padding:12px 14px;
+      border-radius:20px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        rgba(7,16,29,.9);
+      border:1px solid rgba(148,163,184,.13);
+    }
+    .trip-switch-title{font-size:.84rem;font-weight:800;line-height:1.2;min-width:0}
+    .trip-switch-control{position:relative;width:62px;height:36px;flex:0 0 auto}
+    .trip-switch-control input{
+      position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:3
+    }
+    .trip-switch-slider{
+      position:absolute;inset:0;border-radius:999px;background:rgba(56,189,248,.16);
+      border:1px solid rgba(56,189,248,.18);transition:.22s background,.22s border-color,.22s box-shadow
+    }
+    .trip-switch-slider::before{
+      content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;
+      background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.24);transition:.22s transform
+    }
+    .trip-switch-control input:checked + .trip-switch-slider{
+      background:linear-gradient(135deg,#38bdf8,#fb923c);border-color:rgba(255,255,255,.12);box-shadow:0 0 0 4px rgba(56,189,248,.12)
+    }
+    .trip-switch-control input:checked + .trip-switch-slider::before{transform:translateX(26px)}
+    .trip-quick-panel{margin:14px 0 18px;padding:14px;border-radius:22px;background:rgba(8,18,34,.72);border:1px solid var(--line)}
+    .trip-quick-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .trip-quick-btn{
+      min-height:44px;padding:0 14px;border-radius:16px;background:rgba(255,255,255,.05);color:var(--txt);
+      border:1px solid var(--line);font-weight:800
+    }
+    .trip-quick-hint,.trip-trailer-help{margin-top:6px;color:var(--muted);font-size:.84rem;line-height:1.45}
+    .active-trip-panel{margin:0 0 16px;padding:16px;border-radius:22px;background:linear-gradient(180deg, rgba(12,28,52,.96), rgba(8,18,34,.92));border:1px solid rgba(249,115,22,.18)}
+    .active-trip-panel.is-live{border-color:rgba(249,115,22,.32)}
+    .active-trip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .active-trip-title{font-size:1rem;font-weight:900}
+    .active-trip-sub{margin-top:6px;color:var(--muted);font-size:.9rem}
+    .active-trip-badge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      border:1px solid rgba(249,115,22,.26);background:rgba(249,115,22,.12);color:#fdba74;font-size:.76rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase
+    }
+    .active-trip-dot{width:10px;height:10px;border-radius:50%;background:#fb923c;box-shadow:0 0 0 5px rgba(249,115,22,.18)}
+    .active-trip-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+    .active-trip-box{padding:12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+    .active-trip-box .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted2);font-weight:700}
+    .active-trip-box .v{margin-top:6px;font-size:1rem;font-weight:800;word-break:break-word}
+    .active-trip-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .active-trip-empty{color:var(--muted);font-size:.92rem;line-height:1.55}
+    .history-actions{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px}
+    .badge{
+      display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;border:1px solid transparent
+    }
+    .badge-ok{background:rgba(52,211,153,.12);color:#b9f7df;border-color:rgba(52,211,153,.18)}
+    .badge-warn{background:rgba(251,191,36,.12);color:#ffe29d;border-color:rgba(251,191,36,.18)}
+    .badge-danger{background:rgba(251,113,133,.12);color:#ffd5dd;border-color:rgba(251,113,133,.2)}
+    .badge-info{background:rgba(56,189,248,.12);color:#bcecff;border-color:rgba(56,189,248,.18)}
+    .badge-off{background:rgba(244,63,94,.12);color:#fecdd3;border-color:rgba(244,63,94,.22)}
+    .profile-list-grid,.vehicle-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .profile-card-head,.vehicle-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .profile-card-main,.vehicle-card-main{min-width:0;display:grid;gap:8px}
+    .profile-card-title,.vehicle-card-title{font-size:1rem;font-weight:900;line-height:1.2}
+    .profile-card-meta,.vehicle-card-meta,.history-sub{font-size:.9rem;line-height:1.45;color:var(--muted)}
+    .profile-card-note,.vehicle-card-note{
+      margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem;line-height:1.4
+    }
+    .profile-card-actions,.vehicle-card-actions{display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px}
+    .vehicle-compact-badges{display:flex;gap:8px;flex-wrap:wrap}
+    .vehicle-card.trailer-on{border-color:rgba(34,197,94,.32);box-shadow:0 12px 28px rgba(0,0,0,.14),0 0 0 1px rgba(34,197,94,.08) inset,0 0 22px rgba(34,197,94,.10)}
+    .vehicle-card.trailer-off{border-color:rgba(244,63,94,.26);box-shadow:0 12px 28px rgba(0,0,0,.14),0 0 0 1px rgba(244,63,94,.08) inset,0 0 22px rgba(244,63,94,.10)}
+    .vehicle-connection-wrap{grid-column:1 / -1}
+    .vehicle-connection-switch{min-height:58px;border-radius:20px}
+    .vehicle-connection-main{display:block;font-size:.88rem;font-weight:900;color:var(--txt)}
+    .vehicle-connection-sub{display:block;margin-top:4px;font-size:.76rem;font-weight:700;color:var(--muted)}
+    .vehicle-connection-switch .trip-switch-slider{
+      background:linear-gradient(135deg, rgba(244,63,94,.34), rgba(190,24,93,.34));
+      border-color:rgba(244,63,94,.28);box-shadow:0 0 0 4px rgba(244,63,94,.08)
+    }
+    .vehicle-connection-switch .trip-switch-control input:checked + .trip-switch-slider{
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      border-color:rgba(134,239,172,.36);box-shadow:0 0 0 4px rgba(34,197,94,.14)
+    }
+    
+    .vehicle-stack-section{display:grid;gap:12px}
+    .vehicle-section-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap
+    }
+    .vehicle-section-head h3{
+      margin:0;font-size:1rem;font-weight:900;letter-spacing:-.02em
+    }
+    .vehicle-section-sub{
+      color:var(--muted);font-size:.88rem;line-height:1.45
+    }
+    .vehicle-focus-card{
+      padding:18px;border-radius:26px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),
+        rgba(10,20,35,.94);
+      border:1px solid rgba(56,189,248,.18);
+      box-shadow:0 20px 42px rgba(2,6,23,.26), 0 0 0 1px rgba(56,189,248,.06) inset
+    }
+    .vehicle-focus-title{
+      font-size:1.02rem;font-weight:900;letter-spacing:-.02em
+    }
+    .vehicle-focus-meta{
+      margin-top:6px;color:var(--muted);font-size:.9rem;line-height:1.45
+    }
+    .vehicle-focus-actions{
+      display:flex;gap:10px;flex-wrap:wrap;margin-top:14px
+    }
+    .vehicle-focus-card .trip-switch{
+      margin-top:14px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)),
+        rgba(7,16,29,.94)
+    }
+    .vehicle-focus-card .vehicle-connection-main{font-size:.94rem}
+    .vehicle-focus-card .vehicle-connection-sub{font-size:.8rem}
+    .vehicle-card.truck-on{
+      border-color:rgba(34,197,94,.28);
+      box-shadow:
+        0 12px 28px rgba(0,0,0,.14),
+        0 0 0 1px rgba(34,197,94,.08) inset,
+        0 0 22px rgba(34,197,94,.08);
+    }
+    .vehicle-card.truck-off{
+      border-color:rgba(59,130,246,.18);
+    }
+    .vehicle-card.stk-warning{
+      border-color:rgba(251,191,36,.36);
+      box-shadow:
+        0 12px 28px rgba(0,0,0,.14),
+        0 0 0 1px rgba(251,191,36,.08) inset,
+        0 0 22px rgba(251,191,36,.12);
+    }
+    .vehicle-card.stk-alert{
+      border-color:rgba(244,63,94,.36);
+      box-shadow:
+        0 12px 28px rgba(0,0,0,.14),
+        0 0 0 1px rgba(244,63,94,.10) inset,
+        0 0 26px rgba(244,63,94,.14);
+      animation:stkPulse 1.8s ease-in-out infinite;
+    }
+    .vehicle-card.stk-expired{
+      border-color:rgba(225,29,72,.44);
+      box-shadow:
+        0 12px 28px rgba(0,0,0,.14),
+        0 0 0 1px rgba(225,29,72,.12) inset,
+        0 0 30px rgba(225,29,72,.20);
+      background:
+        linear-gradient(180deg, rgba(127,29,29,.10), rgba(255,255,255,.01)),
+        var(--card2);
+    }
+    .badge-stk-ok{
+      background:rgba(52,211,153,.12);
+      color:#bbf7d0;
+      border-color:rgba(52,211,153,.18);
+    }
+    .badge-stk-warning{
+      background:rgba(251,191,36,.16);
+      color:#ffe08a;
+      border-color:rgba(251,191,36,.24);
+      box-shadow:0 0 0 3px rgba(251,191,36,.08);
+    }
+    .badge-stk-alert{
+      background:rgba(244,63,94,.16);
+      color:#ffd1da;
+      border-color:rgba(244,63,94,.26);
+      box-shadow:0 0 0 4px rgba(244,63,94,.10);
+    }
+    .badge-stk-expired{
+      background:rgba(190,24,93,.22);
+      color:#ffe4ea;
+      border-color:rgba(244,63,94,.34);
+      box-shadow:0 0 0 4px rgba(190,24,93,.14);
+    }
+    @keyframes stkPulse{
+      0%,100%{transform:translateY(0);box-shadow:0 12px 28px rgba(0,0,0,.14),0 0 0 1px rgba(244,63,94,.10) inset,0 0 24px rgba(244,63,94,.12)}
+      50%{transform:translateY(-1px);box-shadow:0 12px 30px rgba(0,0,0,.14),0 0 0 1px rgba(244,63,94,.12) inset,0 0 34px rgba(244,63,94,.20)}
+    }
+
+    .history-trip-list,.list-gap{display:grid;gap:12px}
+    .trip-row{padding:0;overflow:hidden}
+    .trip-row-btn{
+      width:100%;background:transparent;color:var(--txt);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;text-align:left
+    }
+    .trip-row-main{display:grid;gap:6px;min-width:0;flex:1}
+    .trip-row-time{font-size:.94rem;font-weight:900}
+    .trip-row-route{font-size:1rem;font-weight:800;line-height:1.3}
+    .trip-row-meta{font-size:.88rem;color:var(--muted)}
+    .trip-row-side{display:flex;align-items:center;gap:12px}
+    .trip-row-km{padding:8px 12px;border-radius:16px;background:rgba(7,16,29,.86);border:1px solid rgba(148,163,184,.1);font-size:.86rem;font-weight:900}
+    .trip-row-arrow{font-size:1.1rem;color:var(--muted);transition:transform .18s}
+    .trip-row.open .trip-row-arrow{transform:rotate(180deg)}
+    .trip-row-detail{display:none;padding:0 14px 14px;border-top:1px solid rgba(148,163,184,.08);background:rgba(6,14,25,.36)}
+    .trip-row.open .trip-row-detail{display:block}
+
+    .history-calendar-card{background:rgba(12,23,40,.88);border:1px solid rgba(148,163,184,.12);border-radius:28px;padding:16px;box-shadow:var(--shadow)}
+    .history-calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .history-calendar-nav{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .history-calendar-month{font-size:1.45rem;font-weight:900;letter-spacing:-.04em}
+    .history-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:16px}
+    .history-calendar-weekday{text-align:center;color:var(--muted2);font-size:.82rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:6px 0}
+    .history-calendar-day{position:relative;min-height:88px;border-radius:20px;border:1px solid rgba(148,163,184,.1);background:rgba(7,16,29,.9);color:var(--txt);padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;transition:.18s transform,.18s border-color,.18s background}
+    .history-calendar-day:hover{transform:translateY(-1px);border-color:rgba(125,211,252,.26)}
+    .history-calendar-day.outside{opacity:.42;background:rgba(8,18,34,.52)}
+    .history-calendar-day.selected{border-color:rgba(56,189,248,.36);box-shadow:0 0 0 3px rgba(56,189,248,.08),0 16px 30px rgba(2,6,23,.2);background:linear-gradient(180deg, rgba(56,189,248,.06), rgba(251,146,60,.03)), rgba(10,21,36,.95)}
+    .history-calendar-day.today .history-calendar-date{color:#fff;text-shadow:0 0 14px rgba(56,189,248,.18)}
+    .history-calendar-date{font-size:1.08rem;font-weight:900;line-height:1}
+    .history-calendar-marker-wrap{margin-top:auto;width:100%;display:grid;gap:6px;min-height:28px;align-items:end;justify-items:center}
+    .history-calendar-marker-row{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;min-height:8px}
+    .history-calendar-marker{height:8px;border-radius:999px;background:var(--acc2);box-shadow:0 0 14px rgba(37,99,235,.28)}
+    .history-calendar-marker.fuel{background:var(--acc);box-shadow:0 0 14px rgba(249,115,22,.25)}
+    .history-calendar-marker.count-1{width:28px}
+    .history-calendar-marker.count-2{width:42px}
+    .history-calendar-marker.count-3{width:58px}
+    .history-calendar-counts{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;min-height:14px}
+    .history-calendar-count-badge{padding:2px 6px;border-radius:999px;border:1px solid rgba(148,163,184,.1);background:rgba(7,16,29,.86);color:var(--muted);font-size:.66rem;font-weight:900;line-height:1}
+    .history-calendar-count-badge.fuel{color:#ffd4b0;border-color:rgba(249,115,22,.25)}
+    .history-calendar-count-badge.trip{color:#bfdbfe;border-color:rgba(37,99,235,.25)}
+    .history-calendar-legend{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:.9rem;font-weight:700}
+    .history-calendar-legend-line{width:28px;height:8px;border-radius:999px;background:var(--acc2);display:inline-block}
+    .history-calendar-legend-line.fuel{background:var(--acc)}
+    .history-selected-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .history-selected-sub{margin-top:6px;color:var(--muted);font-size:.94rem;line-height:1.45}
+    .history-selected-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .history-selected-chip{padding:8px 12px;border-radius:999px;background:rgba(7,16,29,.86);border:1px solid rgba(148,163,184,.1);color:var(--txt);font-size:.82rem;font-weight:800}
+    .trip-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+    .trip-detail-box{padding:12px;border-radius:18px;background:rgba(7,16,29,.88);border:1px solid rgba(148,163,184,.1)}
+    .trip-detail-box .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);font-weight:700}
+    .trip-detail-box .v{margin-top:6px;font-size:1rem;font-weight:800;line-height:1.35;word-break:break-word}
+    .empty{
+      padding:28px;border-radius:24px;border:1px dashed rgba(148,163,184,.18);background:rgba(5,12,24,.5);
+      text-align:center;color:var(--muted)
+    }
+    .nav{
+      position:relative;z-index:30;background:rgba(4,10,20,.72);border-top:1px solid rgba(148,163,184,.1);
+      backdrop-filter:blur(18px) saturate(150%);box-shadow:0 -16px 40px rgba(2,6,23,.3)
+    }
+    .nav-in{
+      max-width:var(--max);margin:0 auto;padding:10px 12px 2px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px
+    }
+    .nav button{
+      min-height:60px;border-radius:22px;background:transparent;color:#90a4c3;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 6px
+    }
+    .nav button.active{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
+        rgba(12,24,42,.96);
+      border:1px solid rgba(148,163,184,.12);color:#fff
+    }
+    .nav .i{font-size:1.06rem}
+    .nav .t{font-size:.74rem;font-weight:800;text-align:center;line-height:1.05}
+    @media (max-width:900px){
+      .split,.triple,.stats-grid,.profile-stats-grid,.chart-kpi-row,.metrics,.trip-detail-grid,.active-trip-grid{grid-template-columns:1fr}
+      .nav-in{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    @media (max-width:740px){
+      .hero,.section{padding:16px}
+      .history-actions,.profile-card-actions,.vehicle-card-actions{grid-template-columns:1fr}
+      .trip-row-btn{align-items:flex-start}
+      .trip-row-side{flex-direction:column;align-items:flex-end;gap:8px}
+      .history-calendar-day{min-height:72px;padding:10px 8px 8px;border-radius:16px}
+      .history-calendar-month{font-size:1.25rem}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="screen-overview" class="screen">
+      <header class="hero">
+        <div class="hero-version">V13.4</div>
+        <div class="hero-main">
+          <div class="hero-logo-panel">
+            <img class="hero-logo-image" src="brand-logo.png" alt="TruckLog logo" />
+          </div>
+          <div class="hero-accent-line"></div>
+          <h1>TruckLog</h1>
+          <p class="hero-tagline">digitální deník řidiče pro nákladní dopravu</p>
+        </div>
+        <div class="icon-stats">
+          <div class="icon-stat"><div class="icon-bubble">📝</div><div class="value" id="miniTrips">0</div></div>
+          <div class="icon-stat"><div class="icon-bubble">⛽</div><div class="value" id="miniFuel">0</div></div>
+        </div>
+      </header>
+
+      <section class="section">
+        <div class="section-head">
+          <div><h2 class="title">Profil</h2></div>
+          <div class="profile-switcher" id="profileSwitcher"></div>
+        </div>
+        <div id="overviewStats"></div>
+        <div id="overviewPilotStats" class="mt-16"></div>
+        <div id="overviewActiveTrip" class="mt-16"></div>
+      </section>
+    </section>
+
+    <section id="screen-trip" class="screen hidden">
+      <form id="tripForm">
+        <section class="section">
+          <div class="section-head"><div><h2 class="title" id="tripFormTitle">Nová jízda</h2></div></div>
+
+          <div id="tripLivePanel"></div>
+
+          <div class="trip-quick-panel">
+            <div class="trip-quick-actions">
+              <button class="trip-quick-btn" type="button" id="tripRepeatLastBtn">Zopakovat poslední</button>
+              <button class="trip-quick-btn" type="button" id="tripReverseRouteBtn">Otočit trasu</button>
+              <button class="trip-quick-btn" type="button" id="tripPrefillRouteBtn">Doplnit podle trasy</button>
+            </div>
+            <div id="tripQuickHint" class="trip-quick-hint"></div>
+          </div>
+
+          <div class="split">
+            <div class="block">
+              <h3>Jízda</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="tripDate">Datum</label>
+                  <input id="tripDate" type="date" />
+                </div>
+
+                <div class="triple">
+                  <div class="field">
+                    <label for="tripDepartureTime">Čas odjezdu</label>
+                    <input id="tripDepartureTime" type="time" />
+                  </div>
+                  <div class="field">
+                    <label for="tripArrivalTime">Čas příjezdu</label>
+                    <input id="tripArrivalTime" type="time" />
+                  </div>
+                  <div class="field">
+                    <label for="tripEmptyDrive">Typ jízdy</label>
+                    <label class="trip-switch" for="tripEmptyDrive">
+                      <span class="trip-switch-title">Jízda po prázdnu</span>
+                      <span class="trip-switch-control">
+                        <input id="tripEmptyDrive" type="checkbox" />
+                        <span class="trip-switch-slider"></span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="triple">
+                  <div class="field">
+                    <label for="tripKmStart">Km start</label>
+                    <input id="tripKmStart" inputmode="numeric" />
+                  </div>
+                  <div class="field">
+                    <label for="tripKmEnd">Km konec</label>
+                    <input id="tripKmEnd" inputmode="numeric" />
+                  </div>
+                  <div class="field">
+                    <label for="tripDistancePreview">Ujeto km</label>
+                    <input id="tripDistancePreview" disabled placeholder="Počítá se automaticky" />
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="tripFromPlace">Odkud firma / místo</label>
+                  <input id="tripFromPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off" />
+                </div>
+
+                <div class="field">
+                  <label for="tripFromAddress">Odkud adresa</label>
+                  <input id="tripFromAddress" placeholder="Adresa místa odkud" />
+                </div>
+
+                <div class="field">
+                  <label for="tripToPlace">Kam firma / místo</label>
+                  <input id="tripToPlace" list="placesList" placeholder="Začni psát název místa..." autocomplete="off" />
+                </div>
+
+                <div class="field">
+                  <label for="tripToAddress">Kam adresa</label>
+                  <input id="tripToAddress" placeholder="Adresa místa kam" />
+                </div>
+
+                <div class="field">
+                  <label for="tripTrailerSelect">Přípojné vozidlo</label>
+                  <select id="tripTrailerSelect"></select>
+                  <small id="tripTrailerHelp" class="trip-trailer-help"></small>
+                </div>
+
+                <datalist id="placesList"></datalist>
+              </div>
+            </div>
+
+            <div class="block">
+              <h3>Náklad</h3>
+              <div class="grid">
+                <div class="field" id="tripCommodityField">
+                  <label for="tripCommodityPreset">Komodita</label>
+                  <select id="tripCommodityPreset" aria-label="Komodita">
+                    <option value="">Vyber komoditu</option>
+                    <option>Cement</option>
+                    <option>Popílek</option>
+                    <option>Granulát</option>
+                    <option>Vápno</option>
+                    <option>Moučka</option>
+                    <option>Sádra</option>
+                    <option>Písek</option>
+                    <option>Kamenivo</option>
+                    <option>Jiná</option>
+                  </select>
+                </div>
+
+                <div class="field hidden" id="tripCommodityCustomWrap">
+                  <label for="tripCommodityCustom">Jiná komodita</label>
+                  <input id="tripCommodityCustom" aria-label="Jiná komodita" placeholder="Jiná komodita" />
+                </div>
+
+                <div class="field" id="tripQuantityField">
+                  <label for="tripQuantityKg">Naložené množství (kg)</label>
+                  <input id="tripQuantityKg" inputmode="numeric" placeholder="Např. 25450" />
+                </div>
+
+                <div class="field hidden" id="tripContainerWrap">
+                  <label for="tripContainerNumber">Číslo kontejneru</label>
+                  <input id="tripContainerNumber" placeholder="Např. TGHU 482915-3" />
+                  <small id="tripContainerInfo"></small>
+                </div>
+
+                <div class="field">
+                  <label for="tripNote">Poznámka</label>
+                  <textarea id="tripNote" placeholder="Např. delší čekání, objížďka, zvláštní poznámka"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button class="btn" type="submit" id="tripSubmitBtn">Uložit jízdu</button>
+          <button class="btn2" type="button" onclick="resetTripForm()">Vyčistit formulář</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="screen-fuel" class="screen hidden">
+      <form id="fuelForm">
+        <section class="section">
+          <div class="section-head"><div><h2 class="title" id="fuelFormTitle">Tankování / nabíjení</h2></div></div>
+          <div class="split">
+            <div class="block">
+              <div class="grid">
+                <div class="field">
+                  <label for="fuelType">Typ</label>
+                  <select id="fuelType">
+                    <option value="Nafta">Nafta</option>
+                    <option value="AdBlue">AdBlue</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LNG">LNG</option>
+                    <option value="Nabíjení">Nabíjení</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fuelDate">Datum</label>
+                  <input id="fuelDate" type="date" />
+                </div>
+                <div class="field">
+                  <label for="fuelOdometer">Stav km</label>
+                  <input id="fuelOdometer" inputmode="numeric" />
+                </div>
+                <div class="field">
+                  <label for="fuelQuantity" id="fuelQuantityLabel">Litry</label>
+                  <input id="fuelQuantity" inputmode="decimal" />
+                </div>
+                <div class="field hidden" id="fuelDurationWrap">
+                  <label for="fuelDurationMinutes">Doba nabíjení (min)</label>
+                  <input id="fuelDurationMinutes" inputmode="numeric" placeholder="Např. 45" />
+                </div>
+              </div>
+            </div>
+            <div class="block">
+              <div class="grid">
+                <div class="field">
+                  <label for="fuelStation" id="fuelStationLabel">Pumpa / místo</label>
+                  <input id="fuelStation" />
+                </div>
+                <div class="field">
+                  <label for="fuelNote">Poznámka</label>
+                  <textarea id="fuelNote"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <div class="actions">
+          <button class="btn" type="submit" id="fuelSubmitBtn">Uložit záznam</button>
+          <button class="btn2" type="button" onclick="resetFuelForm()">Vyčistit formulář</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="screen-tech" class="screen hidden">
+      <section class="section">
+        <div class="section-head"><div><h2 class="title">Přehled</h2></div></div>
+        <div id="vehicleQuickCards" class="stats-grid"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><h2 class="title">Seznam vozidel</h2></div></div>
+        <div id="vehiclesList" class="list-gap"></div>
+        <div id="vehicleFormLinkWrap" style="display:flex;justify-content:center;margin-top:12px">
+          <button class="chip" type="button" onclick="openVehicleForm()">+ Přidat nové vozidlo</button>
+        </div>
+      </section>
+
+      <section id="vehicleFormSection" class="section hidden">
+        <form id="vehicleForm">
+          <div class="section-head"><div><h2 class="title">Vozidla</h2></div></div>
+
+          <div class="block">
+            <h3 id="vehicleBlockTitle">Nové vozidlo</h3>
+            <div class="grid">
+              <div class="field">
+                <label for="vehicleType">Typ vozidla</label>
+                <select id="vehicleType">
+                  <option value="Tahač">Tahač</option>
+                  <option value="Silo cisterna">Silo cisterna</option>
+                  <option value="Silo šasi">Silo šasi</option>
+                  <option value="Kontejnerové šasi">Kontejnerové šasi</option>
+                  <option value="Kontejnerový návěs">Kontejnerový návěs</option>
+                  <option value="Frigo návěs">Frigo návěs</option>
+                  <option value="Plachtový návěs">Plachtový návěs</option>
+                  <option value="Skříňový návěs">Skříňový návěs</option>
+                  <option value="Walking floor">Walking floor</option>
+                  <option value="Sklápěcí návěs">Sklápěcí návěs</option>
+                  <option value="Sklápěcí šasi">Sklápěcí šasi</option>
+                  <option value="Valník / plato">Valník / plato</option>
+                  <option value="Tandem / přívěs">Tandem / přívěs</option>
+                  <option value="Jiné vozidlo">Jiné vozidlo</option>
+                </select>
+              </div>
+
+              <div class="field" id="vehicleBrandWrap">
+                <label for="vehicleBrand">Značka tahače</label>
+                <input id="vehicleBrand" placeholder="Např. MAN, VOLVO, SCANIA" />
+              </div>
+
+              <div class="field">
+                <label for="vehicleLabel">Označení</label>
+                <input id="vehicleLabel" placeholder="Např. Hlavní tahač, Silo 1, Šasi 2..." />
+              </div>
+
+              <div class="field">
+                <label for="vehiclePlate">SPZ</label>
+                <input id="vehiclePlate" placeholder="Např. 6AA4092" />
+              </div>
+
+              <div class="field">
+                <label for="vehicleYear">Rok výroby</label>
+                <input id="vehicleYear" inputmode="numeric" placeholder="Např. 2019" maxlength="4" />
+              </div>
+
+              <div class="field">
+                <label for="vehicleStk">STK do</label>
+                <input id="vehicleStk" type="date" />
+              </div>
+
+              <div class="field">
+                <label for="vehicleNote">Poznámka</label>
+                <textarea id="vehicleNote" placeholder="Např. servis, rezerva, hlídat termín..."></textarea>
+              </div>
+
+              <div class="field">
+                <label>&nbsp;</label>
+                <div class="toggle-line">
+                  <input id="vehiclePrimary" type="checkbox" />
+                  <span id="vehiclePrimaryText">Použít jako hlavní v profilu</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" type="submit" id="vehicleSubmitBtn">Uložit vozidlo</button>
+            <button class="btn2" type="button" onclick="resetVehicleForm()">Zavřít formulář</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <section id="screen-profiles" class="screen hidden">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Profily</h2>
+            <p class="desc">Vytvoř více profilů řidičů a mezi nimi přepínej aktivní profil</p>
+          </div>
+        </div>
+        <div class="profile-switcher" id="profilesQuickSwitch"></div>
+        <div id="profilesSummary" style="margin-top:16px"></div>
+      </section>
+
+      <form id="profileForm">
+        <section class="section">
+          <div class="section-head">
+            <div>
+              <h2 class="title" id="profileFormTitle">Nový profil</h2>
+              <p class="desc">SPZ a souprava se nastavují v sekci Vozidla</p>
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="block">
+              <h3>Řidič</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="profileDriverName">Jméno řidiče</label>
+                  <input id="profileDriverName" />
+                </div>
+              </div>
+            </div>
+
+            <div class="block">
+              <h3>Poznámka</h3>
+              <div class="grid">
+                <div class="field">
+                  <label for="profileNote">Poznámka k profilu</label>
+                  <textarea id="profileNote"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" type="submit" id="profileSubmitBtn">Uložit profil</button>
+            <button class="btn2" type="button" onclick="resetProfileForm()">Zrušit editaci</button>
+          </div>
+        </section>
+      </form>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Seznam profilů</h2>
+            <p class="desc">Přepnutí aktivního profilu a správa řidičů</p>
+          </div>
+        </div>
+        <div id="profilesList" class="list-gap"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="title">Záloha a export</h2>
+            <p class="desc">Záloha dat do JSON a export jízd / tankování do CSV</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" onclick="downloadBackup()">Stáhnout zálohu</button>
+          <button class="btn2" type="button" onclick="promptRestoreBackup()">Obnovit ze souboru</button>
+          <button class="btn2" type="button" onclick="exportTripsCsv()">Export jízd CSV</button>
+          <button class="btn2" type="button" onclick="exportFuelingsCsv()">Export tankování CSV</button>
+        </div>
+        <input id="backupRestoreInput" type="file" accept=".json,application/json" class="hidden" />
+      </section>
+    </section>
+
+    <section id="screen-history" class="screen hidden">
+      <section class="section">
+        <div class="history-top">
+          <div><h2 class="title">HISTORIE JÍZD A TANKOVÁNÍ</h2></div>
+          <div class="tabs">
+            <button id="historyTripsBtn" class="active" type="button" onclick="setHistoryMode('trips')">Jízdy</button>
+            <button id="historyFuelBtn" type="button" onclick="setHistoryMode('fuel')">Tankování / nabíjení</button>
+          </div>
+        </div>
+
+        <div class="triple" id="historyFilters" style="margin-top:16px">
+          <div class="field">
+            <label for="historySearch">Hledat</label>
+            <input id="historySearch" type="search" placeholder="Trasa, profil, komodita..." />
+          </div>
+
+          <div class="field">
+            <label for="historyProfileFilter">Profil</label>
+            <select id="historyProfileFilter"></select>
+          </div>
+
+          <div class="field">
+            <label for="historyCommodityFilter">Komodita</label>
+            <select id="historyCommodityFilter">
+              <option value="">Vše</option>
+              <option>Cement</option>
+              <option>Popílek</option>
+              <option>Granulát</option>
+              <option>Vápno</option>
+              <option>Moučka</option>
+              <option>Sádra</option>
+              <option>Písek</option>
+              <option>Kamenivo</option>
+            </select>
+          </div>
+        </div>
+      </section>
+      <div id="historyList"></div>
+    </section>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-in">
+      <button id="nav-overview" class="active" type="button" onclick="openScreen('overview')"><span class="i">🧭</span><span class="t">Přehled</span></button>
+      <button id="nav-trip" type="button" onclick="openScreen('trip')"><span class="i">📝</span><span class="t">Jízda</span></button>
+      <button id="nav-fuel" type="button" onclick="openScreen('fuel')"><span class="i">⛽</span><span class="t">Tankování</span></button>
+      <button id="nav-tech" type="button" onclick="openScreen('tech')"><span class="i">🚚</span><span class="t">Vozidla</span></button>
+      <button id="nav-profiles" type="button" onclick="openScreen('profiles')"><span class="i">👤</span><span class="t">Profily</span></button>
+      <button id="nav-history" type="button" onclick="openScreen('history')"><span class="i">📁</span><span class="t">Historie</span></button>
+    </div>
+  </nav>
+
+  <script>
+    const STORAGE = {
+      profiles: 'trucklog_profiles_v105',
+      activeProfileId: 'trucklog_active_profile_id_v105',
+      trips: 'trucklog_trips_v105',
+      fuelings: 'trucklog_fuelings_v105',
+      places: 'trucklog_places_v105',
+      activeTrip: 'trucklog_active_trip_v1344'
+    };
+
+    const COMMODITIES = ['Cement','Popílek','Granulát','Vápno','Moučka','Sádra','Písek','Kamenivo'];
+    const VEHICLE_TYPES = ['Tahač','Silo cisterna','Silo šasi','Kontejnerové šasi','Kontejnerový návěs','Frigo návěs','Plachtový návěs','Skříňový návěs','Walking floor','Sklápěcí návěs','Sklápěcí šasi','Valník / plato','Tandem / přívěs','Jiné vozidlo'];
+
+    const ENERGY_TYPE_CONFIG = {
+      'Nafta': { unit:'l', quantityLabel:'Litry', stationLabel:'Pumpa / místo' },
+      'AdBlue': { unit:'l', quantityLabel:'Litry AdBlue', stationLabel:'Pumpa / místo' },
+      'CNG': { unit:'kg', quantityLabel:'Množství CNG (kg)', stationLabel:'Stanice / místo' },
+      'LNG': { unit:'kg', quantityLabel:'Množství LNG (kg)', stationLabel:'Stanice / místo' },
+      'Nabíjení': { unit:'kWh', quantityLabel:'Nabitá energie (kWh)', stationLabel:'Nabíječka / místo' }
+    };
+
+    const DEFAULT_PLACES = [
+      { name:'Karl Schmidt SpeditionsgesmbH', address:'Industrie Strasse 7, 2431 Enzersdorf an der Fischa, Rakousko' },
+      { name:'Borealis Polyolefine GmbH', address:'Danubiastraße 21/25, 2320 Schwechat, Rakousko' },
+      { name:'NKT s.r.o.', address:'U Tržiště 685/1, 594 01 Velké Meziříčí, Česká republika' }
+    ];
+
+    const HISTORY_MONTH_NAMES = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+    const HISTORY_WEEKDAY_NAMES = ['Po','Út','St','Čt','Pá','So','Ne'];
+
+    const state = {
+      screen:'overview',
+      historyMode:'trips',
+      calendarYear:new Date().getFullYear(),
+      calendarMonth:new Date().getMonth(),
+      selectedCalendarDate:today(),
+      editingProfileId:null,
+      editingTripId:null,
+      editingFuelId:null,
+      editingVehicleId:null,
+      profiles: readStorage(STORAGE.profiles, []),
+      activeProfileId: localStorage.getItem(STORAGE.activeProfileId) || '',
+      trips: readStorage(STORAGE.trips, []),
+      fuelings: readStorage(STORAGE.fuelings, []),
+      places: readStorage(STORAGE.places, []),
+      activeTrip: readStorage(STORAGE.activeTrip, null),
+      finishingActiveTrip: false
+    };
+
+    const gpsRuntime = {
+      watchId: null
+    };
+
+    function qs(id){ return document.getElementById(id); }
+    function qsa(sel){ return Array.from(document.querySelectorAll(sel)); }
+    function trim(value){ return String(value ?? '').trim(); }
+    function digitsOnly(value){ return String(value || '').replace(/\D/g, ''); }
+    function decimalOnly(value){ return String(value || '').replace(/[^\d,.]/g, '').replace(',', '.'); }
+    function normalizeText(value){
+      return String(value ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    }
+    function esc(value){
+      return String(value ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'", '&#039;');
+    }
+    function generateId(prefix){ return prefix + '-' + Date.now() + '-' + Math.floor(Math.random() * 100000); }
+    function today(){
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offset).toISOString().slice(0,10);
+    }
+    function formatDate(value){
+      if(!value) return '—';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('cs-CZ').format(date);
+    }
+
+    function parseDateParts(value){
+      const clean = trim(value);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return null;
+      const [year, month, day] = clean.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      if(date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+      return date;
+    }
+    function dateKeyFromParts(year, month, day){
+      return String(year) + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    }
+    function dateKeyFromDate(date){
+      return dateKeyFromParts(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+    function historyMonthLabel(year, month){
+      return HISTORY_MONTH_NAMES[month] + ' ' + year;
+    }
+    function monthItemLabel(count, mode){
+      if(mode === 'fuel') return count === 1 ? '1 doplnění' : count + ' doplnění';
+      if(count === 1) return '1 jízda';
+      if(count >= 2 && count <= 4) return count + ' jízdy';
+      return count + ' jízd';
+    }
+    function readStorage(key, fallback){
+      try{
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      }catch(error){
+        console.error('Storage read error', key, error);
+        return fallback;
+      }
+    }
+    function saveState(){
+      localStorage.setItem(STORAGE.profiles, JSON.stringify(state.profiles));
+      localStorage.setItem(STORAGE.activeProfileId, state.activeProfileId || '');
+      localStorage.setItem(STORAGE.trips, JSON.stringify(state.trips));
+      localStorage.setItem(STORAGE.fuelings, JSON.stringify(state.fuelings));
+      localStorage.setItem(STORAGE.places, JSON.stringify(state.places));
+      localStorage.setItem(STORAGE.activeTrip, JSON.stringify(state.activeTrip));
+    }
+
+    function sortByCreated(a,b){
+      return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+    }
+    function tripSortValue(item){
+      const date = trim(item?.date);
+      if(!date) return 0;
+      const time = trim(item?.departureTime) || '00:00';
+      const stamp = new Date(date + 'T' + (time.length === 5 ? time : '00:00') + ':00').getTime();
+      return Number.isNaN(stamp) ? 0 : stamp;
+    }
+    function sortTripsByCalendar(list){
+      return list.slice().sort((a,b)=>{
+        const diff = tripSortValue(b) - tripSortValue(a);
+        if(diff !== 0) return diff;
+        return new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0);
+      });
+    }
+    function kmDiff(start,end){
+      const s = Number(start || 0);
+      const e = Number(end || 0);
+      return e > s ? e - s : 0;
+    }
+    function minutesBetween(start,end){
+      if(!start || !end) return null;
+      const s = start.split(':').map(Number);
+      const e = end.split(':').map(Number);
+      if(s.length < 2 || e.length < 2 || s.some(Number.isNaN) || e.some(Number.isNaN)) return null;
+      const m = (e[0]*60+e[1]) - (s[0]*60+s[1]);
+      return m >= 0 ? m : null;
+    }
+    function formatDuration(minutes){
+      if(minutes === null || minutes === undefined) return '—';
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      if(h && m) return h + ' h ' + m + ' min';
+      if(h) return h + ' h';
+      return m + ' min';
+    }
+    function monthLabel(date){
+      const d = date || new Date();
+      return d.toLocaleDateString('cs-CZ', { month:'long', year:'numeric' });
+    }
+    function csvEscape(value){
+      const text = String(value ?? '');
+      return /[";\n\r]/.test(text) ? '"' + text.replaceAll('"', '""') + '"' : text;
+    }
+    function buildCsv(rows){
+      return rows.map(row => row.map(csvEscape).join(';')).join('\r\n');
+    }
+    function exportFileName(prefix, extension){
+      const now = new Date();
+      const pad = value => String(value).padStart(2, '0');
+      return 'trucklog-' + prefix + '-' + now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + '_' + pad(now.getHours()) + '-' + pad(now.getMinutes()) + '.' + extension;
+    }
+    function downloadTextFile(filename, content, mimeType = 'text/plain;charset=utf-8'){
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function vehicleGroup(vehicle){
+      return trim(vehicle?.type) === 'Tahač' ? 'truck' : 'trailer';
+    }
+    function normalizeVehicle(vehicle){
+      const type = VEHICLE_TYPES.includes(trim(vehicle?.type)) ? trim(vehicle.type) : 'Jiné vozidlo';
+      return {
+        id: vehicle?.id || generateId('VEH'),
+        type,
+        brand: type === 'Tahač' ? trim(vehicle?.brand) : '',
+        label: trim(vehicle?.label),
+        plate: trim(vehicle?.plate).toUpperCase(),
+        year: digitsOnly(vehicle?.year).slice(0,4),
+        stk: trim(vehicle?.stk),
+        note: trim(vehicle?.note),
+        primaryForProfile: !!vehicle?.primaryForProfile,
+        createdAt: vehicle?.createdAt || new Date().toISOString()
+      };
+    }
+    function fixVehiclePrimaries(vehicles){
+      const normalized = vehicles.map(normalizeVehicle);
+      function enforceGroup(group, requireOne){
+        let seenPrimary = false;
+        normalized.forEach(vehicle => {
+          if(vehicleGroup(vehicle) !== group) return;
+          if(vehicle.primaryForProfile && !seenPrimary){
+            seenPrimary = true;
+            return;
+          }
+          if(vehicle.primaryForProfile && seenPrimary){
+            vehicle.primaryForProfile = false;
+          }
+        });
+        if(requireOne && !normalized.some(vehicle => vehicleGroup(vehicle) === group && vehicle.primaryForProfile)){
+          const first = normalized.find(vehicle => vehicleGroup(vehicle) === group);
+          if(first) first.primaryForProfile = true;
+        }
+      }
+      enforceGroup('truck', true);
+      enforceGroup('trailer', false);
+      return normalized;
+    }
+    function normalizeProfile(profile){
+      const vehicles = Array.isArray(profile?.vehicles) ? profile.vehicles.map(normalizeVehicle) : [];
+      return {
+        id: profile?.id || generateId('PROFILE'),
+        driverName: trim(profile?.driverName),
+        note: trim(profile?.note),
+        vehicles: fixVehiclePrimaries(vehicles),
+        createdAt: profile?.createdAt || new Date().toISOString(),
+        updatedAt: profile?.updatedAt || new Date().toISOString()
+      };
+    }
+    function normalizeTrip(item){
+      return {
+        id: item?.id || generateId('TRIP'),
+        profileId: trim(item?.profileId),
+        date: trim(item?.date),
+        departureTime: trim(item?.departureTime),
+        arrivalTime: trim(item?.arrivalTime),
+        emptyDrive: !!item?.emptyDrive,
+        kmStart: digitsOnly(item?.kmStart),
+        kmEnd: digitsOnly(item?.kmEnd),
+        fromPlace: trim(item?.fromPlace),
+        fromAddress: trim(item?.fromAddress),
+        toPlace: trim(item?.toPlace),
+        toAddress: trim(item?.toAddress),
+        commodity: trim(item?.commodity),
+        quantityKg: digitsOnly(item?.quantityKg),
+        containerNumber: trim(item?.containerNumber),
+        trailerType: trim(item?.trailerType),
+        trailerPlate: trim(item?.trailerPlate).toUpperCase(),
+        note: trim(item?.note),
+        createdAt: item?.createdAt || new Date().toISOString(),
+        updatedAt: item?.updatedAt || item?.createdAt || new Date().toISOString()
+      };
+    }
+    function normalizeFuel(item){
+      const type = trim(item?.energyType || 'Nafta') || 'Nafta';
+      return {
+        id: item?.id || generateId('FUEL'),
+        profileId: trim(item?.profileId),
+        date: trim(item?.date),
+        odometer: digitsOnly(item?.odometer),
+        energyType: type,
+        quantity: decimalOnly(item?.quantity),
+        station: trim(item?.station),
+        durationMinutes: digitsOnly(item?.durationMinutes),
+        note: trim(item?.note),
+        createdAt: item?.createdAt || new Date().toISOString(),
+        updatedAt: item?.updatedAt || item?.createdAt || new Date().toISOString()
+      };
+    }
+    function normalizePlace(place){
+      return {
+        id: place?.id || generateId('PLACE'),
+        name: trim(place?.name),
+        address: trim(place?.address),
+        usageCount: Number(place?.usageCount || 0),
+        lastUsed: place?.lastUsed || new Date().toISOString()
+      };
+    }
+
+    function activeProfile(){
+      return state.profiles.find(profile => profile.id === state.activeProfileId) || null;
+    }
+    function activeVehicles(profile = activeProfile()){
+      return Array.isArray(profile?.vehicles) ? fixVehiclePrimaries(profile.vehicles) : [];
+    }
+    function primaryTruckVehicle(profile){
+      const vehicles = activeVehicles(profile);
+      return vehicles.find(v => vehicleGroup(v) === 'truck' && v.primaryForProfile) || vehicles.find(v => vehicleGroup(v) === 'truck') || null;
+    }
+    function primaryTrailerVehicle(profile){
+      const vehicles = activeVehicles(profile);
+      return vehicles.find(v => vehicleGroup(v) === 'trailer' && v.primaryForProfile) || null;
+    }
+    function primaryTruckPlate(profile){ return primaryTruckVehicle(profile)?.plate || ''; }
+    function primaryTrailerPlate(profile){ return primaryTrailerVehicle(profile)?.plate || ''; }
+    function profileLabel(profile){
+      if(!profile) return 'Bez profilu';
+      return [profile.driverName, primaryTruckPlate(profile)].filter(Boolean).join(' • ') || 'Profil';
+    }
+
+    function ensureDataShape(){
+      state.profiles = state.profiles.map(normalizeProfile);
+      state.trips = sortTripsByCalendar(state.trips.map(normalizeTrip));
+      state.fuelings = state.fuelings.map(normalizeFuel).sort(sortByCreated);
+      state.places = Array.isArray(state.places) ? state.places.map(normalizePlace).filter(place => place.name) : [];
+      DEFAULT_PLACES.forEach(place => upsertPlace(place.name, place.address, false));
+      if(state.activeProfileId && !state.profiles.some(profile => profile.id === state.activeProfileId)){
+        state.activeProfileId = '';
+      }
+      if(!state.activeProfileId && state.profiles.length){
+        state.activeProfileId = state.profiles[0].id;
+      }
+      state.activeTrip = normalizeActiveTrip(state.activeTrip);
+    }
+
+    function findPlace(name){
+      const n = normalizeText(name);
+      return state.places.find(place => normalizeText(place.name) === n) || null;
+    }
+    function upsertPlace(name, address, countUsage = true){
+      const cleanName = trim(name);
+      const cleanAddress = trim(address);
+      if(!cleanName || !cleanAddress) return;
+      const existing = findPlace(cleanName);
+      if(existing){
+        existing.address = cleanAddress;
+        if(countUsage) existing.usageCount = (existing.usageCount || 0) + 1;
+        existing.lastUsed = new Date().toISOString();
+      }else{
+        state.places.unshift({
+          id: generateId('PLACE'),
+          name: cleanName,
+          address: cleanAddress,
+          usageCount: countUsage ? 1 : 0,
+          lastUsed: new Date().toISOString()
+        });
+      }
+      state.places.sort((a,b)=>(b.usageCount || 0) - (a.usageCount || 0) || new Date(b.lastUsed || 0) - new Date(a.lastUsed || 0));
+    }
+    function renderPlacesDatalist(){
+      qs('placesList').innerHTML = state.places.map(place => '<option value="' + esc(place.name) + '"></option>').join('');
+    }
+    function autoFillPlaceAddress(placeInputId, addressInputId){
+      const place = findPlace(qs(placeInputId).value);
+      if(place) qs(addressInputId).value = place.address || '';
+    }
+    function currentOdometer(profileId = state.activeProfileId){
+      const tripMax = state.trips.filter(item => item.profileId === profileId).reduce((max, item) => Math.max(max, Number(item.kmEnd || 0)), 0);
+      const fuelMax = state.fuelings.filter(item => item.profileId === profileId).reduce((max, item) => Math.max(max, Number(item.odometer || 0)), 0);
+      return Math.max(tripMax, fuelMax);
+    }
+    function roundedCurrentTime(step = 5){
+      const now = new Date();
+      now.setSeconds(0,0);
+      const rounded = Math.ceil(now.getMinutes() / step) * step;
+      now.setMinutes(rounded);
+      return String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+    }
+    function routeEndpointKey(place, address){
+      return normalizeText(trim(place) || trim(address));
+    }
+    function getProfileTrips(profileId = state.activeProfileId){
+      return sortTripsByCalendar(state.trips.filter(item => item.profileId === profileId));
+    }
+    function getLastTrip(profileId = state.activeProfileId){
+      return getProfileTrips(profileId)[0] || null;
+    }
+    function setTripQuickHint(text){
+      const hint = qs('tripQuickHint');
+      if(hint) hint.textContent = text;
+    }
+
+    function gpsSupported(){
+      return typeof navigator !== 'undefined' && !!navigator.geolocation;
+    }
+    function activeTripGps(){
+      return state.activeTrip?.gps || {
+        enabled:false,
+        tracking:false,
+        status:'Vypnuto',
+        distanceMeters:0,
+        pointsCount:0,
+        accuracyMeters:0,
+        lastPoint:null,
+        updatedAt:'',
+        lastMessage:'',
+        lastError:''
+      };
+    }
+    function gpsDistanceKm(value = activeTripGps().distanceMeters){
+      return Number(value || 0) / 1000;
+    }
+    function gpsDistanceLabel(value = activeTripGps().distanceMeters){
+      const km = gpsDistanceKm(value);
+      if(km <= 0) return '0.0 km';
+      return km.toFixed(km >= 10 ? 1 : 2) + ' km';
+    }
+    function gpsAccuracyLabel(value = activeTripGps().accuracyMeters){
+      const accuracy = Number(value || 0);
+      return accuracy > 0 ? '±' + Math.round(accuracy) + ' m' : '—';
+    }
+    function gpsStatusText(){
+      const gps = activeTripGps();
+      if(!gpsSupported()) return 'GPS není v tomto zařízení podporováno';
+      if(gpsRuntime.watchId !== null) return gps.lastMessage || 'GPS sleduje trasu';
+      if(gps.enabled) return gps.lastError || gps.lastMessage || 'GPS je připravené pokračovat';
+      return 'GPS asistent je vypnutý';
+    }
+    function gpsStatusClass(){
+      const gps = activeTripGps();
+      if(!gpsSupported() || !gps.enabled) return 'off';
+      if(gps.lastError) return 'warn';
+      return '';
+    }
+    function normalizeActiveTrip(activeTrip){
+      if(!activeTrip || typeof activeTrip !== 'object') return null;
+      return {
+        id: activeTrip?.id || generateId('ATRIP'),
+        profileId: trim(activeTrip?.profileId),
+        date: trim(activeTrip?.date) || today(),
+        departureTime: trim(activeTrip?.departureTime) || roundedCurrentTime(5),
+        kmStart: digitsOnly(activeTrip?.kmStart),
+        fromPlace: trim(activeTrip?.fromPlace),
+        fromAddress: trim(activeTrip?.fromAddress),
+        toPlace: trim(activeTrip?.toPlace),
+        toAddress: trim(activeTrip?.toAddress),
+        emptyDrive: !!activeTrip?.emptyDrive,
+        commodity: trim(activeTrip?.commodity),
+        quantityKg: digitsOnly(activeTrip?.quantityKg),
+        containerNumber: trim(activeTrip?.containerNumber),
+        trailerType: trim(activeTrip?.trailerType),
+        trailerPlate: trim(activeTrip?.trailerPlate).toUpperCase(),
+        note: trim(activeTrip?.note),
+        startedAt: activeTrip?.startedAt || new Date().toISOString(),
+        gps: {
+          enabled: !!activeTrip?.gps?.enabled,
+          tracking: false,
+          status: trim(activeTrip?.gps?.status) || 'Vypnuto',
+          distanceMeters: Math.max(0, Number(activeTrip?.gps?.distanceMeters || 0)),
+          pointsCount: Math.max(0, Number(activeTrip?.gps?.pointsCount || 0)),
+          accuracyMeters: Math.max(0, Number(activeTrip?.gps?.accuracyMeters || 0)),
+          lastPoint: activeTrip?.gps?.lastPoint && typeof activeTrip.gps.lastPoint === 'object'
+            ? {
+                lat: Number(activeTrip.gps.lastPoint.lat || 0),
+                lon: Number(activeTrip.gps.lastPoint.lon || 0),
+                accuracy: Math.max(0, Number(activeTrip.gps.lastPoint.accuracy || 0)),
+                timestamp: Number(activeTrip.gps.lastPoint.timestamp || 0)
+              }
+            : null,
+          updatedAt: activeTrip?.gps?.updatedAt || '',
+          lastMessage: trim(activeTrip?.gps?.lastMessage),
+          lastError: trim(activeTrip?.gps?.lastError)
+        }
+      };
+    }
+    function activeTripDurationMinutes(){
+      if(!state.activeTrip?.startedAt) return null;
+      const started = new Date(state.activeTrip.startedAt).getTime();
+      if(Number.isNaN(started)) return null;
+      return Math.max(0, Math.floor((Date.now() - started) / 60000));
+    }
+    function activeTripRouteLabel(item = state.activeTrip){
+      if(!item) return 'Trasa zatím není doplněná';
+      const fromText = trim(item.fromPlace || item.fromAddress);
+      const toText = trim(item.toPlace || item.toAddress);
+      if(fromText && toText) return fromText + ' → ' + toText;
+      if(fromText) return fromText + ' → …';
+      if(toText) return '… → ' + toText;
+      return 'Trasa zatím není doplněná';
+    }
+    function gpsDistanceMetersBetween(a, b){
+      if(!a || !b) return 0;
+      const toRad = value => value * Math.PI / 180;
+      const lat1 = Number(a.lat || 0);
+      const lon1 = Number(a.lon || 0);
+      const lat2 = Number(b.lat || 0);
+      const lon2 = Number(b.lon || 0);
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const sinLat = Math.sin(dLat / 2);
+      const sinLon = Math.sin(dLon / 2);
+      const h = sinLat * sinLat + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * sinLon * sinLon;
+      return 6371000 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    }
+    function stopGpsAssistant(save = true){
+      if(gpsRuntime.watchId !== null && gpsSupported()){
+        navigator.geolocation.clearWatch(gpsRuntime.watchId);
+      }
+      gpsRuntime.watchId = null;
+      if(state.activeTrip){
+        state.activeTrip.gps.tracking = false;
+        state.activeTrip.gps.status = state.activeTrip.gps.enabled ? 'Pozastaveno' : 'Vypnuto';
+        if(save) saveState();
+      }
+    }
+    function handleGpsPosition(position){
+      if(!state.activeTrip) return stopGpsAssistant(false);
+      const coords = position?.coords;
+      if(!coords) return;
+      const accuracy = Math.max(0, Number(coords.accuracy || 0));
+      const point = {
+        lat: Number(coords.latitude || 0),
+        lon: Number(coords.longitude || 0),
+        accuracy,
+        timestamp: Number(position.timestamp || Date.now())
+      };
+      const gps = activeTripGps();
+      let nextDistance = Number(gps.distanceMeters || 0);
+      let nextPoints = Number(gps.pointsCount || 0);
+      let nextLastPoint = gps.lastPoint;
+      let message = accuracy > 0 ? 'GPS ' + gpsAccuracyLabel(accuracy) : 'GPS bod přijat';
+      let lastError = '';
+      if(accuracy > 120){
+        message = 'GPS signál je slabší ' + gpsAccuracyLabel(accuracy);
+      }else if(!gps.lastPoint){
+        nextLastPoint = point;
+        nextPoints = 1;
+        message = 'GPS start potvrzen ' + gpsAccuracyLabel(accuracy);
+      }else{
+        const deltaMeters = gpsDistanceMetersBetween(gps.lastPoint, point);
+        const deltaSeconds = Math.max(1, (point.timestamp - Number(gps.lastPoint.timestamp || point.timestamp)) / 1000);
+        const speed = deltaMeters / deltaSeconds;
+        if(deltaMeters < 12){
+          nextLastPoint = point.accuracy <= gps.lastPoint.accuracy ? point : gps.lastPoint;
+          message = 'GPS běží • drobný posun ignorován';
+        }else if(speed > 55){
+          message = 'GPS skok ignorován';
+          lastError = 'GPS zachytila nepřesný skok';
+        }else{
+          nextDistance += deltaMeters;
+          nextPoints += 1;
+          nextLastPoint = point;
+          message = 'GPS sleduje trasu • ' + gpsDistanceLabel(nextDistance);
+        }
+      }
+      state.activeTrip.gps = {
+        ...gps,
+        enabled:true,
+        tracking:gpsRuntime.watchId !== null,
+        status:'Sleduje trasu',
+        distanceMeters:nextDistance,
+        pointsCount:nextPoints,
+        accuracyMeters:accuracy,
+        lastPoint:nextLastPoint,
+        updatedAt:new Date().toISOString(),
+        lastMessage:message,
+        lastError
+      };
+      saveState();
+      if(state.screen === 'trip' || state.screen === 'overview') renderAll();
+    }
+    function handleGpsError(error){
+      if(!state.activeTrip) return;
+      const code = Number(error?.code || 0);
+      let message = 'GPS asistent nemá dostupnou polohu';
+      if(code === 1) message = 'Přístup k poloze byl zamítnut';
+      if(code === 2) message = 'Poloha není momentálně dostupná';
+      if(code === 3) message = 'GPS čeká na přesnější polohu';
+      state.activeTrip.gps = {
+        ...activeTripGps(),
+        enabled:true,
+        tracking:gpsRuntime.watchId !== null,
+        status:'Čeká na polohu',
+        updatedAt:new Date().toISOString(),
+        lastError:message,
+        lastMessage:message
+      };
+      saveState();
+      if(state.screen === 'trip' || state.screen === 'overview') renderAll();
+    }
+    function startGpsAssistant(){
+      if(!state.activeTrip){
+        alert('Nejdřív spusť aktivní jízdu.');
+        return;
+      }
+      if(!gpsSupported()){
+        alert('Toto zařízení nebo prohlížeč nepodporuje GPS polohu.');
+        return;
+      }
+      if(gpsRuntime.watchId !== null){
+        setTripQuickHint('GPS asistent už běží.');
+        return;
+      }
+      state.activeTrip.gps = {
+        ...activeTripGps(),
+        enabled:true,
+        tracking:true,
+        status:'Čeká na polohu',
+        updatedAt:new Date().toISOString(),
+        lastMessage:'GPS se připojuje…',
+        lastError:''
+      };
+      saveState();
+      renderAll();
+      gpsRuntime.watchId = navigator.geolocation.watchPosition(handleGpsPosition, handleGpsError, {
+        enableHighAccuracy:true,
+        maximumAge:5000,
+        timeout:15000
+      });
+      setTripQuickHint('GPS asistent je zapnutý. Appku nech při jízdě otevřenou pro co nejlepší výsledky.');
+    }
+    function applyGpsDistanceToTripForm(force = false){
+      if(!state.activeTrip?.gps) return false;
+      const kmStart = Number(digitsOnly(qs('tripKmStart')?.value || state.activeTrip.kmStart || 0));
+      const gpsKm = Math.round(gpsDistanceKm());
+      if(!kmStart || gpsKm <= 0) return false;
+      const kmEndInput = qs('tripKmEnd');
+      if(!kmEndInput) return false;
+      if(!force && digitsOnly(kmEndInput.value)) return false;
+      kmEndInput.value = String(kmStart + gpsKm);
+      updateTripDistancePreview();
+      return true;
+    }
+    function activeTripSnapshotFromForm(){
+      const trailerSnapshot = currentTripTrailerSnapshot();
+      return normalizeActiveTrip({
+        id: generateId('ATRIP'),
+        profileId: state.activeProfileId,
+        date: qs('tripDate').value || today(),
+        departureTime: trim(qs('tripDepartureTime').value) || roundedCurrentTime(5),
+        kmStart: digitsOnly(qs('tripKmStart').value),
+        fromPlace: trim(qs('tripFromPlace').value),
+        fromAddress: trim(qs('tripFromAddress').value),
+        toPlace: trim(qs('tripToPlace').value),
+        toAddress: trim(qs('tripToAddress').value),
+        emptyDrive: !!qs('tripEmptyDrive').checked,
+        commodity: qs('tripEmptyDrive').checked ? '' : selectedCommodity(),
+        quantityKg: qs('tripEmptyDrive').checked ? '0' : digitsOnly(qs('tripQuantityKg').value),
+        containerNumber: trim(qs('tripContainerNumber').value),
+        trailerType: trailerSnapshot.type,
+        trailerPlate: trailerSnapshot.plate,
+        note: trim(qs('tripNote').value),
+        startedAt: new Date().toISOString(),
+        gps: { enabled:false, tracking:false, status:'Vypnuto', distanceMeters:0, pointsCount:0, accuracyMeters:0, lastPoint:null, updatedAt:'', lastMessage:'', lastError:'' }
+      });
+    }
+    function startActiveTrip(useGps = false){
+      if(!state.activeProfileId){
+        alert('Nejdřív si vytvoř a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
+      if(state.activeTrip){
+        alert('Jedna aktivní jízda už běží. Nejprve ji dokonči nebo zruš.');
+        return;
+      }
+      fillTripSmartStart(false);
+      const snapshot = activeTripSnapshotFromForm();
+      if(!snapshot?.kmStart){
+        alert('Pro zahájení jízdy vyplň km start.');
+        qs('tripKmStart')?.focus();
+        return;
+      }
+      state.activeTrip = normalizeActiveTrip({
+        ...snapshot,
+        gps: {
+          ...snapshot.gps,
+          enabled: !!useGps,
+          status: useGps ? 'Čeká na polohu' : 'Vypnuto',
+          lastMessage: useGps ? 'GPS se připojuje…' : ''
+        }
+      });
+      state.finishingActiveTrip = false;
+      saveState();
+      renderAll();
+      if(useGps){
+        startGpsAssistant();
+        setTripQuickHint('Aktivní jízda spuštěna i s GPS asistentem.');
+      }else{
+        setTripQuickHint('Aktivní jízda spuštěna. Až dorazíš, klikni na Dokončit aktivní a doplň km konec.');
+      }
+    }
+    function loadActiveTripIntoForm(){
+      if(!state.activeTrip) return;
+      stopGpsAssistant(false);
+      const item = state.activeTrip;
+      state.activeProfileId = item.profileId || state.activeProfileId;
+      state.editingTripId = null;
+      state.finishingActiveTrip = true;
+      qs('tripDate').value = item.date || today();
+      qs('tripDepartureTime').value = item.departureTime || roundedCurrentTime(5);
+      qs('tripArrivalTime').value = roundedCurrentTime(5);
+      qs('tripEmptyDrive').checked = !!item.emptyDrive;
+      qs('tripKmStart').value = item.kmStart || '';
+      qs('tripKmEnd').value = '';
+      qs('tripFromPlace').value = item.fromPlace || '';
+      qs('tripFromAddress').value = item.fromAddress || '';
+      qs('tripToPlace').value = item.toPlace || '';
+      qs('tripToAddress').value = item.toAddress || '';
+      setCommodityFields(item.commodity || '');
+      qs('tripQuantityKg').value = item.emptyDrive ? '0' : (item.quantityKg || '');
+      qs('tripContainerNumber').value = item.containerNumber || '';
+      qs('tripNote').value = item.note || '';
+      qs('tripFormTitle').textContent = 'Dokončit aktivní jízdu';
+      qs('tripSubmitBtn').textContent = 'Uložit dokončenou jízdu';
+      toggleEmptyDrive();
+      populateTripTrailerSelect(item.trailerType, item.trailerPlate);
+      updateTripContainerField();
+      applyGpsDistanceToTripForm(true);
+      updateTripDistancePreview();
+      saveState();
+      openScreen('trip');
+      const gpsText = item.gps?.distanceMeters ? ' GPS odhad doplnil km konec.' : '';
+      setTripQuickHint('Načtená aktivní jízda. Doplň km konec, cíl a případně náklad, pak ji ulož.' + gpsText);
+      qs('tripKmEnd')?.focus();
+    }
+    function cancelActiveTrip(){
+      if(!state.activeTrip) return;
+      if(!confirm('Opravdu zrušit aktivní jízdu? Neuložený rozjezd se smaže.')) return;
+      stopGpsAssistant(false);
+      state.activeTrip = null;
+      state.finishingActiveTrip = false;
+      saveState();
+      renderAll();
+      setTripQuickHint('Aktivní jízda byla zrušena.');
+    }
+    function renderActiveTripPanel(){
+      const root = qs('tripLivePanel');
+      if(!root) return;
+      if(!state.activeTrip){
+        root.innerHTML = `
+          <div class="active-trip-panel">
+            <div class="active-trip-empty">
+              <strong>Aktivní jízda teď neběží</strong>
+              Jízdu můžeš spustit klasicky nebo rovnou s GPS asistentem.
+            </div>
+            <div class="active-trip-actions">
+              <button class="btn" type="button" onclick="startActiveTrip()">Začít jízdu</button>
+              <button class="btn2" type="button" onclick="startActiveTrip(true)">Začít jízdu + GPS</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      root.innerHTML = `
+        <div class="active-trip-panel is-live">
+          <div class="active-trip-head">
+            <div>
+              <div class="active-trip-title">Aktivní jízda právě běží</div>
+              <div class="active-trip-sub">${esc(activeTripRouteLabel())}</div>
+            </div>
+            <div class="active-trip-badge"><span class="active-trip-dot"></span>Jízda běží</div>
+          </div>
+          <div class="active-trip-grid">
+            <div class="active-trip-box"><div class="l">Start</div><div class="v">${esc(formatDate(state.activeTrip.date))} ${esc(state.activeTrip.departureTime || '—')}</div></div>
+            <div class="active-trip-box"><div class="l">Km start</div><div class="v">${esc(state.activeTrip.kmStart || '—')}</div></div>
+            <div class="active-trip-box"><div class="l">Doba jízdy</div><div class="v">${esc(formatDuration(activeTripDurationMinutes()))}</div></div>
+            <div class="active-trip-box"><div class="l">GPS odhad</div><div class="v">${esc(gpsDistanceLabel())}</div></div>
+          </div>
+          <div class="active-trip-actions">
+            <span class="gps-pill ${gpsStatusClass()}">${esc(gpsStatusText())}</span>
+            <span class="gps-pill ${gpsStatusClass()}">${esc(gpsAccuracyLabel())}</span>
+          </div>
+          <div class="active-trip-actions">
+            ${gpsRuntime.watchId !== null
+              ? `<button class="btn2" type="button" onclick="stopGpsAssistant(); renderAll(); setTripQuickHint('GPS asistent byl pozastaven.');">Vypnout GPS</button>`
+              : `<button class="btn2" type="button" onclick="startGpsAssistant()">Zapnout GPS asistenta</button>`}
+            <button class="btn" type="button" onclick="loadActiveTripIntoForm()">Dokončit aktivní</button>
+            <button class="btn2" type="button" onclick="cancelActiveTrip()">Zrušit aktivní</button>
+          </div>
+        </div>
+      `;
+    }
+    function resumeGpsAssistantIfNeeded(){
+      if(!state.activeTrip?.gps?.enabled || gpsRuntime.watchId !== null || !gpsSupported()) return;
+      try{ startGpsAssistant(); }catch(error){ console.error('GPS resume error', error); }
+    }
+    function selectedCommodity(){
+      if(qs('tripEmptyDrive').checked) return '';
+      return qs('tripCommodityPreset').value === 'Jiná' ? trim(qs('tripCommodityCustom').value) : trim(qs('tripCommodityPreset').value);
+    }
+    function getTripTrailerSelectSnapshot(){
+      const select = qs('tripTrailerSelect');
+      if(!select) return { type:'', plate:'' };
+      const option = select.selectedOptions && select.selectedOptions[0];
+      return {
+        type: trim(option?.dataset?.type),
+        plate: trim(option?.dataset?.plate).toUpperCase()
+      };
+    }
+    function populateTripTrailerSelect(selectedType = '', selectedPlate = ''){
+      const select = qs('tripTrailerSelect');
+      if(!select) return;
+      const profile = activeProfile();
+      const trailers = activeVehicles(profile).filter(vehicle => vehicleGroup(vehicle) === 'trailer');
+      const activeTrailer = primaryTrailerVehicle(profile);
+      const cleanType = trim(selectedType);
+      const cleanPlate = trim(selectedPlate).toUpperCase();
+
+      let selectedValue = '';
+      const options = ['<option value="" data-type="" data-plate="">Bez přípojného vozidla</option>'];
+
+      trailers.forEach(vehicle => {
+        const vehiclePlate = trim(vehicle.plate).toUpperCase();
+        const vehicleType = trim(vehicle.type);
+        const isSelected = cleanPlate
+          ? vehiclePlate === cleanPlate
+          : (cleanType ? vehicleType === cleanType : (!!activeTrailer && vehicle.id === activeTrailer.id));
+        if(isSelected) selectedValue = vehicle.id;
+
+        options.push(
+          '<option value="' + esc(vehicle.id) + '" data-type="' + esc(vehicleType) + '" data-plate="' + esc(vehiclePlate) + '">' +
+            esc([vehicle.label || vehicle.type, vehicle.plate].filter(Boolean).join(' • ')) +
+          '</option>'
+        );
+      });
+
+      if((cleanType || cleanPlate) && !selectedValue){
+        selectedValue = 'history-trailer';
+        options.push(
+          '<option value="history-trailer" data-type="' + esc(cleanType) + '" data-plate="' + esc(cleanPlate) + '">' +
+            esc('Historický záznam • ' + ([cleanType, cleanPlate].filter(Boolean).join(' • ') || 'Bez přípojného vozidla')) +
+          '</option>'
+        );
+      }
+
+      select.innerHTML = options.join('');
+      select.value = selectedValue;
+    }
+    function syncTripTrailerSelect(){
+      const select = qs('tripTrailerSelect');
+      if(!select) return;
+      const currentValue = select.value;
+      const current = getTripTrailerSelectSnapshot();
+      const editingTrip = state.trips.find(item => item.id === state.editingTripId) || null;
+      const hasCurrentSelection = currentValue !== '';
+      const preferredType = hasCurrentSelection ? current.type : (editingTrip?.trailerType || '');
+      const preferredPlate = hasCurrentSelection ? current.plate : (editingTrip?.trailerPlate || '');
+      populateTripTrailerSelect(preferredType, preferredPlate);
+      if(currentValue === '' && !editingTrip) select.value = '';
+    }
+    function currentTripTrailerSnapshot(){
+      const select = qs('tripTrailerSelect');
+      if(select){
+        const option = select.selectedOptions && select.selectedOptions[0];
+        return {
+          type: trim(option?.dataset?.type),
+          plate: trim(option?.dataset?.plate).toUpperCase()
+        };
+      }
+      const trailer = primaryTrailerVehicle(activeProfile());
+      return {
+        type: trim(trailer?.type),
+        plate: trim(trailer?.plate).toUpperCase()
+      };
+    }
+    function trailerNeedsContainerField(trailerType){
+      return ['Silo šasi', 'Kontejnerové šasi', 'Kontejnerový návěs'].includes(trim(trailerType));
+    }
+    function updateTripContainerField(){
+      const snapshot = currentTripTrailerSnapshot();
+      const trailerType = trim(snapshot.type);
+      const trailerPlate = trim(snapshot.plate).toUpperCase();
+      const shouldShow = trailerNeedsContainerField(trailerType) || !!trim(qs('tripContainerNumber')?.value);
+
+      qs('tripContainerWrap').classList.toggle('hidden', !shouldShow);
+      qs('tripContainerInfo').textContent = shouldShow ? [trailerType, trailerPlate].filter(Boolean).join(' • ') : '';
+
+      const trailerHelp = qs('tripTrailerHelp');
+      if(trailerHelp){
+        if(trailerType || trailerPlate){
+          const existsInProfile = activeVehicles(activeProfile()).some(vehicle =>
+            vehicleGroup(vehicle) === 'trailer' &&
+            trim(vehicle.type) === trailerType &&
+            trim(vehicle.plate).toUpperCase() === trailerPlate
+          );
+          trailerHelp.textContent = existsInProfile
+            ? 'Vybrané přípojné vozidlo se uloží přímo do tohoto záznamu jízdy.'
+            : 'Tato jízda používá historický snapshot přípojného vozidla.';
+        }else{
+          trailerHelp.textContent = 'Jízda bude uložená bez přípojného vozidla.';
+        }
+      }
+      if(!shouldShow) qs('tripContainerNumber').value = '';
+    }
+    function toggleTrailerConnection(id, enabled){
+      const profile = activeProfile();
+      if(!profile) return;
+      state.profiles = state.profiles.map(item => {
+        if(item.id !== profile.id) return item;
+        const updatedVehicles = activeVehicles(item).map(vehicle => {
+          if(vehicleGroup(vehicle) !== 'trailer') return vehicle;
+          if(enabled){
+            return { ...vehicle, primaryForProfile: vehicle.id === id };
+          }
+          if(vehicle.id === id){
+            return { ...vehicle, primaryForProfile: false };
+          }
+          return vehicle;
+        });
+        return {
+          ...item,
+          vehicles: fixVehiclePrimaries(updatedVehicles),
+          updatedAt: new Date().toISOString()
+        };
+      });
+      saveState();
+      renderAll();
+    }
+
+    function toggleCommodityCustom(){
+      const isOther = qs('tripCommodityPreset').value === 'Jiná';
+      qs('tripCommodityCustomWrap').classList.toggle('hidden', !isOther);
+      if(!isOther) qs('tripCommodityCustom').value = '';
+    }
+    function toggleEmptyDrive(){
+      const checked = qs('tripEmptyDrive').checked;
+      qs('tripCommodityField').classList.toggle('hidden', checked);
+      qs('tripCommodityCustomWrap').classList.add('hidden');
+      qs('tripQuantityField').classList.toggle('hidden', checked);
+      if(checked){
+        qs('tripCommodityPreset').value = '';
+        qs('tripCommodityCustom').value = '';
+        qs('tripQuantityKg').value = '0';
+      }else if(qs('tripQuantityKg').value === '0'){
+        qs('tripQuantityKg').value = '';
+      }
+    }
+    function setCommodityFields(value){
+      const clean = trim(value);
+      if(!clean){
+        qs('tripCommodityPreset').value = '';
+        qs('tripCommodityCustom').value = '';
+        toggleCommodityCustom();
+        return;
+      }
+      if(COMMODITIES.includes(clean)){
+        qs('tripCommodityPreset').value = clean;
+        qs('tripCommodityCustom').value = '';
+      }else{
+        qs('tripCommodityPreset').value = 'Jiná';
+        qs('tripCommodityCustom').value = clean;
+      }
+      toggleCommodityCustom();
+    }
+    function updateTripDistancePreview(){
+      const diff = kmDiff(qs('tripKmStart').value, qs('tripKmEnd').value);
+      qs('tripDistancePreview').value = diff ? String(diff) : '';
+    }
+    function autofillTripKmStart(force = false){
+      if(state.editingTripId) return;
+      const input = qs('tripKmStart');
+      if(!force && digitsOnly(input.value)) return;
+      const odometer = currentOdometer();
+      input.value = odometer > 0 ? String(odometer) : '';
+      updateTripDistancePreview();
+    }
+    function autofillFuelOdometer(force = false){
+      if(state.editingFuelId) return;
+      const input = qs('fuelOdometer');
+      if(!force && digitsOnly(input.value)) return;
+      const odometer = currentOdometer();
+      input.value = odometer > 0 ? String(odometer) : '';
+    }
+    function fillTripSmartStart(force = false){
+      if(force || !qs('tripDate').value) qs('tripDate').value = today();
+      if(force || !trim(qs('tripDepartureTime').value)) qs('tripDepartureTime').value = roundedCurrentTime(5);
+      autofillTripKmStart(force);
+    }
+
+    function routePresetSource(){
+      return state.trips.find(item =>
+        routeEndpointKey(item.fromPlace, item.fromAddress) === routeEndpointKey(qs('tripFromPlace').value, qs('tripFromAddress').value) &&
+        routeEndpointKey(item.toPlace, item.toAddress) === routeEndpointKey(qs('tripToPlace').value, qs('tripToAddress').value) &&
+        item.profileId === state.activeProfileId
+      ) || null;
+    }
+    function prefillTripByCurrentRoute(showMessage = true){
+      const item = routePresetSource();
+      if(!item){
+        if(showMessage) setTripQuickHint('Pro tuhle trasu zatím není uložená žádná minulá jízda.');
+        return false;
+      }
+      if(!trim(qs('tripArrivalTime').value)){
+        const duration = minutesBetween(item.departureTime, item.arrivalTime);
+        if(duration !== null){
+          const dep = trim(qs('tripDepartureTime').value) || roundedCurrentTime(5);
+          const depMinutes = dep.split(':').map(Number);
+          let total = depMinutes[0]*60 + depMinutes[1] + duration;
+          total = ((total % 1440) + 1440) % 1440;
+          qs('tripArrivalTime').value = String(Math.floor(total/60)).padStart(2,'0') + ':' + String(total % 60).padStart(2,'0');
+        }
+      }
+      qs('tripEmptyDrive').checked = !!item.emptyDrive;
+      setCommodityFields(item.commodity || '');
+      qs('tripQuantityKg').value = item.emptyDrive ? '0' : (item.quantityKg || '');
+      qs('tripContainerNumber').value = item.containerNumber || '';
+      populateTripTrailerSelect(item.trailerType, item.trailerPlate);
+      toggleEmptyDrive();
+      updateTripContainerField();
+      if(showMessage) setTripQuickHint('Doplněno podle poslední stejné trasy.');
+      return true;
+    }
+    function maybeSmartPrefillTripByRoute(){
+      if(state.editingTripId) return;
+      const hasRoute = routeEndpointKey(qs('tripFromPlace').value, qs('tripFromAddress').value) && routeEndpointKey(qs('tripToPlace').value, qs('tripToAddress').value);
+      if(!hasRoute) return;
+      const hasManualValues = !!(trim(qs('tripCommodityPreset').value) || trim(qs('tripCommodityCustom').value) || digitsOnly(qs('tripQuantityKg').value) || trim(qs('tripArrivalTime').value));
+      if(hasManualValues) return;
+      prefillTripByCurrentRoute(false);
+    }
+    function applyTripTemplate(item, options = {}){
+      if(!item) return false;
+      const reverse = !!options.reverse;
+      state.activeProfileId = item.profileId || state.activeProfileId;
+      state.editingTripId = null;
+
+      qs('tripDate').value = today();
+      const departure = roundedCurrentTime(5);
+      qs('tripDepartureTime').value = departure;
+      const duration = minutesBetween(item.departureTime, item.arrivalTime);
+      if(duration !== null){
+        let total = departure.split(':').map(Number);
+        let mins = total[0]*60 + total[1] + duration;
+        mins = ((mins % 1440) + 1440) % 1440;
+        qs('tripArrivalTime').value = String(Math.floor(mins/60)).padStart(2,'0') + ':' + String(mins % 60).padStart(2,'0');
+      }else{
+        qs('tripArrivalTime').value = '';
+      }
+      qs('tripEmptyDrive').checked = !!item.emptyDrive;
+      qs('tripKmStart').value = '';
+      qs('tripKmEnd').value = '';
+      qs('tripFromPlace').value = reverse ? (item.toPlace || '') : (item.fromPlace || '');
+      qs('tripFromAddress').value = reverse ? (item.toAddress || '') : (item.fromAddress || '');
+      qs('tripToPlace').value = reverse ? (item.fromPlace || '') : (item.toPlace || '');
+      qs('tripToAddress').value = reverse ? (item.fromAddress || '') : (item.toAddress || '');
+      setCommodityFields(item.commodity || '');
+      qs('tripQuantityKg').value = item.emptyDrive ? '0' : (item.quantityKg || '');
+      qs('tripContainerNumber').value = item.containerNumber || '';
+      qs('tripNote').value = '';
+      qs('tripFormTitle').textContent = options.title || 'Nová jízda';
+      qs('tripSubmitBtn').textContent = 'Uložit jízdu';
+      toggleEmptyDrive();
+      populateTripTrailerSelect(item.trailerType, item.trailerPlate);
+      updateTripContainerField();
+      autofillTripKmStart(true);
+      updateTripDistancePreview();
+      saveState();
+      openScreen('trip');
+      return true;
+    }
+    function repeatLastTrip(){
+      const item = getLastTrip();
+      if(!item){
+        alert('Zatím nemáš žádnou uloženou jízdu pro zopakování.');
+        return;
+      }
+      applyTripTemplate(item, { title:'Nová jízda • zopakovaná' });
+      setTripQuickHint('Načtena poslední jízda.');
+    }
+    function reverseTripRouteQuick(){
+      const hasCurrentRoute = trim(qs('tripFromPlace').value) || trim(qs('tripFromAddress').value) || trim(qs('tripToPlace').value) || trim(qs('tripToAddress').value);
+      if(hasCurrentRoute){
+        const fromPlace = qs('tripFromPlace').value;
+        const fromAddress = qs('tripFromAddress').value;
+        qs('tripFromPlace').value = qs('tripToPlace').value;
+        qs('tripFromAddress').value = qs('tripToAddress').value;
+        qs('tripToPlace').value = fromPlace;
+        qs('tripToAddress').value = fromAddress;
+        maybeSmartPrefillTripByRoute();
+        setTripQuickHint('Trasa byla otočená.');
+        return;
+      }
+      const item = getLastTrip();
+      if(!item){
+        alert('Nejdřív potřebuješ alespoň jednu uloženou jízdu.');
+        return;
+      }
+      applyTripTemplate(item, { title:'Nová jízda • otočená', reverse:true });
+      setTripQuickHint('Načtena otočená trasa z poslední jízdy.');
+    }
+
+
+    function daysUntil(dateValue){
+      if(!dateValue) return null;
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const target = new Date(dateValue);
+      if(Number.isNaN(target.getTime())) return null;
+      const targetStart = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+      return Math.round((targetStart - todayStart) / 86400000);
+    }
+
+    function getVehicleStkMeta(vehicle){
+      const days = daysUntil(vehicle?.stk);
+      if(days === null){
+        return {
+          badgeClass:'badge-warn',
+          badgeText:'STK nenastavena',
+          cardClass:'',
+          hint:'Doplň datum STK, ať jde hlídat včas.'
+        };
+      }
+      if(days < 0){
+        return {
+          badgeClass:'badge-stk-expired',
+          badgeText:'STK po termínu ' + Math.abs(days) + ' dní',
+          cardClass:' stk-expired',
+          hint:'Kritický stav. Vozidlo je po expiraci STK.'
+        };
+      }
+      if(days <= 7){
+        return {
+          badgeClass:'badge-stk-alert',
+          badgeText:'STK za ' + days + ' dní',
+          cardClass:' stk-alert',
+          hint:'Alarm. Poslední týden před expirací STK.'
+        };
+      }
+      if(days <= 30){
+        return {
+          badgeClass:'badge-stk-warning',
+          badgeText:'STK za ' + days + ' dní',
+          cardClass:' stk-warning',
+          hint:'Varování. Poslední měsíc před expirací STK.'
+        };
+      }
+      return {
+        badgeClass:'badge-stk-ok',
+        badgeText:'STK ' + formatDate(vehicle.stk),
+        cardClass:'',
+        hint:'STK je zatím v klidu.'
+      };
+    }
+
+    function toggleTruckConnection(id){
+      setVehicleAsPrimary(id);
+    }
+
+    function currentMonthStats(profileId = state.activeProfileId){
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const trips = state.trips.filter(item => item.profileId === profileId).filter(item => {
+        const d = new Date(item.date);
+        return !Number.isNaN(d.getTime()) && d.getFullYear() === year && d.getMonth() === month;
+      });
+      const fuelings = state.fuelings.filter(item => item.profileId === profileId).filter(item => {
+        const d = new Date(item.date);
+        return !Number.isNaN(d.getTime()) && d.getFullYear() === year && d.getMonth() === month;
+      });
+      const diesel = fuelings.filter(item => item.energyType === 'Nafta').reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+      return {
+        label: monthLabel(now),
+        tripCount: trips.length,
+        tripKm: trips.reduce((sum, item) => sum + kmDiff(item.kmStart, item.kmEnd), 0),
+        fuelingCount: fuelings.length,
+        diesel
+      };
+    }
+
+    function getAverageConsumption(profileId = state.activeProfileId){
+      const dieselFuelings = state.fuelings
+        .filter(item => item.profileId === profileId)
+        .filter(item => item.energyType === 'Nafta')
+        .filter(item => item.date && item.odometer && item.quantity)
+        .slice()
+        .sort((a, b) => {
+          const byDate = new Date(a.date) - new Date(b.date);
+          if(byDate !== 0) return byDate;
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
+
+      if(dieselFuelings.length < 2) return null;
+
+      let totalKm = 0;
+      let totalLiters = 0;
+
+      for(let i = 1; i < dieselFuelings.length; i++){
+        const prev = dieselFuelings[i - 1];
+        const curr = dieselFuelings[i];
+        const prevOdo = Number(prev.odometer || 0);
+        const currOdo = Number(curr.odometer || 0);
+        const liters = Number(curr.quantity || 0);
+        const intervalKm = currOdo - prevOdo;
+
+        if(intervalKm > 0 && liters > 0){
+          totalKm += intervalKm;
+          totalLiters += liters;
+        }
+      }
+
+      return totalKm > 0 ? (totalLiters / totalKm) * 100 : null;
+    }
+
+    function formatConsumption(value){
+      if(value === null || value === undefined || Number.isNaN(Number(value))) return '—';
+      return Number(value).toFixed(1) + ' l/100 km';
+    }
+
+    function renderProfileSwitchers(){
+      const markup = state.profiles.length
+        ? state.profiles.map(profile =>
+            '<button type="button" class="' + (profile.id === state.activeProfileId ? 'active' : '') + '" onclick="activateProfile(\'' + esc(profile.id) + '\')">' +
+              esc(profile.driverName || primaryTruckPlate(profile) || 'Profil') +
+            '</button>'
+          ).join('')
+        : '<button type="button" class="active">Bez profilu</button>';
+
+      qs('profileSwitcher').innerHTML = markup;
+      qs('profilesQuickSwitch').innerHTML = markup;
+    }
+    function renderOverview(){
+      qs('miniTrips').textContent = String(state.trips.length);
+      qs('miniFuel').textContent = String(state.fuelings.length);
+
+      const profile = activeProfile();
+      if(!profile){
+        qs('overviewStats').innerHTML = '<div class="empty">Nejdřív si vytvoř profil.</div>';
+        qs('overviewPilotStats').innerHTML = '<div class="summary"><strong>Pilot verze V13.4.6</strong><span>Tahle verze vrací do přehledu i průměrnou spotřebu a zachovává sjednocené slidery pro tahač i přípojné vozidlo.</span></div>';
+        qs('overviewActiveTrip').innerHTML = state.activeTrip ? '<div class="summary"><strong>Aktivní jízda běží</strong><span>' + esc(activeTripRouteLabel()) + ' • GPS ' + esc(gpsDistanceLabel()) + '</span></div>' : '';
+        return;
+      }
+
+      const plates = [primaryTruckPlate(profile), primaryTrailerPlate(profile)].filter(Boolean).join(' • ');
+      const odometer = currentOdometer(profile.id);
+      const monthStats = currentMonthStats(profile.id);
+      const avgConsumption = getAverageConsumption(profile.id);
+
+      qs('overviewStats').innerHTML = `
+        <div class="summary">
+          <strong>${esc(profile.driverName || '—')}</strong>
+          <span>${esc(plates || 'Bez SPZ soupravy')}</span>
+        </div>
+        <div class="profile-stats-grid" style="margin-top:14px">
+          <div class="card"><div class="tiny">Aktuální stav km</div><div class="big">${esc(odometer > 0 ? String(odometer) : '—')}</div></div>
+          <div class="card"><div class="tiny">Průměrná spotřeba</div><div class="big">${esc(avgConsumption === null ? '—' : Number(avgConsumption).toFixed(1))}</div><div class="hint">${esc(avgConsumption === null ? 'potřebuje aspoň 2 tankování nafty' : 'l/100 km')}</div></div>
+          <div class="card"><div class="tiny">Tento měsíc</div><div class="big">${esc(String(monthStats.tripKm))}</div><div class="hint">ujetých km</div></div>
+        </div>
+      `;
+
+      qs('overviewPilotStats').innerHTML = `
+        <div class="stats-grid">
+          <div class="card"><div class="tiny">Měsíc</div><div class="big">${esc(String(monthStats.tripCount))}</div><div class="hint">jízd</div></div>
+          <div class="card"><div class="tiny">Měsíc</div><div class="big">${esc(String(monthStats.fuelingCount))}</div><div class="hint">tankování / nabíjení</div></div>
+          <div class="card"><div class="tiny">Nafta</div><div class="big">${esc(monthStats.diesel.toFixed(1))}</div><div class="hint">l v tomto měsíci</div></div>
+        </div>
+      `;
+      qs('overviewActiveTrip').innerHTML = state.activeTrip ? '<div class="summary"><strong>Aktivní jízda běží</strong><span>' + esc(activeTripRouteLabel()) + ' • GPS ' + esc(gpsDistanceLabel()) + '</span></div>' : '';
+    }
+
+    function renderProfiles(){
+      const current = activeProfile();
+      qs('profilesSummary').innerHTML = current
+        ? '<div class="summary"><strong>Aktivní profil</strong><span>' + esc(current.driverName || 'Řidič') + '</span>' + (current.note ? '<span>' + esc(current.note) + '</span>' : '') + '</div>'
+        : '<div class="empty">Zatím není vybraný žádný profil.</div>';
+
+      qs('profilesList').innerHTML = state.profiles.length
+        ? '<div class="profile-list-grid">' + state.profiles.map(profile => {
+            const isActive = profile.id === state.activeProfileId;
+            return `
+              <div class="profile-card">
+                <div class="profile-card-head">
+                  <div class="profile-card-main">
+                    <div class="profile-active-line"><div class="badge ${isActive ? 'badge-ok' : 'badge-info'}">${isActive ? '🟢 Aktivní' : 'Profil'}</div></div>
+                    <div class="profile-card-title">${esc(profile.driverName || 'Řidič')}</div>
+                  </div>
+                </div>
+                ${profile.note ? '<div class="profile-card-note">' + esc(profile.note) + '</div>' : ''}
+                <div class="profile-card-actions">
+                  <button class="${isActive ? 'btn-ok' : 'btn2'}" type="button" onclick="activateProfile('${esc(profile.id)}')">${esc(isActive ? '🟢 Aktivní' : 'Aktivovat')}</button>
+                  <button class="btn2" type="button" onclick="editProfile('${esc(profile.id)}')">Upravit</button>
+                  <button class="btn-danger" type="button" onclick="removeProfile('${esc(profile.id)}')">Smazat</button>
+                </div>
+              </div>
+            `;
+          }).join('') + '</div>'
+        : '<div class="empty">Zatím tu není žádný profil.</div>';
+    }
+
+
+    function renderVehicles(){
+      const profile = activeProfile();
+      if(!profile){
+        qs('vehicleQuickCards').innerHTML = '';
+        qs('vehiclesList').innerHTML = '<div class="empty">Nejdřív vytvoř profil.</div>';
+        return;
+      }
+
+      const vehicles = activeVehicles(profile);
+      const trucks = vehicles.filter(vehicle => vehicleGroup(vehicle) === 'truck');
+      const trailers = vehicles.filter(vehicle => vehicleGroup(vehicle) === 'trailer');
+      const activeTruck = primaryTruckVehicle(profile);
+      const expiredCount = vehicles.filter(vehicle => {
+        const days = daysUntil(vehicle.stk);
+        return days !== null && days < 0;
+      }).length;
+      const nearCount = vehicles.filter(vehicle => {
+        const days = daysUntil(vehicle.stk);
+        return days !== null && days >= 0 && days <= 30;
+      }).length;
+
+      qs('vehicleQuickCards').innerHTML = `
+        <div class="card"><div class="tiny">Celkem vozidel</div><div class="big">${esc(String(vehicles.length))}</div></div>
+        <div class="card"><div class="tiny">Po termínu</div><div class="big">${esc(String(expiredCount))}</div></div>
+        <div class="card"><div class="tiny">Do 30 dní</div><div class="big">${esc(String(nearCount))}</div></div>
+      `;
+
+      if(!vehicles.length){
+        qs('vehiclesList').innerHTML = '<div class="empty">Zatím tu není žádné vozidlo.</div>';
+        return;
+      }
+
+      const activeTruckMeta = activeTruck ? getVehicleStkMeta(activeTruck) : null;
+      const otherTrucks = activeTruck
+        ? trucks.filter(vehicle => vehicle.id !== activeTruck.id)
+        : trucks;
+
+      const renderVehicleCard = (vehicle, isTruck) => {
+        const isActive = !!vehicle.primaryForProfile;
+        const stkMeta = getVehicleStkMeta(vehicle);
+        const activeClass = isTruck
+          ? (isActive ? ' truck-on' : ' truck-off')
+          : (isActive ? ' trailer-on' : ' trailer-off');
+
+        const title = vehicle.label || vehicle.plate || vehicle.type || 'Vozidlo';
+        const titleIsPlate = !!vehicle.plate && title === vehicle.plate;
+        const metaParts = isTruck
+          ? [vehicle.brand, titleIsPlate ? '' : vehicle.plate].filter(Boolean)
+          : [vehicle.type, titleIsPlate ? '' : vehicle.plate].filter(Boolean);
+        const extraLines = [
+          vehicle.year ? 'Rok výroby ' + vehicle.year : '',
+          stkMeta.hint
+        ].filter(Boolean);
+
+        return `
+          <div class="vehicle-card${activeClass}${stkMeta.cardClass}">
+            <div class="vehicle-card-head">
+              <div class="vehicle-card-main">
+                <div class="vehicle-compact-badges">
+                  <span class="badge ${stkMeta.badgeClass}">${esc(stkMeta.badgeText)}</span>
+                </div>
+                <div class="vehicle-card-title">${esc(title)}</div>
+                ${metaParts.length ? `<div class="vehicle-card-meta">${esc(metaParts.join(' • '))}</div>` : ''}
+                ${extraLines.map(line => `<div class="vehicle-card-meta">${esc(line)}</div>`).join('')}
+              </div>
+            </div>
+            ${vehicle.note ? '<div class="vehicle-card-note">' + esc(vehicle.note) + '</div>' : ''}
+            <div class="vehicle-card-actions">
+              <label class="trip-switch vehicle-connection-switch vehicle-connection-wrap" for="vehicle-connect-${esc(vehicle.id)}">
+                <span class="trip-switch-title">
+                  <span class="vehicle-connection-main">${esc(isTruck ? 'Aktivní' : (isActive ? 'Zapojeno' : 'Odpojeno'))}</span>
+                </span>
+                <span class="trip-switch-control">
+                  <input
+                    id="vehicle-connect-${esc(vehicle.id)}"
+                    type="checkbox"
+                    ${isActive ? 'checked' : ''}
+                    onchange="${isTruck ? "toggleTruckConnection('" + esc(vehicle.id) + "')" : "toggleTrailerConnection('" + esc(vehicle.id) + "', this.checked)"}"
+                  />
+                  <span class="trip-switch-slider"></span>
+                </span>
+              </label>
+              <button class="chip" type="button" onclick="editVehicle('${esc(vehicle.id)}')">Upravit</button>
+              <button class="btn-danger" type="button" onclick="removeVehicle('${esc(vehicle.id)}')">Smazat</button>
+            </div>
+          </div>
+        `;
+      };
+
+      qs('vehiclesList').innerHTML = `
+        <div class="vehicle-focus-card${activeTruckMeta ? activeTruckMeta.cardClass : ''}">
+          <div class="vehicle-section-head">
+            <div>
+              <div class="vehicle-focus-title">Hlavní tahač</div>
+              <div class="vehicle-focus-meta">${esc(activeTruck ? [activeTruck.label || activeTruck.type || 'Tahač', activeTruck.brand, activeTruck.plate].filter(Boolean).join(' • ') : 'Zatím není vybraný hlavní tahač.')}</div>
+            </div>
+            ${activeTruckMeta ? `<span class="badge ${activeTruckMeta.badgeClass}">${esc(activeTruckMeta.badgeText)}</span>` : ''}
+          </div>
+          ${activeTruck ? `
+            <label class="trip-switch vehicle-connection-switch" for="active-truck-focus-${esc(activeTruck.id)}">
+              <span class="trip-switch-title">
+                <span class="vehicle-connection-main">Aktivní</span>
+              </span>
+              <span class="trip-switch-control">
+                <input id="active-truck-focus-${esc(activeTruck.id)}" type="checkbox" checked onchange="toggleTruckConnection('${esc(activeTruck.id)}')" />
+                <span class="trip-switch-slider"></span>
+              </span>
+            </label>
+            <div class="vehicle-focus-actions">
+              <button class="chip" type="button" onclick="editVehicle('${esc(activeTruck.id)}')">Upravit tahač</button>
+            </div>
+          ` : '<div class="vehicle-focus-meta">Přidej tahač a nastav ho jako hlavní.</div>'}
+        </div>
+
+        <div class="vehicle-stack-section">
+          <div class="vehicle-section-head">
+            <div>
+              <h3>${esc(activeTruck ? 'Další tahače' : 'Tahače')}</h3>
+            </div>
+          </div>
+          <div class="vehicle-grid">
+            ${otherTrucks.length ? otherTrucks.map(vehicle => renderVehicleCard(vehicle, true)).join('') : '<div class="empty">Další tahače tu nejsou.</div>'}
+          </div>
+        </div>
+
+        <div class="vehicle-stack-section">
+          <div class="vehicle-section-head">
+            <div>
+              <h3>Přípojná vozidla</h3>
+            </div>
+          </div>
+          <div class="vehicle-grid">
+            ${trailers.length ? trailers.map(vehicle => renderVehicleCard(vehicle, false)).join('') : '<div class="empty">Zatím tu není žádné přípojné vozidlo.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+
+    function renderHistoryFilters(){
+      const currentValue = qs('historyProfileFilter').value;
+      qs('historyProfileFilter').innerHTML = '<option value="">Všechny profily</option>' + state.profiles.map(profile => '<option value="' + esc(profile.id) + '">' + esc(profileLabel(profile)) + '</option>').join('');
+      qs('historyProfileFilter').value = state.profiles.some(profile => profile.id === currentValue) ? currentValue : '';
+    }
+    function filteredTrips(){
+      const search = normalizeText(qs('historySearch').value);
+      const profileId = trim(qs('historyProfileFilter').value);
+      const commodity = trim(qs('historyCommodityFilter').value);
+      return sortTripsByCalendar(
+        state.trips.filter(item => {
+          if(profileId && item.profileId !== profileId) return false;
+          if(commodity && item.commodity !== commodity) return false;
+          if(!search) return true;
+          const profile = state.profiles.find(p => p.id === item.profileId);
+          const haystack = [item.fromPlace,item.fromAddress,item.toPlace,item.toAddress,item.commodity,item.containerNumber,item.trailerType,item.trailerPlate,item.note,profileLabel(profile)].join(' ');
+          return normalizeText(haystack).includes(search);
+        })
+      );
+    }
+    function filteredFuelings(){
+      const search = normalizeText(qs('historySearch').value);
+      const profileId = trim(qs('historyProfileFilter').value);
+      return state.fuelings.filter(item => {
+        if(profileId && item.profileId !== profileId) return false;
+        if(!search) return true;
+        const profile = state.profiles.find(p => p.id === item.profileId);
+        const haystack = [item.energyType,item.station,item.note,profileLabel(profile),item.odometer,item.quantity].join(' ');
+        return normalizeText(haystack).includes(search);
+      }).slice().sort(sortByCreated);
+    }
+    function historyEntries(){
+      return state.historyMode === 'fuel' ? filteredFuelings() : filteredTrips();
+    }
+    function getHistoryCalendarStats(){
+      const trips = filteredTrips();
+      const fuelings = filteredFuelings();
+      const stats = {};
+      trips.forEach(item => {
+        const key = trim(item?.date);
+        if(!key) return;
+        if(!stats[key]) stats[key] = { tripCount:0, fuelCount:0, tripKm:0 };
+        stats[key].tripCount += 1;
+        stats[key].tripKm += kmDiff(item.kmStart, item.kmEnd);
+      });
+      fuelings.forEach(item => {
+        const key = trim(item?.date);
+        if(!key) return;
+        if(!stats[key]) stats[key] = { tripCount:0, fuelCount:0, tripKm:0 };
+        stats[key].fuelCount += 1;
+      });
+      return stats;
+    }
+    function getMonthStatKeys(stats, year = state.calendarYear, month = state.calendarMonth){
+      return Object.keys(stats).filter(key => {
+        const date = parseDateParts(key);
+        return date && date.getFullYear() === year && date.getMonth() === month;
+      }).sort((a, b) => new Date(b) - new Date(a));
+    }
+    function syncSelectedCalendarDate(stats){
+      const current = parseDateParts(state.selectedCalendarDate);
+      const isInVisibleMonth = current && current.getFullYear() === state.calendarYear && current.getMonth() === state.calendarMonth;
+      if(isInVisibleMonth) return;
+      const monthKeys = getMonthStatKeys(stats);
+      if(monthKeys.length){
+        state.selectedCalendarDate = monthKeys[0];
+        return;
+      }
+      state.selectedCalendarDate = dateKeyFromParts(state.calendarYear, state.calendarMonth, 1);
+    }
+    function shiftHistoryCalendarMonth(step){
+      const moved = new Date(state.calendarYear, state.calendarMonth + step, 1);
+      state.calendarYear = moved.getFullYear();
+      state.calendarMonth = moved.getMonth();
+      state.selectedCalendarDate = dateKeyFromParts(state.calendarYear, state.calendarMonth, 1);
+      renderHistory();
+    }
+    function jumpHistoryCalendarToday(){
+      const now = new Date();
+      state.calendarYear = now.getFullYear();
+      state.calendarMonth = now.getMonth();
+      state.selectedCalendarDate = today();
+      renderHistory();
+    }
+    function selectHistoryCalendarDate(key){
+      const date = parseDateParts(key);
+      if(!date) return;
+      state.calendarYear = date.getFullYear();
+      state.calendarMonth = date.getMonth();
+      state.selectedCalendarDate = key;
+      renderHistory();
+    }
+    function renderTripHistoryRow(item){
+      const profile = state.profiles.find(p => p.id === item.profileId);
+      const duration = formatDuration(minutesBetween(item.departureTime, item.arrivalTime));
+      const route = (item.fromPlace || item.fromAddress || '—') + ' → ' + (item.toPlace || item.toAddress || '—');
+      const quantityText = item.emptyDrive ? '0 kg' : (item.quantityKg ? item.quantityKg + ' kg' : '—');
+      const trailerSnapshot = [item.trailerType, item.trailerPlate].filter(Boolean).join(' • ') || 'Bez přípojného vozidla';
+      return `
+        <div class="trip-row" id="trip-history-${esc(item.id)}">
+          <button class="trip-row-btn" type="button" onclick="toggleTripHistoryItem('${esc(item.id)}')">
+            <div class="trip-row-main">
+              <div class="trip-row-time">${esc(item.departureTime || '—')} → ${esc(item.arrivalTime || '—')}</div>
+              <div class="trip-row-route">${esc(route)}</div>
+              <div class="trip-row-meta">${esc(duration)} • ${esc(profileLabel(profile))} • ${esc(trailerSnapshot)}</div>
+            </div>
+            <div class="trip-row-side">
+              <div class="trip-row-km">${esc(String(kmDiff(item.kmStart, item.kmEnd)))} km</div>
+              <div class="trip-row-arrow">⌄</div>
+            </div>
+          </button>
+          <div class="trip-row-detail">
+            <div class="trip-detail-grid">
+              <div class="trip-detail-box"><div class="l">Profil</div><div class="v">${esc(profileLabel(profile))}</div></div>
+              <div class="trip-detail-box"><div class="l">Přípojné vozidlo</div><div class="v">${esc(trailerSnapshot)}</div></div>
+              <div class="trip-detail-box"><div class="l">Typ jízdy</div><div class="v">${esc(item.emptyDrive ? 'Bez nákladu' : 'S nákladem')}</div></div>
+              <div class="trip-detail-box"><div class="l">Čas</div><div class="v">${esc(item.departureTime || '—')} → ${esc(item.arrivalTime || '—')}</div></div>
+              <div class="trip-detail-box"><div class="l">Km start</div><div class="v">${esc(item.kmStart || '—')}</div></div>
+              <div class="trip-detail-box"><div class="l">Km konec</div><div class="v">${esc(item.kmEnd || '—')}</div></div>
+              <div class="trip-detail-box"><div class="l">Komodita</div><div class="v">${esc(item.emptyDrive ? 'Po prázdnu' : (item.commodity || '—'))}</div></div>
+              <div class="trip-detail-box"><div class="l">Množství</div><div class="v">${esc(quantityText)}</div></div>
+              ${item.containerNumber ? `<div class="trip-detail-box"><div class="l">Kontejner</div><div class="v">${esc(item.containerNumber)}</div></div>` : ''}
+              ${item.note ? `<div class="trip-detail-box"><div class="l">Poznámka</div><div class="v">${esc(item.note)}</div></div>` : ''}
+            </div>
+            <div class="history-actions">
+              <button class="chip" type="button" onclick="copyTrip('${esc(item.id)}')">Kopírovat</button>
+              <button class="chip" type="button" onclick="editTrip('${esc(item.id)}')">Upravit</button>
+              <button class="btn-danger" type="button" onclick="removeTrip('${esc(item.id)}')">Smazat</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function renderFuelHistoryCard(item){
+      const profile = state.profiles.find(p => p.id === item.profileId);
+      const config = ENERGY_TYPE_CONFIG[item.energyType] || ENERGY_TYPE_CONFIG['Nafta'];
+      return `
+        <div class="history-card">
+          <div class="history-sub">${esc(formatDate(item.date))} • ${esc(profileLabel(profile))}</div>
+          <h3 style="margin-top:10px">${esc(item.station || config.stationLabel)}</h3>
+          <div class="metrics" style="margin-top:14px">
+            <div class="metric"><div class="l">Typ</div><div class="v">${esc(item.energyType)}</div></div>
+            <div class="metric"><div class="l">Množství</div><div class="v">${esc(item.quantity || '—')} ${esc(config.unit)}</div></div>
+            <div class="metric"><div class="l">Stav km</div><div class="v">${esc(item.odometer || '—')}</div></div>
+            ${item.energyType === 'Nabíjení' ? `<div class="metric"><div class="l">Doba</div><div class="v">${esc(item.durationMinutes || '—')} min</div></div>` : ''}
+          </div>
+          ${item.note ? '<div class="summary" style="margin-top:16px"><strong>Poznámka</strong><span>' + esc(item.note) + '</span></div>' : ''}
+          <div class="history-actions">
+            <button class="chip" type="button" onclick="editFuel('${esc(item.id)}')">Upravit</button>
+            <button class="btn-danger" type="button" onclick="removeFuel('${esc(item.id)}')">Smazat</button>
+          </div>
+        </div>
+      `;
+    }
+    function toggleTripHistoryItem(id){
+      const targetId = 'trip-history-' + id;
+      qsa('.trip-row').forEach(item => { if(item.id !== targetId) item.classList.remove('open'); });
+      const target = qs(targetId);
+      if(target) target.classList.toggle('open');
+    }
+    function renderHistoryCalendar(calendarStats){
+      const startOffset = (new Date(state.calendarYear, state.calendarMonth, 1).getDay() + 6) % 7;
+      const gridStart = new Date(state.calendarYear, state.calendarMonth, 1 - startOffset);
+      const cells = [];
+      for(let i = 0; i < 42; i++){
+        const cellDate = new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i);
+        const key = dateKeyFromDate(cellDate);
+        const dayStats = calendarStats[key] || { tripCount:0, fuelCount:0, tripKm:0 };
+        const isSelected = key === state.selectedCalendarDate;
+        const isToday = key === today();
+        const isOutside = cellDate.getMonth() !== state.calendarMonth;
+        cells.push(`
+          <button type="button" class="history-calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''} ${isOutside ? 'outside' : ''}" onclick="selectHistoryCalendarDate('${key}')">
+            <div class="history-calendar-date">${cellDate.getDate()}</div>
+            <div class="history-calendar-marker-wrap">
+              <div class="history-calendar-marker-row">
+                ${dayStats.tripCount ? `<div class="history-calendar-marker count-${Math.min(dayStats.tripCount, 3)}"></div>` : ''}
+              </div>
+              <div class="history-calendar-marker-row">
+                ${dayStats.fuelCount ? `<div class="history-calendar-marker fuel count-${Math.min(dayStats.fuelCount, 3)}"></div>` : ''}
+              </div>
+              <div class="history-calendar-counts">
+                ${dayStats.tripCount ? `<span class="history-calendar-count-badge trip">${dayStats.tripCount}×📝</span>` : ''}
+                ${dayStats.fuelCount ? `<span class="history-calendar-count-badge fuel">${dayStats.fuelCount}×⛽</span>` : ''}
+              </div>
+            </div>
+          </button>
+        `);
+      }
+      return `
+        <section class="section">
+          <div class="history-calendar-card">
+            <div class="history-calendar-toolbar">
+              <div>
+                <div class="history-calendar-month">${esc(historyMonthLabel(state.calendarYear, state.calendarMonth))}</div>
+              </div>
+              <div class="history-calendar-nav">
+                <button class="chip" type="button" onclick="shiftHistoryCalendarMonth(-1)">←</button>
+                <button class="chip" type="button" onclick="jumpHistoryCalendarToday()">Dnes</button>
+                <button class="chip" type="button" onclick="shiftHistoryCalendarMonth(1)">→</button>
+              </div>
+            </div>
+            <div class="history-calendar-grid">
+              ${HISTORY_WEEKDAY_NAMES.map(day => `<div class="history-calendar-weekday">${esc(day)}</div>`).join('')}
+              ${cells.join('')}
+            </div>
+            <div class="history-calendar-legend">
+              <span class="history-calendar-legend-line"></span>
+              <span>Jízdy v daný den</span>
+              <span class="history-calendar-legend-line fuel"></span>
+              <span>Doplnění v daný den</span>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+    function renderHistorySelectedDay(list, calendarStats){
+      const selectedKey = state.selectedCalendarDate;
+      const selectedDate = parseDateParts(selectedKey);
+      const items = list.filter(item => trim(item.date) === selectedKey);
+      const dayStats = calendarStats[selectedKey] || { tripCount:0, fuelCount:0, tripKm:0 };
+      const title = selectedDate ? formatDate(selectedKey) : 'Vybraný den';
+      const modeSubtitle = items.length
+        ? monthItemLabel(items.length, state.historyMode)
+        : (state.historyMode === 'fuel' ? 'V tomto dni není žádné doplnění.' : 'V tomto dni není žádná jízda.');
+      const daySummary = [monthItemLabel(dayStats.tripCount, 'trips'), monthItemLabel(dayStats.fuelCount, 'fuel'), (dayStats.tripKm > 0 ? dayStats.tripKm : 0) + ' km'].join(' • ');
+      return `
+        <section class="section">
+          <div class="history-selected-head">
+            <div>
+              <h2 class="title">${esc(title)}</h2>
+              <div class="history-selected-sub">${esc(daySummary)}</div>
+              <div class="history-selected-stats">
+                <span class="history-selected-chip">${esc(monthItemLabel(dayStats.tripCount, 'trips'))}</span>
+                <span class="history-selected-chip">${esc(monthItemLabel(dayStats.fuelCount, 'fuel'))}</span>
+                <span class="history-selected-chip">${esc((dayStats.tripKm > 0 ? dayStats.tripKm : 0) + ' km')}</span>
+                <span class="history-selected-chip">Zobrazeno: ${esc(modeSubtitle)}</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-16 ${state.historyMode === 'fuel' ? 'list-gap' : 'history-trip-list'}">
+            ${items.length
+              ? (state.historyMode === 'fuel'
+                  ? items.map(renderFuelHistoryCard).join('')
+                  : items.map(renderTripHistoryRow).join(''))
+              : `<div class="empty">${esc(state.historyMode === 'fuel' ? 'V tomto dni není žádné doplnění.' : 'V tomto dni není žádná jízda.')}</div>`}
+          </div>
+        </section>
+      `;
+    }
+    function renderHistory(){
+      renderHistoryFilters();
+      const root = qs('historyList');
+      const list = historyEntries();
+      const calendarStats = getHistoryCalendarStats();
+      syncSelectedCalendarDate(calendarStats);
+      root.innerHTML = renderHistoryCalendar(calendarStats) + renderHistorySelectedDay(list, calendarStats);
+    }
+
+    function updateFuelFormFields(){
+      const type = qs('fuelType').value;
+      const config = ENERGY_TYPE_CONFIG[type] || ENERGY_TYPE_CONFIG['Nafta'];
+      qs('fuelQuantityLabel').textContent = config.quantityLabel;
+      qs('fuelStationLabel').textContent = config.stationLabel;
+      qs('fuelDurationWrap').classList.toggle('hidden', type !== 'Nabíjení');
+      if(type !== 'Nabíjení') qs('fuelDurationMinutes').value = '';
+    }
+    function toggleVehicleBrandField(){
+      const isTruck = qs('vehicleType').value === 'Tahač';
+      qs('vehicleBrandWrap').classList.toggle('hidden', !isTruck);
+      if(!isTruck) qs('vehicleBrand').value = '';
+    }
+    function updateVehiclePrimaryLabel(){
+      const isTruck = qs('vehicleType').value === 'Tahač';
+      qs('vehiclePrimaryText').textContent = isTruck
+        ? 'Použít jako hlavní tahač v profilu'
+        : 'Použít jako hlavní vozidlo za tahačem v profilu';
+      toggleVehicleBrandField();
+    }
+
+    function openScreen(screen){
+      state.screen = screen;
+      qsa('.screen').forEach(el => el.classList.add('hidden'));
+      qs('screen-' + screen).classList.remove('hidden');
+      qsa('.nav button').forEach(btn => btn.classList.remove('active'));
+      qs('nav-' + screen).classList.add('active');
+      renderAll();
+      if(screen === 'trip' && !state.editingTripId) autofillTripKmStart(true);
+      if(screen === 'fuel' && !state.editingFuelId) autofillFuelOdometer(true);
+      document.querySelector('.app')?.scrollTo({ top:0, behavior:'smooth' });
+      if(screen === 'trip' || screen === 'overview') setTimeout(resumeGpsAssistantIfNeeded, 120);
+    }
+    function setHistoryMode(mode){
+      state.historyMode = mode;
+      qs('historyTripsBtn').classList.toggle('active', mode === 'trips');
+      qs('historyFuelBtn').classList.toggle('active', mode === 'fuel');
+      qs('historyCommodityFilter').disabled = mode !== 'trips';
+      syncSelectedCalendarDate(getHistoryCalendarStats());
+      renderHistory();
+    }
+    function activateProfile(id){
+      state.activeProfileId = id;
+      state.editingVehicleId = null;
+      saveState();
+      renderAll();
+    }
+
+    function resetProfileForm(){
+      state.editingProfileId = null;
+      qs('profileForm').reset();
+      qs('profileFormTitle').textContent = 'Nový profil';
+      qs('profileSubmitBtn').textContent = 'Uložit profil';
+    }
+    function getProfileFormData(){
+      const existing = state.profiles.find(item => item.id === state.editingProfileId);
+      return normalizeProfile({
+        id: existing?.id || generateId('PROFILE'),
+        driverName: qs('profileDriverName').value,
+        note: qs('profileNote').value,
+        vehicles: existing?.vehicles || [],
+        createdAt: existing?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+    function profileValid(profile){ return !!profile.driverName; }
+    function editProfile(id){
+      const profile = state.profiles.find(item => item.id === id);
+      if(!profile) return;
+      state.editingProfileId = id;
+      qs('profileDriverName').value = profile.driverName || '';
+      qs('profileNote').value = profile.note || '';
+      qs('profileFormTitle').textContent = 'Upravit profil';
+      qs('profileSubmitBtn').textContent = 'Uložit změny';
+      openScreen('profiles');
+    }
+    function removeProfile(id){
+      if(!confirm('Opravdu smazat profil?')) return;
+      state.trips = state.trips.filter(item => item.profileId !== id);
+      state.fuelings = state.fuelings.filter(item => item.profileId !== id);
+      state.profiles = state.profiles.filter(item => item.id !== id);
+      if(state.activeTrip?.profileId === id){ state.activeTrip = null; state.finishingActiveTrip = false; }
+      if(state.activeProfileId === id) state.activeProfileId = state.profiles[0]?.id || '';
+      saveState();
+      renderAll();
+    }
+
+    function resetTripForm(){
+      state.editingTripId = null;
+      state.finishingActiveTrip = false;
+      qs('tripForm').reset();
+      qs('tripFormTitle').textContent = 'Nová jízda';
+      qs('tripSubmitBtn').textContent = 'Uložit jízdu';
+      qs('tripDate').value = today();
+      qs('tripDistancePreview').value = '';
+      qs('tripEmptyDrive').checked = false;
+      qs('tripContainerNumber').value = '';
+      qs('tripContainerInfo').textContent = '';
+      setCommodityFields('');
+      toggleEmptyDrive();
+      populateTripTrailerSelect();
+      updateTripContainerField();
+      fillTripSmartStart(true);
+      setTripQuickHint('');
+    }
+    function getTripFormData(){
+      const existing = state.trips.find(item => item.id === state.editingTripId);
+      const finishingActiveTrip = state.finishingActiveTrip && state.activeTrip;
+      const trailerSnapshot = currentTripTrailerSnapshot();
+      const containerNumber = trailerNeedsContainerField(trailerSnapshot.type) || existing?.containerNumber
+        ? trim(qs('tripContainerNumber').value)
+        : '';
+      return normalizeTrip({
+        id: existing?.id || generateId('TRIP'),
+        profileId: state.activeProfileId,
+        date: qs('tripDate').value || state.activeTrip?.date || today(),
+        departureTime: qs('tripDepartureTime').value || state.activeTrip?.departureTime || roundedCurrentTime(5),
+        arrivalTime: qs('tripArrivalTime').value,
+        emptyDrive: !!qs('tripEmptyDrive').checked,
+        kmStart: digitsOnly(qs('tripKmStart').value),
+        kmEnd: digitsOnly(qs('tripKmEnd').value),
+        fromPlace: trim(qs('tripFromPlace').value),
+        fromAddress: trim(qs('tripFromAddress').value),
+        toPlace: trim(qs('tripToPlace').value),
+        toAddress: trim(qs('tripToAddress').value),
+        commodity: qs('tripEmptyDrive').checked ? '' : selectedCommodity(),
+        quantityKg: qs('tripEmptyDrive').checked ? '0' : digitsOnly(qs('tripQuantityKg').value),
+        containerNumber,
+        trailerType: trailerSnapshot.type,
+        trailerPlate: trailerSnapshot.plate,
+        note: trim(qs('tripNote').value),
+        gpsDistanceMeters: finishingActiveTrip ? Number(state.activeTrip?.gps?.distanceMeters || 0) : Number(existing?.gpsDistanceMeters || 0),
+        gpsPointsCount: finishingActiveTrip ? Number(state.activeTrip?.gps?.pointsCount || 0) : Number(existing?.gpsPointsCount || 0),
+        gpsAccuracyMeters: finishingActiveTrip ? Number(state.activeTrip?.gps?.accuracyMeters || 0) : Number(existing?.gpsAccuracyMeters || 0),
+        createdAt: existing?.createdAt || (finishingActiveTrip ? state.activeTrip.startedAt : new Date().toISOString()),
+        updatedAt: new Date().toISOString()
+      });
+    }
+    function tripValid(trip){
+      return !!(trip.profileId && trip.date && trip.kmStart && trip.kmEnd && (trip.fromPlace || trip.fromAddress) && (trip.toPlace || trip.toAddress));
+    }
+    function fillTripFormFromRecord(item, mode = 'edit'){
+      if(!item) return;
+      if(mode === 'copy'){
+        applyTripTemplate(item, { title:'Kopie minulé jízdy' });
+        setTripQuickHint('Načtena kopie minulé jízdy.');
+        return;
+      }
+      state.activeProfileId = item.profileId;
+      state.editingTripId = item.id;
+      qs('tripDate').value = item.date || today();
+      qs('tripDepartureTime').value = item.departureTime || '';
+      qs('tripArrivalTime').value = item.arrivalTime || '';
+      qs('tripEmptyDrive').checked = !!item.emptyDrive;
+      qs('tripKmStart').value = item.kmStart || '';
+      qs('tripKmEnd').value = item.kmEnd || '';
+      qs('tripFromPlace').value = item.fromPlace || '';
+      qs('tripFromAddress').value = item.fromAddress || '';
+      qs('tripToPlace').value = item.toPlace || '';
+      qs('tripToAddress').value = item.toAddress || '';
+      setCommodityFields(item.commodity || '');
+      qs('tripQuantityKg').value = item.quantityKg || '';
+      qs('tripContainerNumber').value = item.containerNumber || '';
+      qs('tripNote').value = item.note || '';
+      qs('tripFormTitle').textContent = 'Upravit jízdu';
+      qs('tripSubmitBtn').textContent = 'Uložit změny';
+      state.finishingActiveTrip = false;
+      toggleEmptyDrive();
+      populateTripTrailerSelect(item.trailerType, item.trailerPlate);
+      updateTripContainerField();
+      updateTripDistancePreview();
+      saveState();
+      openScreen('trip');
+      setTripQuickHint('Upravuješ existující jízdu.');
+    }
+    function editTrip(id){
+      const item = state.trips.find(trip => trip.id === id);
+      if(item) fillTripFormFromRecord(item, 'edit');
+    }
+    function copyTrip(id){
+      const item = state.trips.find(trip => trip.id === id);
+      if(item) fillTripFormFromRecord(item, 'copy');
+    }
+    function removeTrip(id){
+      if(!confirm('Opravdu smazat jízdu?')) return;
+      state.trips = state.trips.filter(item => item.id !== id);
+      saveState();
+      renderAll();
+    }
+
+    function resetFuelForm(){
+      state.editingFuelId = null;
+      qs('fuelForm').reset();
+      qs('fuelType').value = 'Nafta';
+      qs('fuelFormTitle').textContent = 'Tankování / nabíjení';
+      qs('fuelSubmitBtn').textContent = 'Uložit záznam';
+      qs('fuelDate').value = today();
+      updateFuelFormFields();
+      autofillFuelOdometer(true);
+    }
+    function getFuelFormData(){
+      const existing = state.fuelings.find(item => item.id === state.editingFuelId);
+      return normalizeFuel({
+        id: existing?.id || generateId('FUEL'),
+        profileId: state.activeProfileId,
+        date: qs('fuelDate').value,
+        odometer: digitsOnly(qs('fuelOdometer').value),
+        energyType: qs('fuelType').value,
+        quantity: decimalOnly(qs('fuelQuantity').value),
+        station: trim(qs('fuelStation').value),
+        durationMinutes: digitsOnly(qs('fuelDurationMinutes').value),
+        note: trim(qs('fuelNote').value),
+        createdAt: existing?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+    function fuelValid(fuel){ return !!(fuel.profileId && fuel.date && fuel.odometer && fuel.quantity); }
+    function editFuel(id){
+      const item = state.fuelings.find(fuel => fuel.id === id);
+      if(!item) return;
+      state.editingFuelId = id;
+      state.activeProfileId = item.profileId;
+      qs('fuelType').value = item.energyType || 'Nafta';
+      qs('fuelDate').value = item.date || today();
+      qs('fuelOdometer').value = item.odometer || '';
+      qs('fuelQuantity').value = item.quantity || '';
+      qs('fuelDurationMinutes').value = item.durationMinutes || '';
+      qs('fuelStation').value = item.station || '';
+      qs('fuelNote').value = item.note || '';
+      updateFuelFormFields();
+      qs('fuelFormTitle').textContent = 'Upravit tankování / nabíjení';
+      qs('fuelSubmitBtn').textContent = 'Uložit změny';
+      saveState();
+      openScreen('fuel');
+    }
+    function removeFuel(id){
+      if(!confirm('Opravdu smazat záznam tankování / nabíjení?')) return;
+      state.fuelings = state.fuelings.filter(item => item.id !== id);
+      saveState();
+      renderAll();
+    }
+
+    function openVehicleForm(){
+      qs('vehicleFormSection').classList.remove('hidden');
+      qs('vehicleFormLinkWrap').classList.add('hidden');
+    }
+    function closeVehicleForm(){
+      qs('vehicleFormSection').classList.add('hidden');
+      qs('vehicleFormLinkWrap').classList.remove('hidden');
+    }
+    function resetVehicleForm(){
+      state.editingVehicleId = null;
+      qs('vehicleForm').reset();
+      qs('vehicleType').value = 'Tahač';
+      qs('vehicleBrand').value = '';
+      qs('vehiclePrimary').checked = false;
+      qs('vehicleBlockTitle').textContent = 'Nové vozidlo';
+      qs('vehicleSubmitBtn').textContent = 'Uložit vozidlo';
+      updateVehiclePrimaryLabel();
+      closeVehicleForm();
+    }
+    function vehicleValid(vehicle){ return !!(vehicle.type && (vehicle.label || vehicle.plate || vehicle.stk)); }
+    function getVehicleFormData(){
+      const profile = activeProfile();
+      const existing = activeVehicles(profile).find(item => item.id === state.editingVehicleId);
+      return normalizeVehicle({
+        id: existing?.id || generateId('VEH'),
+        type: qs('vehicleType').value,
+        brand: qs('vehicleBrand').value,
+        label: qs('vehicleLabel').value,
+        plate: qs('vehiclePlate').value,
+        year: qs('vehicleYear').value,
+        stk: qs('vehicleStk').value,
+        note: qs('vehicleNote').value,
+        primaryForProfile: !!qs('vehiclePrimary').checked,
+        createdAt: existing?.createdAt || new Date().toISOString()
+      });
+    }
+    function editVehicle(id){
+      const profile = activeProfile();
+      if(!profile) return;
+      const vehicle = activeVehicles(profile).find(item => item.id === id);
+      if(!vehicle) return;
+      state.editingVehicleId = id;
+      qs('vehicleType').value = vehicle.type || 'Tahač';
+      qs('vehicleBrand').value = vehicle.brand || '';
+      qs('vehicleLabel').value = vehicle.label || '';
+      qs('vehiclePlate').value = vehicle.plate || '';
+      qs('vehicleYear').value = vehicle.year || '';
+      qs('vehicleStk').value = vehicle.stk || '';
+      qs('vehicleNote').value = vehicle.note || '';
+      qs('vehiclePrimary').checked = !!vehicle.primaryForProfile;
+      qs('vehicleBlockTitle').textContent = 'Upravit vozidlo';
+      qs('vehicleSubmitBtn').textContent = 'Uložit změny';
+      updateVehiclePrimaryLabel();
+      openScreen('tech');
+      openVehicleForm();
+    }
+    function removeVehicle(id){
+      const profile = activeProfile();
+      if(!profile) return;
+      if(!confirm('Opravdu smazat vozidlo?')) return;
+      state.profiles = state.profiles.map(item => {
+        if(item.id !== profile.id) return item;
+        const filtered = activeVehicles(item).filter(vehicle => vehicle.id !== id);
+        return { ...item, vehicles: fixVehiclePrimaries(filtered), updatedAt:new Date().toISOString() };
+      });
+      saveState();
+      renderAll();
+    }
+    function setVehicleAsPrimary(id){
+      const profile = activeProfile();
+      if(!profile) return;
+      const target = activeVehicles(profile).find(vehicle => vehicle.id === id);
+      if(!target) return;
+      state.profiles = state.profiles.map(item => {
+        if(item.id !== profile.id) return item;
+        const vehicles = activeVehicles(item).map(vehicle => {
+          if(vehicleGroup(vehicle) !== vehicleGroup(target)) return vehicle;
+          return { ...vehicle, primaryForProfile: vehicle.id === id };
+        });
+        return { ...item, vehicles: fixVehiclePrimaries(vehicles), updatedAt:new Date().toISOString() };
+      });
+      saveState();
+      renderAll();
+    }
+
+    function downloadBackup(){
+      const payload = {
+        schema:'trucklog-backup',
+        appVersion:'V13.4',
+        exportedAt:new Date().toISOString(),
+        data:{
+          activeProfileId: state.activeProfileId || '',
+          profiles: state.profiles,
+          trips: state.trips,
+          fuelings: state.fuelings,
+          places: state.places,
+          activeTrip: state.activeTrip
+        }
+      };
+      downloadTextFile('trucklog-backup.json', JSON.stringify(payload, null, 2), 'application/json;charset=utf-8');
+    }
+    function promptRestoreBackup(){
+      qs('backupRestoreInput').value = '';
+      qs('backupRestoreInput').click();
+    }
+    function handleBackupImport(event){
+      const file = event.target.files && event.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(loadEvent){
+        try{
+          const parsed = JSON.parse(String(loadEvent.target?.result || '{}'));
+          const data = parsed && parsed.data ? parsed.data : parsed;
+          state.profiles = Array.isArray(data?.profiles) ? data.profiles : [];
+          state.trips = Array.isArray(data?.trips) ? data.trips : [];
+          state.fuelings = Array.isArray(data?.fuelings) ? data.fuelings : [];
+          state.places = Array.isArray(data?.places) ? data.places : [];
+          state.activeTrip = data?.activeTrip || null;
+          state.activeProfileId = trim(data?.activeProfileId);
+          ensureDataShape();
+          saveState();
+          resetProfileForm();
+          resetTripForm();
+          resetFuelForm();
+          resetVehicleForm();
+          renderAll();
+          alert('Záloha byla úspěšně obnovena.');
+        }catch(error){
+          console.error(error);
+          alert('Soubor se nepodařilo obnovit.');
+        }
+      };
+      reader.readAsText(file, 'utf-8');
+    }
+    function exportTripsCsv(){
+      const rows = [[
+        'Datum','Čas odjezdu','Čas příjezdu','Profil','Řidič','Odkud','Kam','Km start','Km konec','Ujeto km','Komodita','Množství kg','Přípojné vozidlo','SPZ přípojného vozidla','Kontejner','Poznámka'
+      ]];
+      sortTripsByCalendar(state.trips).forEach(item => {
+        const profile = state.profiles.find(p => p.id === item.profileId);
+        rows.push([
+          item.date || '',
+          item.departureTime || '',
+          item.arrivalTime || '',
+          profileLabel(profile),
+          profile?.driverName || '',
+          item.fromPlace || item.fromAddress || '',
+          item.toPlace || item.toAddress || '',
+          item.kmStart || '',
+          item.kmEnd || '',
+          String(kmDiff(item.kmStart, item.kmEnd) || ''),
+          item.emptyDrive ? 'Po prázdnu' : (item.commodity || ''),
+          item.emptyDrive ? '0' : (item.quantityKg || ''),
+          item.trailerType || '',
+          item.trailerPlate || '',
+          item.containerNumber || '',
+          item.note || ''
+        ]);
+      });
+      downloadTextFile(exportFileName('jizdy', 'csv'), buildCsv(rows), 'text/csv;charset=utf-8');
+    }
+    function exportFuelingsCsv(){
+      const rows = [['Datum','Profil','Řidič','Typ','Množství','Stav km','Místo','Doba nabíjení min','Poznámka']];
+      state.fuelings.slice().sort(sortByCreated).forEach(item => {
+        const profile = state.profiles.find(p => p.id === item.profileId);
+        rows.push([
+          item.date || '',
+          profileLabel(profile),
+          profile?.driverName || '',
+          item.energyType || 'Nafta',
+          item.quantity || '',
+          item.odometer || '',
+          item.station || '',
+          item.durationMinutes || '',
+          item.note || ''
+        ]);
+      });
+      downloadTextFile(exportFileName('tankovani', 'csv'), buildCsv(rows), 'text/csv;charset=utf-8');
+    }
+
+    qs('profileForm').addEventListener('submit', function(event){
+      event.preventDefault();
+      const profile = getProfileFormData();
+      if(!profileValid(profile)){
+        alert('Vyplň prosím jméno řidiče.');
+        return;
+      }
+      const exists = state.profiles.some(item => item.id === profile.id);
+      state.profiles = exists ? state.profiles.map(item => item.id === profile.id ? profile : item) : [profile, ...state.profiles];
+      if(!state.activeProfileId || state.editingProfileId) state.activeProfileId = profile.id;
+      saveState();
+      resetProfileForm();
+      renderAll();
+    });
+
+    qs('tripForm').addEventListener('submit', function(event){
+      event.preventDefault();
+      if(!state.activeProfileId){
+        alert('Nejdřív si vytvoř a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
+      const trip = getTripFormData();
+      if(!tripValid(trip)){
+        alert('Vyplň prosím datum, km start, km konec a odkud/kam.');
+        return;
+      }
+      if(Number(trip.kmEnd) < Number(trip.kmStart)){
+        alert('Km konec nemůže být menší než km start.');
+        return;
+      }
+      if(trip.fromPlace && trip.fromAddress) upsertPlace(trip.fromPlace, trip.fromAddress, true);
+      if(trip.toPlace && trip.toAddress) upsertPlace(trip.toPlace, trip.toAddress, true);
+      const exists = state.trips.some(item => item.id === trip.id);
+      state.trips = exists ? state.trips.map(item => item.id === trip.id ? trip : item) : [trip, ...state.trips];
+      state.trips = sortTripsByCalendar(state.trips);
+      if(state.finishingActiveTrip && state.activeTrip && state.activeTrip.profileId === trip.profileId){
+        stopGpsAssistant(false);
+        state.activeTrip = null;
+        state.finishingActiveTrip = false;
+      }
+      saveState();
+      resetTripForm();
+      openScreen('history');
+    });
+
+    qs('fuelForm').addEventListener('submit', function(event){
+      event.preventDefault();
+      if(!state.activeProfileId){
+        alert('Nejdřív si vytvoř a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
+      const fuel = getFuelFormData();
+      if(!fuelValid(fuel)){
+        alert('Vyplň prosím datum, stav km a množství.');
+        return;
+      }
+      const exists = state.fuelings.some(item => item.id === fuel.id);
+      state.fuelings = exists ? state.fuelings.map(item => item.id === fuel.id ? fuel : item) : [fuel, ...state.fuelings];
+      state.fuelings.sort(sortByCreated);
+      saveState();
+      resetFuelForm();
+      openScreen('history');
+    });
+
+    qs('vehicleForm').addEventListener('submit', function(event){
+      event.preventDefault();
+      const profile = activeProfile();
+      if(!profile){
+        alert('Nejdřív si vytvoř a aktivuj profil.');
+        openScreen('profiles');
+        return;
+      }
+      const vehicle = getVehicleFormData();
+      if(!vehicleValid(vehicle)){
+        alert('Vyplň prosím aspoň typ vozidla a některý z údajů označení, SPZ nebo STK.');
+        return;
+      }
+      state.profiles = state.profiles.map(item => {
+        if(item.id !== profile.id) return item;
+        let vehicles = activeVehicles(item);
+        if(vehicle.primaryForProfile){
+          vehicles = vehicles.map(v => vehicleGroup(v) === vehicleGroup(vehicle) ? { ...v, primaryForProfile:false } : v);
+        }
+        const exists = vehicles.some(v => v.id === vehicle.id);
+        const merged = exists ? vehicles.map(v => v.id === vehicle.id ? vehicle : v) : [vehicle, ...vehicles];
+        return { ...item, vehicles: fixVehiclePrimaries(merged), updatedAt:new Date().toISOString() };
+      });
+      saveState();
+      resetVehicleForm();
+      renderAll();
+    });
+
+    qs('tripCommodityPreset').addEventListener('change', toggleCommodityCustom);
+    qs('tripEmptyDrive').addEventListener('change', toggleEmptyDrive);
+    qs('tripRepeatLastBtn').addEventListener('click', repeatLastTrip);
+    qs('tripReverseRouteBtn').addEventListener('click', reverseTripRouteQuick);
+    qs('tripPrefillRouteBtn').addEventListener('click', function(){ prefillTripByCurrentRoute(true); });
+    qs('tripKmStart').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); updateTripDistancePreview(); });
+    qs('tripKmEnd').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); updateTripDistancePreview(); });
+    qs('tripQuantityKg').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); });
+    qs('tripContainerNumber').addEventListener('input', updateTripContainerField);
+    qs('tripTrailerSelect').addEventListener('change', updateTripContainerField);
+    qs('tripFromPlace').addEventListener('change', function(){ autoFillPlaceAddress('tripFromPlace', 'tripFromAddress'); maybeSmartPrefillTripByRoute(); });
+    qs('tripToPlace').addEventListener('change', function(){ autoFillPlaceAddress('tripToPlace', 'tripToAddress'); maybeSmartPrefillTripByRoute(); });
+    qs('tripFromAddress').addEventListener('change', maybeSmartPrefillTripByRoute);
+    qs('tripToAddress').addEventListener('change', maybeSmartPrefillTripByRoute);
+
+    qs('fuelOdometer').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); });
+    qs('fuelQuantity').addEventListener('input', event => { event.target.value = decimalOnly(event.target.value); });
+    qs('fuelDurationMinutes').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value); });
+    qs('fuelType').addEventListener('change', updateFuelFormFields);
+
+    qs('vehicleYear').addEventListener('input', event => { event.target.value = digitsOnly(event.target.value).slice(0,4); });
+    qs('vehiclePlate').addEventListener('input', event => { event.target.value = event.target.value.toUpperCase(); });
+    qs('vehicleType').addEventListener('change', updateVehiclePrimaryLabel);
+
+    qs('historySearch').addEventListener('input', renderHistory);
+    qs('historyProfileFilter').addEventListener('change', renderHistory);
+    qs('historyCommodityFilter').addEventListener('change', renderHistory);
+    qs('backupRestoreInput').addEventListener('change', handleBackupImport);
+
+    function renderAll(){
+      renderPlacesDatalist();
+      renderProfileSwitchers();
+      syncTripTrailerSelect();
+      updateTripContainerField();
+      renderActiveTripPanel();
+      renderOverview();
+      renderProfiles();
+      renderVehicles();
+      renderHistory();
+    }
+
+    ensureDataShape();
+    state.selectedCalendarDate = today();
+    state.calendarYear = new Date().getFullYear();
+    state.calendarMonth = new Date().getMonth();
+    saveState();
+    resetProfileForm();
+    resetTripForm();
+    resetFuelForm();
+    resetVehicleForm();
+    setHistoryMode('trips');
+    renderAll();
+    setTimeout(resumeGpsAssistantIfNeeded, 200);
+    setInterval(() => {
+      if(!state.activeTrip) return;
+      renderActiveTripPanel();
+      if(state.screen === 'overview') renderOverview();
+    }, 30000);
+  </script>
+</body>
+</html>
