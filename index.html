@@ -1657,7 +1657,7 @@
       downloadTextFile(exportFileName('tankovani', 'csv'), buildCsv(rows), 'text/csv;charset=utf-8');
     }
 
-    function authControlsGuest(infoText='Použij účet, který jsi vytvořil ve Firebase Authentication.'){
+    function authControlsGuest(infoText='misutsonn@seznam.cz'){
       qs('authBanner').className = 'banner';
       qs('authStatus').textContent = infoText;
       qs('authControls').innerHTML = `
@@ -1675,7 +1675,8 @@
         <button id="logoutBtn" class="btn2" type="button">Odhlásit</button>
       `;
     }
-
+window.authControlsGuest = authControlsGuest;
+window.authControlsUser = authControlsUser;
     qs('profileForm').addEventListener('submit', function(event){
       event.preventDefault();
       const profile = getProfileFormData();
