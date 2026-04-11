@@ -3135,9 +3135,12 @@
     getDoc
   } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
   import {
-    getAuth,
-    onAuthStateChanged
-  } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyA3vdgHphyimE4916E-uIQrGx-IwAsmjws",
