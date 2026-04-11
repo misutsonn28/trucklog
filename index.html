@@ -3129,14 +3129,14 @@
   import {
     initializeFirestore,
     persistentLocalCache,
-    persistentMultipleTabManager
+    persistentMultipleTabManager,
+    doc,
+    setDoc,
+    getDoc
   } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
   import {
     getAuth,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    signOut
+    onAuthStateChanged
   } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
 
   const firebaseConfig = {
@@ -3157,7 +3157,49 @@
   });
 
   const auth = getAuth(firebaseApp);
+async function testFirestoreConnection(user){
+  if(!user){
+    cloudState.level = 'warn';
+    cloudState.message = 'Uživatel není přihlášený. Firestore test zatím neběží.';
+    renderSyncBanner();
+    return;
+  }
 
+  try{
+    const testRef = doc(db, 'users', user.uid, 'meta', 'connection');
+
+    await setDoc(testRef, {
+      email: user.email || '',
+      lastCheck: new Date().toISOString(),
+      source: 'TruckLog web test'
+    }, { merge:true });
+
+    const snap = await getDoc(testRef);
+
+    if(snap.exists()){
+      cloudState.level = '';
+      cloudState.message = 'Firestore vrstva funguje. Zápis i čtení proběhly správně.';
+    }else{
+      cloudState.level = 'warn';
+      cloudState.message = 'Firestore odpověděl, ale testovací dokument nebyl nalezen.';
+    }
+  }catch(error){
+    console.error('Firestore test error:', error);
+    cloudState.level = 'warn';
+    cloudState.message = 'Firestore chyba: ' + (error?.message || error);
+  }
+
+  renderSyncBanner();
+  onAuthStateChanged(auth, async (user) => {
+  if(user){
+    await testFirestoreConnection(user);
+  }else{
+    cloudState.level = 'warn';
+    cloudState.message = 'Nikdo není přihlášený.';
+    renderSyncBanner();
+  }
+});
+}
   function escText(value){
     return String(value ?? '')
       .replaceAll('&','&amp;')
