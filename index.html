@@ -3124,148 +3124,371 @@
     }, 30000);
   </script>
 
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js';
-    import {
-      initializeFirestore,
-      persistentLocalCache,
-      persistentMultipleTabManager
-    } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
+ <script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js';
+  import {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager
+  } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
+  import {
+    getAuth,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut
+  } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA3vdgHphyimE4916E-uIQrGx-IwAsmJws",
-      authDomain: "trucklog-e8e69.firebaseapp.com",
-      projectId: "trucklog-e8e69",
-      storageBucket: "trucklog-e8e69.firebasestorage.app",
-      messagingSenderId: "471621022674",
-      appId: "1:471621022674:web:361f0fb5fbaf5e529b4e0b"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3vdgHphyimE4916E-uIQrGx-IwAsmJws",
+    authDomain: "trucklog-e8e69.firebaseapp.com",
+    projectId: "trucklog-e8e69",
+    storageBucket: "trucklog-e8e69.firebasestorage.app",
+    messagingSenderId: "471621022674",
+    appId: "1:471621022674:web:361f0fb5fbaf5e529b4e0b"
+  };
 
-    const style = document.createElement('style');
-    style.textContent = `
-      .sync-banner{
-        max-width:1180px;
-        width:calc(100% - 32px);
-        margin:12px auto 0;
-        padding:12px 14px;
-        border-radius:18px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        background:
-          linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-          rgba(10,20,35,.94);
-        border:1px solid rgba(56,189,248,.18);
-        box-shadow:0 16px 36px rgba(2,6,23,.24);
-        backdrop-filter:blur(14px) saturate(135%);
-        -webkit-backdrop-filter:blur(14px) saturate(135%);
-        color:#f7fbff;
-        font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  const firebaseApp = initializeApp(firebaseConfig);
+
+  const db = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+
+  const auth = getAuth(firebaseApp);
+
+  function escText(value){
+    return String(value ?? '')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  function authErrorMessage(error){
+    const code = error?.code || '';
+    if(code.includes('invalid-email')) return 'Neplatný e-mail.';
+    if(code.includes('missing-password')) return 'Zadej heslo.';
+    if(code.includes('weak-password')) return 'Heslo je moc slabé. Použij alespoň 6 znaků.';
+    if(code.includes('email-already-in-use')) return 'Tento e-mail už existuje.';
+    if(code.includes('invalid-credential')) return 'Špatný e-mail nebo heslo.';
+    if(code.includes('user-not-found')) return 'Uživatel neexistuje.';
+    if(code.includes('wrong-password')) return 'Špatné heslo.';
+    if(code.includes('too-many-requests')) return 'Příliš mnoho pokusů. Zkus to později.';
+    return 'Došlo k chybě: ' + (error?.message || 'neznámá chyba');
+  }
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .top-cloud-wrap{
+      max-width:1180px;
+      width:100%;
+      margin:0 auto;
+      padding:12px 16px 0;
+    }
+    .sync-banner,
+    .auth-banner{
+      width:100%;
+      margin:0 0 12px 0;
+      padding:12px 14px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        rgba(10,20,35,.94);
+      border:1px solid rgba(56,189,248,.18);
+      box-shadow:0 16px 36px rgba(2,6,23,.24);
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+      color:#f7fbff;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    .sync-banner.warn,
+    .auth-banner.warn{
+      border-color:rgba(251,191,36,.28);
+      box-shadow:0 16px 36px rgba(2,6,23,.24), 0 0 0 1px rgba(251,191,36,.06) inset;
+    }
+    .auth-banner.ok{
+      border-color:rgba(52,211,153,.28);
+      box-shadow:0 16px 36px rgba(2,6,23,.24), 0 0 0 1px rgba(52,211,153,.06) inset;
+    }
+    .sync-banner-title,
+    .auth-banner-title{
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:#7f91af;
+      font-weight:800;
+    }
+    .sync-banner-status,
+    .auth-banner-status{
+      margin-top:4px;
+      font-size:.92rem;
+      color:#f7fbff;
+      font-weight:700;
+      line-height:1.35;
+    }
+    .auth-inline-form{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .auth-inline-form input{
+      width:220px;
+      min-height:46px;
+      border-radius:14px;
+      padding:10px 12px;
+      color:#f7fbff;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        rgba(7,16,29,.86);
+      border:1px solid rgba(148,163,184,.13);
+      outline:none;
+    }
+    .auth-inline-form button{
+      min-height:46px;
+      padding:0 14px;
+      border-radius:14px;
+      font-weight:800;
+      cursor:pointer;
+      border:0;
+    }
+    .auth-btn-main{
+      background:linear-gradient(135deg,#38bdf8,#fb923c);
+      color:#05121f;
+    }
+    .auth-btn-secondary{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        rgba(7,16,29,.9);
+      border:1px solid rgba(148,163,184,.12);
+      color:#f7fbff;
+    }
+    .auth-user-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(52,211,153,.12);
+      border:1px solid rgba(52,211,153,.22);
+      color:#d1fae5;
+      font-weight:800;
+    }
+    .auth-message{
+      margin-top:6px;
+      color:#a9b7d1;
+      font-size:.86rem;
+      line-height:1.4;
+    }
+    @media (max-width:900px){
+      .sync-banner,
+      .auth-banner{
+        flex-direction:column;
+        align-items:flex-start;
       }
-      .sync-banner.warn{
-        border-color:rgba(251,191,36,.28);
-        box-shadow:0 16px 36px rgba(2,6,23,.24), 0 0 0 1px rgba(251,191,36,.06) inset;
+      .auth-inline-form{
+        width:100%;
+        justify-content:flex-start;
       }
-      .sync-banner-title{
-        font-size:.78rem;
-        text-transform:uppercase;
-        letter-spacing:.12em;
-        color:#7f91af;
-        font-weight:800;
+      .auth-inline-form input{
+        width:100%;
       }
-      .sync-banner-status{
-        margin-top:4px;
-        font-size:.92rem;
-        color:#f7fbff;
-        font-weight:700;
-        line-height:1.35;
-      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  let topWrap = document.getElementById('topCloudWrap');
+  if(!topWrap){
+    topWrap = document.createElement('div');
+    topWrap.id = 'topCloudWrap';
+    topWrap.className = 'top-cloud-wrap';
+    const appRoot = document.querySelector('.app');
+    if(appRoot){
+      document.body.insertBefore(topWrap, appRoot);
+    }else{
+      document.body.prepend(topWrap);
+    }
+  }
+
+  let syncBanner = document.getElementById('syncBanner');
+  if(!syncBanner){
+    syncBanner = document.createElement('div');
+    syncBanner.id = 'syncBanner';
+    syncBanner.className = 'sync-banner';
+    topWrap.appendChild(syncBanner);
+  }
+
+  let authBanner = document.getElementById('authBanner');
+  if(!authBanner){
+    authBanner = document.createElement('div');
+    authBanner.id = 'authBanner';
+    authBanner.className = 'auth-banner';
+    topWrap.appendChild(authBanner);
+  }
+
+  const cloudState = {
+    ready: true,
+    online: navigator.onLine,
+    level: '',
+    message: 'Firebase vrstva je připravená.'
+  };
+
+  function renderSyncBanner(){
+    syncBanner.className = 'sync-banner' + (cloudState.level ? ' ' + cloudState.level : '');
+    syncBanner.innerHTML = `
+      <div>
+        <div class="sync-banner-title">Firebase vrstva</div>
+        <div class="sync-banner-status">${escText(cloudState.message)}</div>
+      </div>
+      <div class="sync-banner-status">${cloudState.online ? 'Online' : 'Offline'}</div>
     `;
-    document.head.appendChild(style);
+  }
 
-    let syncBanner = document.getElementById('syncBanner');
-    if(!syncBanner){
-      syncBanner = document.createElement('div');
-      syncBanner.id = 'syncBanner';
-      syncBanner.className = 'sync-banner';
-      document.body.insertBefore(syncBanner, document.body.firstChild);
-    }
-
-    const firebaseApp = initializeApp(firebaseConfig);
-
-    const db = initializeFirestore(firebaseApp, {
-      localCache: persistentLocalCache({
-        tabManager: persistentMultipleTabManager()
-      })
-    });
-
-    const auth = getAuth(firebaseApp);
-
-    function escText(value){
-      return String(value ?? '')
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    const cloudState = {
-      ready: true,
-      online: navigator.onLine,
-      level: '',
-      message: 'Firebase SDK připravené. Cloud synchronizaci zapneme v dalším kroku.'
-    };
-
-    function renderSyncBanner(){
-      syncBanner.className = 'sync-banner' + (cloudState.level ? ' ' + cloudState.level : '');
-      syncBanner.innerHTML = `
+  function renderAuthBanner(user, infoText = ''){
+    if(user){
+      authBanner.className = 'auth-banner ok';
+      authBanner.innerHTML = `
         <div>
-          <div class="sync-banner-title">Firebase vrstva</div>
-          <div class="sync-banner-status">${escText(cloudState.message)}</div>
+          <div class="auth-banner-title">Přihlášení</div>
+          <div class="auth-banner-status">Přihlášený uživatel: ${escText(user.email || 'bez e-mailu')}</div>
+          <div class="auth-message">${escText(infoText || 'Přihlášení přes Firebase Authentication je aktivní.')}</div>
         </div>
-        <div class="sync-banner-status">${cloudState.online ? 'Online' : 'Offline'}</div>
+        <div class="auth-inline-form">
+          <span class="auth-user-chip">✅ Přihlášen</span>
+          <button id="logoutBtn" class="auth-btn-secondary" type="button">Odhlásit</button>
+        </div>
       `;
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if(logoutBtn){
+        logoutBtn.addEventListener('click', async () => {
+          try{
+            await signOut(auth);
+          }catch(error){
+            renderAuthBanner(user, authErrorMessage(error));
+          }
+        });
+      }
+      return;
     }
 
-    window.TruckLogCloud = {
-      app: firebaseApp,
-      db,
-      auth,
-      ready: true,
-      online: navigator.onLine,
-      message: cloudState.message
-    };
+    authBanner.className = 'auth-banner';
+    authBanner.innerHTML = `
+      <div>
+        <div class="auth-banner-title">Přihlášení</div>
+        <div class="auth-banner-status">Přihlas se e-mailem a heslem</div>
+        <div class="auth-message">${escText(infoText || 'Použij účet, který jsi vytvořil ve Firebase Authentication.')}</div>
+      </div>
+      <div class="auth-inline-form">
+        <input id="authEmail" type="email" placeholder="E-mail" autocomplete="username" />
+        <input id="authPassword" type="password" placeholder="Heslo" autocomplete="current-password" />
+        <button id="loginBtn" class="auth-btn-main" type="button">Přihlásit</button>
+        <button id="registerBtn" class="auth-btn-secondary" type="button">Registrovat</button>
+      </div>
+    `;
 
-    const oldRenderAll = window.renderAll;
-    if(typeof oldRenderAll === 'function'){
-      window.renderAll = function(...args){
-        renderSyncBanner();
-        return oldRenderAll.apply(this, args);
-      };
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+
+    async function loginNow(){
+      const email = (emailInput?.value || '').trim();
+      const password = passwordInput?.value || '';
+      if(!email || !password){
+        renderAuthBanner(null, 'Vyplň e-mail i heslo.');
+        return;
+      }
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+      }catch(error){
+        renderAuthBanner(null, authErrorMessage(error));
+      }
     }
 
-    window.addEventListener('online', () => {
-      cloudState.online = true;
-      cloudState.level = '';
-      cloudState.message = 'Zařízení je online. Firebase vrstva je připravená.';
-      window.TruckLogCloud.online = true;
-      window.TruckLogCloud.message = cloudState.message;
-      renderSyncBanner();
-    });
+    async function registerNow(){
+      const email = (emailInput?.value || '').trim();
+      const password = passwordInput?.value || '';
+      if(!email || !password){
+        renderAuthBanner(null, 'Vyplň e-mail i heslo.');
+        return;
+      }
+      try{
+        await createUserWithEmailAndPassword(auth, email, password);
+      }catch(error){
+        renderAuthBanner(null, authErrorMessage(error));
+      }
+    }
 
-    window.addEventListener('offline', () => {
-      cloudState.online = false;
-      cloudState.level = 'warn';
-      cloudState.message = 'Zařízení je offline. Lokální vrstva běží dál.';
-      window.TruckLogCloud.online = false;
-      window.TruckLogCloud.message = cloudState.message;
-      renderSyncBanner();
-    });
+    if(loginBtn) loginBtn.addEventListener('click', loginNow);
+    if(registerBtn) registerBtn.addEventListener('click', registerNow);
+    if(passwordInput){
+      passwordInput.addEventListener('keydown', (event) => {
+        if(event.key === 'Enter'){
+          event.preventDefault();
+          loginNow();
+        }
+      });
+    }
+  }
 
+  window.TruckLogCloud = {
+    app: firebaseApp,
+    db,
+    auth,
+    ready: true,
+    online: navigator.onLine,
+    message: cloudState.message,
+    user: null
+  };
+
+  window.addEventListener('online', () => {
+    cloudState.online = true;
+    cloudState.level = '';
+    cloudState.message = 'Zařízení je online. Firebase vrstva je připravená.';
+    window.TruckLogCloud.online = true;
+    window.TruckLogCloud.message = cloudState.message;
     renderSyncBanner();
+  });
+
+  window.addEventListener('offline', () => {
+    cloudState.online = false;
+    cloudState.level = 'warn';
+    cloudState.message = 'Zařízení je offline. Lokální vrstva běží dál.';
+    window.TruckLogCloud.online = false;
+    window.TruckLogCloud.message = cloudState.message;
+    renderSyncBanner();
+  });
+
+  renderSyncBanner();
+  renderAuthBanner(null, 'Načítám stav přihlášení...');
+
+  onAuthStateChanged(auth, (user) => {
+    window.TruckLogCloud.user = user || null;
+    renderSyncBanner();
+    renderAuthBanner(
+      user,
+      user
+        ? 'Firebase Authentication funguje správně.'
+        : 'Použij účet, který jsi vytvořil ve Firebase Authentication.'
+    );
+
+    if(typeof window.renderAll === 'function'){
+      try{
+        window.renderAll();
+      }catch(error){
+        console.error(error);
+      }
+    }
+  });
   </script>
 </body>
 </html>    
