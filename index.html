@@ -3122,6 +3122,148 @@
       renderActiveTripPanel();
       if(state.screen === 'overview') renderOverview();
     }, 30000);
-  </script>
+  <script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js';
+  import {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager
+  } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
+  import { getAuth } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3vdgHphyimE4916E-uIQrGx-IwAsmJws",
+    authDomain: "trucklog-e8e69.firebaseapp.com",
+    projectId: "trucklog-e8e69",
+    storageBucket: "trucklog-e8e69.firebasestorage.app",
+    messagingSenderId: "471621022674",
+    appId: "1:471621022674:web:361f0fb5fbaf5e529b4e0b"
+  };
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .sync-banner{
+      max-width:1180px;
+      width:calc(100% - 32px);
+      margin:12px auto 0;
+      padding:12px 14px;
+      border-radius:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
+        rgba(10,20,35,.94);
+      border:1px solid rgba(56,189,248,.18);
+      box-shadow:0 16px 36px rgba(2,6,23,.24);
+      backdrop-filter:blur(14px) saturate(135%);
+      -webkit-backdrop-filter:blur(14px) saturate(135%);
+      color:#f7fbff;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    .sync-banner.warn{
+      border-color:rgba(251,191,36,.28);
+      box-shadow:0 16px 36px rgba(2,6,23,.24), 0 0 0 1px rgba(251,191,36,.06) inset;
+    }
+    .sync-banner-title{
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:#7f91af;
+      font-weight:800;
+    }
+    .sync-banner-status{
+      margin-top:4px;
+      font-size:.92rem;
+      color:#f7fbff;
+      font-weight:700;
+      line-height:1.35;
+    }
+  `;
+  document.head.appendChild(style);
+
+  let syncBanner = document.getElementById('syncBanner');
+  if(!syncBanner){
+    syncBanner = document.createElement('div');
+    syncBanner.id = 'syncBanner';
+    syncBanner.className = 'sync-banner';
+    document.body.insertBefore(syncBanner, document.body.firstChild);
+  }
+
+  const firebaseApp = initializeApp(firebaseConfig);
+
+  const db = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+
+  const auth = getAuth(firebaseApp);
+
+  function escText(value){
+    return String(value ?? '')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  const cloudState = {
+    ready: true,
+    online: navigator.onLine,
+    level: '',
+    message: 'Firebase SDK připravené. Cloud synchronizaci zapneme v dalším kroku.'
+  };
+
+  function renderSyncBanner(){
+    syncBanner.className = 'sync-banner' + (cloudState.level ? ' ' + cloudState.level : '');
+    syncBanner.innerHTML = `
+      <div>
+        <div class="sync-banner-title">Firebase vrstva</div>
+        <div class="sync-banner-status">${escText(cloudState.message)}</div>
+      </div>
+      <div class="sync-banner-status">${cloudState.online ? 'Online' : 'Offline'}</div>
+    `;
+  }
+
+  window.TruckLogCloud = {
+    app: firebaseApp,
+    db,
+    auth,
+    ready: true,
+    online: navigator.onLine,
+    message: cloudState.message
+  };
+
+  const oldRenderAll = window.renderAll;
+  if(typeof oldRenderAll === 'function'){
+    window.renderAll = function(...args){
+      renderSyncBanner();
+      return oldRenderAll.apply(this, args);
+    };
+  }
+
+  window.addEventListener('online', () => {
+    cloudState.online = true;
+    cloudState.level = '';
+    cloudState.message = 'Zařízení je online. Firebase vrstva je připravená.';
+    window.TruckLogCloud.online = true;
+    window.TruckLogCloud.message = cloudState.message;
+    renderSyncBanner();
+  });
+
+  window.addEventListener('offline', () => {
+    cloudState.online = false;
+    cloudState.level = 'warn';
+    cloudState.message = 'Zařízení je offline. Lokální vrstva běží dál.';
+    window.TruckLogCloud.online = false;
+    window.TruckLogCloud.message = cloudState.message;
+    renderSyncBanner();
+  });
+
+  renderSyncBanner();
+</script>
 </body>
 </html>
