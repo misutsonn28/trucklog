@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>TruckLog</title>
+<meta name="theme-color" content="#081a33" />
+<style>
+:root{
+  --bg:#06101d;
+  --panel:rgba(12,23,40,.92);
+  --line:rgba(148,163,184,.14);
+  --txt:#f7fbff;
+  --muted:#9fb0cb;
+  --muted2:#7f91af;
+  --a:#fb923c;
+  --b:#38bdf8;
+  --danger:#fb7185;
+  --shadow:0 20px 60px rgba(2,6,23,.42);
+  --r:22px;
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--txt);
+  font-family:Inter,system-ui,"Segoe UI",sans-serif;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 8% 6%,rgba(56,189,248,.16),transparent 24%),
+    radial-gradient(circle at 92% 0,rgba(251,146,60,.14),transparent 22%),
+    linear-gradient(180deg,#030712 0%,#07101d 38%,#091321 100%);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+input,select,textarea{
+  width:100%;
+  min-height:50px;
+  padding:13px 15px;
+  border-radius:16px;
+  border:1px solid rgba(148,163,184,.13);
+  background:rgba(7,16,29,.88);
+  color:var(--txt);
+  outline:none;
+}
+textarea{min-height:100px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:rgba(56,189,248,.45);box-shadow:0 0 0 3px rgba(56,189,248,.12)}
+.hidden{display:none!important}
+.app,.nav-in{max-width:var(--max);width:100%;margin:0 auto}
+.app{flex:1;min-height:0;overflow:auto;padding:18px 16px 24px}
+.screen{display:block}
+.hero,.section,.card,.block,.item,.calendar{
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015)),var(--panel);
+  border:1px solid rgba(148,163,184,.12);
+  border-radius:var(--r);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(18px);
+}
+.hero,.section,.calendar{padding:22px;margin-bottom:18px}
+.card,.block,.item{padding:16px}
+.hero{text-align:center}
+.hero-head{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
+.logo{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(56,189,248,.22),rgba(251,146,60,.22));border:1px solid rgba(255,255,255,.12)}
+.logo svg{width:44px;height:44px}
+.bar{width:min(220px,55%);height:5px;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#60a5fa,#fb923c);margin:12px auto 0}
+.title{margin:0;font-size:clamp(1.2rem,2vw,1.8rem);font-weight:800;letter-spacing:-.04em}
+.sub{color:var(--muted);font-size:.92rem}
+.head,.actions,.top,.list-head{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+.grid{display:grid;gap:14px}
+.split{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.triple{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:.95rem;font-weight:700}
+.btn,.btn2,.btnDanger,.chip,.mBtn{
+  min-height:48px;
+  padding:0 16px;
+  border-radius:16px;
+  font-weight:800;
+  transition:.16s transform;
+}
+.btn{background:linear-gradient(135deg,#38bdf8,#fb923c);color:#05121f}
+.btn2,.chip,.mBtn{background:rgba(7,16,29,.9);border:1px solid rgba(148,163,184,.12);color:var(--txt)}
+.btnDanger{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:#ffd1da}
+.btn:hover,.btn2:hover,.btnDanger:hover,.chip:hover,.mBtn:hover{transform:translateY(-1px)}
+.switcher,.tabs{display:inline-flex;gap:6px;padding:7px;border-radius:18px;flex-wrap:wrap;background:rgba(5,12,24,.72);border:1px solid rgba(148,163,184,.1)}
+.switcher button,.tabs button{background:transparent;color:#9db0cd;border-radius:14px;padding:10px 14px;min-height:42px;font-weight:800}
+.switcher button.active,.tabs button.active{background:linear-gradient(135deg,#38bdf8,#fb923c);color:#04111f}
+.stats{display:grid;gap:12px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.tiny{font-size:.74rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);font-weight:700}
+.big{margin-top:6px;font-size:1.45rem;font-weight:900}
+.muted{color:var(--muted)}
+.mt12{margin-top:12px}
+.mt16{margin-top:16px}
+.vehicleGrid,.profileGrid,.dayList,.stack{display:grid;gap:12px}
+.vehicleGrid,.profileGrid,.dayList{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:58px;padding:12px 14px;border-radius:20px;background:rgba(7,16,29,.9);border:1px solid rgba(148,163,184,.13)}
+.sw.on{border-color:rgba(251,146,60,.46);box-shadow:0 0 0 1px rgba(251,146,60,.18) inset,0 12px 26px rgba(251,146,60,.12);background:linear-gradient(180deg,rgba(251,146,60,.08),rgba(7,16,29,.9))}
+.swt{font-size:.84rem;font-weight:800}
+.swm{display:block;margin-top:4px;font-size:.8rem;color:var(--muted);font-weight:600}
+.swc{position:relative;width:62px;height:36px;flex:0 0 auto}
+.swc input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+.sws{position:absolute;inset:0;border-radius:999px;background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.18);transition:.22s}
+.sws:before{content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(0,0,0,.24);transition:.22s transform}
+.swc input:checked+.sws{background:linear-gradient(135deg,#38bdf8,#fb923c);border-color:rgba(255,255,255,.12)}
+.swc input:checked+.sws:before{transform:translateX(26px)}
+.over{display:grid;gap:16px;grid-template-columns:1.1fr .9fr}
+.metrics{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.meter{height:12px;border-radius:999px;background:rgba(148,163,184,.12);overflow:hidden}
+.meter>div{height:100%;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#fb923c)}
+.donutWrap{display:flex;justify-content:center;align-items:center}
+.donut{width:120px;height:120px;transform:rotate(-90deg)}
+.dbg{fill:none;stroke:rgba(148,163,184,.14);stroke-width:12}
+.dload{fill:none;stroke:#fb923c;stroke-width:12;stroke-linecap:round}
+.legend{display:grid;gap:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.left{display:flex;align-items:center;gap:10px}
+.dot{width:12px;height:12px;border-radius:999px;display:inline-block}
+.dl{background:#fb923c}
+.de{background:#38bdf8}
+.month{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mTitle{font-size:1.1rem;font-weight:900;text-transform:capitalize}
+.week,.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.week{margin:12px 0 8px}
+.wd{padding:8px 0;text-align:center;font-size:.76rem;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
+.day{min-height:96px;padding:10px;border-radius:18px;border:1px solid rgba(148,163,184,.12);background:rgba(7,16,29,.78);display:flex;flex-direction:column;gap:8px;align-items:flex-start;transition:.16s transform}
+.day:hover{transform:translateY(-1px)}
+button.day{cursor:pointer}
+.day.out{opacity:.16;pointer-events:none}
+.day .n{font-weight:900}
+.day .c{font-size:.82rem;color:var(--muted);font-weight:700}
+.day .p{padding:4px 8px;border-radius:999px;font-size:.75rem;font-weight:900;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.18);color:#dff6ff}
+.day.sel{outline:2px solid rgba(255,255,255,.18);background:rgba(9,21,38,.96)}
+.day.trip{border-color:rgba(251,146,60,.46);background:linear-gradient(180deg,rgba(251,146,60,.26),rgba(7,16,29,.92)),rgba(7,16,29,.82);box-shadow:0 12px 28px rgba(251,146,60,.16)}
+.day.trip .n{color:#ffe5d2}
+.day.trip .c{color:#ffcfac}
+.day.trip .p{background:rgba(251,146,60,.22);border-color:rgba(251,146,60,.36);color:#fff2e9}
+.day.fuel{box-shadow:inset 0 0 0 1px rgba(56,189,248,.24)}
+.nav{position:relative;z-index:30;background:rgba(4,10,20,.72);border-top:1px solid rgba(148,163,184,.1);backdrop-filter:blur(18px);box-shadow:0 -16px 40px rgba(2,6,23,.3)}
+.nav-in{padding:10px 12px 2px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.nav button{min-height:60px;border-radius:22px;background:transparent;color:#90a4c3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 6px}
+.nav button.active{background:rgba(12,24,42,.96);border:1px solid rgba(148,163,184,.12);color:#fff}
+.nav .i{font-size:1.06rem}
+.nav .t{font-size:.74rem;font-weight:800;text-align:center;line-height:1.05}
+.empty{padding:28px;border-radius:24px;border:1px dashed rgba(148,163,184,.18);background:rgba(5,12,24,.5);text-align:center;color:var(--muted)}
+@media (max-width:900px){
+  .split,.triple,.stats,.over,.metrics{grid-template-columns:1fr}
+  .nav-in{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .day{min-height:84px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="screen-overview" class="screen">
+    <section class="hero">
+      <div class="hero-head">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 39L17 23C18.1 20.5 20.6 19 23.4 19H41.2C44 19 46.5 20.5 47.6 23L54 39" stroke="url(#g1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 39H50V46C50 48.2 48.2 50 46 50H18C15.8 50 14 48.2 14 46V39Z" fill="url(#g2)"/>
+            <circle cx="21" cy="45" r="4" fill="#E5F7FF"/>
+            <circle cx="43" cy="45" r="4" fill="#FFE8D6"/>
+            <path d="M24 14H40" stroke="#EAF8FF" stroke-width="5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="g1" x1="10" y1="19" x2="54" y2="50"><stop stop-color="#38BDF8"/><stop offset="1" stop-color="#FB923C"/></linearGradient>
+              <linearGradient id="g2" x1="14" y1="39" x2="50" y2="50"><stop stop-color="#0EA5E9"/><stop offset="1" stop-color="#F97316"/></linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div><h1 class="title" style="font-size:clamp(1.8rem,3vw,2.6rem)">TruckLog</h1></div>
+      </div>
+      <div class="bar"></div>
+    </section>
+    <section class="section">
+      <div class="head">
+        <h2 class="title">Profil</h2>
+        <div class="switcher" id="profileSwitcher"></div>
+      </div>
+      <div id="overviewStats" class="mt16"></div>
+    </section>
+  </section>
+
+  <section id="screen-trip" class="screen hidden">
+    <form id="tripForm">
+      <section class="section">
+        <div class="head"><h2 class="title" id="tripFormTitle">Nová jízda</h2></div>
+        <div class="split mt16">
+          <div class="block">
+            <h3>Jízda</h3>
+            <div class="grid mt16">
+              <div class="field"><label for="tripDate">Datum</label><input id="tripDate" type="date" /></div>
+              <div class="triple">
+                <div class="field"><label for="tripDepartureTime">Čas odjezdu</label><input id="tripDepartureTime" type="time" /></div>
+                <div class="field"><label for="tripArrivalTime">Čas příjezdu</label><input id="tripArrivalTime" type="time" /></div>
+                <div class="field"><label for="tripEmptyDrive">Typ jízdy</label><label class="sw"><span class="swt">Jízda po prázdnu</span><span class="swc"><input id="tripEmptyDrive" type="checkbox" /><span class="sws"></span></span></label></div>
+              </div>
+              <div class="triple">
+                <div class="field"><label for="tripKmStart">Km start</label><input id="tripKmStart" inputmode="numeric" /></div>
+                <div class="field"><label for="tripKmEnd">Km konec</label><input id="tripKmEnd" inputmode="numeric" /></div>
+                <div class="field"><label for="tripDistancePreview">Ujeto km</label><input id="tripDistancePreview" disabled placeholder="Počítá se automaticky" /></div>
+              </div>
+              <div class="field"><label for="tripFromPlace">Odkud firma / místo</label><input id="tripFromPlace" list="placesList" placeholder="Název místa" /></div>
+              <div class="field"><label for="tripFromAddress">Odkud adresa</label><input id="tripFromAddress" placeholder="Adresa místa odkud" /></div>
+              <div class="field"><label for="tripToPlace">Kam firma / místo</label><input id="tripToPlace" list="placesList" placeholder="Název místa" /></div>
+              <div class="field"><label for="tripToAddress">Kam adresa</label><input id="tripToAddress" placeholder="Adresa místa kam" /></div>
+              <div class="field"><label for="tripTrailerSelect">Přípojné vozidlo</label><select id="tripTrailerSelect"></select></div>
+              <div class="field hidden" id="tripContainerWrap"><label for="tripContainerNumber">Číslo kontejneru</label><input id="tripContainerNumber" placeholder="Např. MSCU 1234567" /></div>
+              <datalist id="placesList"></datalist>
+            </div>
+          </div>
+          <div class="block">
+            <h3>Náklad</h3>
+            <div class="grid mt16">
+              <div class="field" id="tripCommodityField"><label for="tripCommodityPreset">Komodita</label><select id="tripCommodityPreset"><option value="">Vyber komoditu</option><option>Cement</option><option>Popílek</option><option>Granulát</option><option>Vápno</option><option>Moučka</option><option>Sádra</option><option>Písek</option><option>Kamenivo</option><option>Jiná</option></select></div>
+              <div class="field hidden" id="tripCommodityCustomWrap"><label for="tripCommodityCustom">Jiná komodita</label><input id="tripCommodityCustom" placeholder="Jiná komodita" /></div>
+              <div class="field" id="tripQuantityField"><label for="tripQuantityKg">Naložené množství (kg)</label><input id="tripQuantityKg" inputmode="numeric" placeholder="Např. 25450" /></div>
+              <div class="field"><label for="tripNote">Poznámka</label><textarea id="tripNote" placeholder="Volitelné"></textarea></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="actions"><button class="btn" type="submit" id="tripSubmitBtn">Uložit jízdu</button><button class="btn2" type="button" id="tripClearBtn">Vyčistit</button></div>
+    </form>
+  </section>
+
+  <section id="screen-fuel" class="screen hidden">
+    <form id="fuelForm">
+      <section class="section">
+        <div class="head"><h2 class="title" id="fuelFormTitle">Tankování</h2></div>
+        <div class="split mt16">
+          <div class="block"><div class="grid">
+            <div class="field"><label for="fuelType">Typ</label><select id="fuelType"><option value="Nafta">Nafta</option><option value="AdBlue">AdBlue</option><option value="CNG">CNG</option><option value="LNG">LNG</option><option value="Nabíjení">Nabíjení</option></select></div>
+            <div class="field"><label for="fuelDate">Datum</label><input id="fuelDate" type="date" /></div>
+            <div class="field"><label for="fuelOdometer">Stav km</label><input id="fuelOdometer" inputmode="numeric" /></div>
+            <div class="field"><label for="fuelQuantity" id="fuelQuantityLabel">Litry</label><input id="fuelQuantity" inputmode="decimal" /></div>
+          </div></div>
+          <div class="block"><div class="grid">
+            <div class="field"><label for="fuelStation" id="fuelStationLabel">Pumpa / místo</label><input id="fuelStation" /></div>
+            <div class="field hidden" id="fuelDurationWrap"><label for="fuelDurationMinutes">Doba nabíjení (min)</label><input id="fuelDurationMinutes" inputmode="numeric" /></div>
+            <div class="field"><label for="fuelNote">Poznámka</label><textarea id="fuelNote"></textarea></div>
+          </div></div>
+        </div>
+      </section>
+      <div class="actions"><button class="btn" type="submit" id="fuelSubmitBtn">Uložit záznam</button><button class="btn2" type="button" id="fuelClearBtn">Vyčistit</button></div>
+    </form>
+  </section>
+
+  <section id="screen-tech" class="screen hidden">
+    <section class="section">
+      <div class="head"><h2 class="title">Souprava</h2></div>
+      <div class="split mt16">
+        <div class="block"><div class="tiny">Aktivní tahač</div><div id="truckSwitcher" class="stack mt12"></div></div>
+        <div class="block"><div class="tiny">Přípojné vozidlo</div><div id="trailerSwitcher" class="stack mt12"></div></div>
+      </div>
+    </section>
+    <section class="section"><div class="head"><h2 class="title">Vozidla</h2></div><div id="vehiclesList" class="mt16"></div></section>
+    <section class="section">
+      <form id="vehicleForm">
+        <div class="head"><h2 class="title" id="vehicleFormTitle">Nové vozidlo</h2></div>
+        <div class="split mt16">
+          <div class="block"><div class="grid">
+            <div class="field"><label for="vehicleType">Typ vozidla</label><select id="vehicleType"><option value="Tahač">Tahač</option><option value="Silo cisterna">Silo cisterna</option><option value="Silo šasi">Silo šasi</option><option value="Kontejnerové šasi">Kontejnerové šasi</option><option value="Kontejnerový návěs">Kontejnerový návěs</option><option value="Frigo návěs">Frigo návěs</option><option value="Plachtový návěs">Plachtový návěs</option><option value="Skříňový návěs">Skříňový návěs</option><option value="Walking floor">Walking floor</option><option value="Sklápěcí návěs">Sklápěcí návěs</option><option value="Sklápěcí šasi">Sklápěcí šasi</option><option value="Valník / plato">Valník / plato</option><option value="Tandem / přívěs">Tandem / přívěs</option><option value="Jiné vozidlo">Jiné vozidlo</option></select></div>
+            <div class="field" id="vehicleBrandWrap"><label for="vehicleBrand">Značka tahače</label><input id="vehicleBrand" placeholder="Např. MAN, VOLVO, SCANIA" /></div>
+            <div class="field"><label for="vehicleLabel">Označení</label><input id="vehicleLabel" placeholder="Např. Hlavní tahač, Silo 1" /></div>
+          </div></div>
+          <div class="block"><div class="grid">
+            <div class="field"><label for="vehiclePlate">SPZ</label><input id="vehiclePlate" placeholder="Např. 6AA4092" /></div>
+            <div class="field"><label for="vehicleStk">STK do</label><input id="vehicleStk" type="date" /></div>
+            <div class="field"><label for="vehicleNote">Poznámka</label><textarea id="vehicleNote"></textarea></div>
+            <div class="field"><label class="sw"><span class="swt" id="vehiclePrimaryText">Použít jako výchozí v profilu</span><span class="swc"><input id="vehiclePrimary" type="checkbox" /><span class="sws"></span></span></label></div>
+          </div></div>
+        </div>
+        <div class="actions"><button class="btn" type="submit" id="vehicleSubmitBtn">Uložit vozidlo</button><button class="btn2" type="button" id="vehicleCancelBtn">Zrušit</button></div>
+      </form>
+    </section>
+  </section>
+
+  <section id="screen-profiles" class="screen hidden">
+    <section class="section"><div class="head"><h2 class="title">Profily</h2></div><div id="profilesList" class="mt16"></div></section>
+    <section class="section">
+      <form id="profileForm">
+        <div class="head"><h2 class="title" id="profileFormTitle">Nový profil</h2></div>
+        <div class="split mt16">
+          <div class="block"><div class="field"><label for="profileDriverName">Jméno řidiče</label><input id="profileDriverName" /></div></div>
+          <div class="block"><div class="field"><label for="profileNote">Poznámka</label><textarea id="profileNote"></textarea></div></div>
+        </div>
+        <div class="actions"><button class="btn" type="submit" id="profileSubmitBtn">Uložit profil</button><button class="btn2" type="button" id="profileCancelBtn">Zrušit editaci</button></div>
+      </form>
+    </section>
+    <section class="section"><div class="head"><h2 class="title">Záloha a export</h2></div><div class="actions mt16"><button class="btn" type="button" id="backupDownloadBtn">Stáhnout zálohu</button><button class="btn2" type="button" id="backupRestoreBtn">Obnovit ze souboru</button><button class="btn2" type="button" id="exportTripsBtn">Export jízd CSV</button><button class="btn2" type="button" id="exportFuelBtn">Export tankování CSV</button></div><input id="backupRestoreInput" type="file" accept=".json,application/json" class="hidden" /></section>
+  </section>
+
+  <section id="screen-history" class="screen hidden">
+    <section class="calendar">
+      <div class="top">
+        <div class="month"><button class="mBtn" type="button" id="prevMonthBtn">←</button><div class="mTitle" id="historyMonthTitle"></div><button class="mBtn" type="button" id="nextMonthBtn">→</button></div>
+        <div class="tabs"><button id="historyTripsBtn" class="active" type="button">Jízdy</button><button id="historyFuelBtn" type="button">Tankování</button></div>
+      </div>
+      <div class="split mt16"><div class="field"><label for="historyProfileFilter">Profil</label><select id="historyProfileFilter"></select></div><div class="field"><label for="historySearch">Hledat</label><input id="historySearch" type="search" placeholder="Hledat" /></div></div>
+      <div class="week mt16"><div class="wd">Po</div><div class="wd">Út</div><div class="wd">St</div><div class="wd">Čt</div><div class="wd">Pá</div><div class="wd">So</div><div class="wd">Ne</div></div>
+      <div id="calendarDays" class="days"></div>
+    </section>
+    <section class="section"><div class="list-head"><h2 class="title" id="historyListTitle">Vybraný den</h2><div class="sub" id="historyListMeta"></div></div><div id="historyList" class="mt16"></div></section>
+  </section>
+</div>
+
+<nav class="nav"><div class="nav-in"><button id="nav-overview" class="active" type="button"><span class="i">🧭</span><span class="t">Přehled</span></button><button id="nav-trip" type="button"><span class="i">📝</span><span class="t">Jízda</span></button><button id="nav-fuel" type="button"><span class="i">⛽</span><span class="t">Tankování</span></button><button id="nav-tech" type="button"><span class="i">🚚</span><span class="t">Vozidla</span></button><button id="nav-profiles" type="button"><span class="i">👤</span><span class="t">Profily</span></button><button id="nav-history" type="button"><span class="i">📅</span><span class="t">Historie</span></button></div></nav>
+
+<script>
+const STORAGE={profiles:'trucklog_profiles_clean_v5',activeProfileId:'trucklog_active_profile_id_clean_v5',trips:'trucklog_trips_clean_v5',fuelings:'trucklog_fuelings_clean_v5',places:'trucklog_places_clean_v5'};
+const COMMODITIES=['Cement','Popílek','Granulát','Vápno','Moučka','Sádra','Písek','Kamenivo'];
+const VEHICLE_TYPES=['Tahač','Silo cisterna','Silo šasi','Kontejnerové šasi','Kontejnerový návěs','Frigo návěs','Plachtový návěs','Skříňový návěs','Walking floor','Sklápěcí návěs','Sklápěcí šasi','Valník / plato','Tandem / přívěs','Jiné vozidlo'];
+const CONTAINER_TYPES=['Silo šasi','Kontejnerové šasi','Kontejnerový návěs'];
+const ENERGY={Nafta:{unit:'l',q:'Litry',s:'Pumpa / místo'},AdBlue:{unit:'l',q:'Litry AdBlue',s:'Pumpa / místo'},CNG:{unit:'kg',q:'Množství CNG (kg)',s:'Stanice / místo'},LNG:{unit:'kg',q:'Množství LNG (kg)',s:'Stanice / místo'},Nabíjení:{unit:'kWh',q:'Nabitá energie (kWh)',s:'Nabíječka / místo'}};
+const PLACES=[{name:'Karl Schmidt SpeditionsgesmbH',address:'Industrie Strasse 7, 2431 Enzersdorf an der Fischa, Rakousko'},{name:'Borealis Polyolefine GmbH',address:'Danubiastraße 21/25, 2320 Schwechat, Rakousko'},{name:'NKT s.r.o.',address:'U Tržiště 685/1, 594 01 Velké Meziříčí, Česká republika'}];
+const state={screen:'overview',editingProfileId:null,editingVehicleId:null,editingTripId:null,editingFuelId:null,historyMode:'trips',historyMonthStart:startOfMonth(new Date()),historySelectedDate:'',historyProfileId:'',historySearch:'',profiles:load(STORAGE.profiles,[]),activeProfileId:localStorage.getItem(STORAGE.activeProfileId)||'',trips:load(STORAGE.trips,[]),fuelings:load(STORAGE.fuelings,[]),places:load(STORAGE.places,[])};
+
+function $(id){return document.getElementById(id)}
+function $$(s){return Array.from(document.querySelectorAll(s))}
+function trim(v){return String(v??'').trim()}
+function digits(v){return String(v||'').replace(/\D/g,'')}
+function dec(v){return String(v||'').replace(/[^\d,.]/g,'').replace(',','.')}
+function ntext(v){return String(v??'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function gid(p){return p+'-'+Date.now()+'-'+Math.floor(Math.random()*100000)}
+function esc(v){return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;')}
+function load(k,f){try{const r=localStorage.getItem(k);return r?JSON.parse(r):f}catch(e){return f}}
+function save(){localStorage.setItem(STORAGE.profiles,JSON.stringify(state.profiles));localStorage.setItem(STORAGE.activeProfileId,state.activeProfileId||'');localStorage.setItem(STORAGE.trips,JSON.stringify(state.trips));localStorage.setItem(STORAGE.fuelings,JSON.stringify(state.fuelings));localStorage.setItem(STORAGE.places,JSON.stringify(state.places))}
+function today(){const n=new Date();const o=n.getTimezoneOffset()*60000;return new Date(n.getTime()-o).toISOString().slice(0,10)}
+function timeNow(step=5){const n=new Date();n.setSeconds(0,0);n.setMinutes(Math.ceil(n.getMinutes()/step)*step);return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')}
+function fmtDate(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?v:new Intl.DateTimeFormat('cs-CZ').format(d)}
+function fmtMonth(d){return new Intl.DateTimeFormat('cs-CZ',{month:'long',year:'numeric'}).format(d)}
+function fmtNum(v,d=0){return new Intl.NumberFormat('cs-CZ',{minimumFractionDigits:d,maximumFractionDigits:d}).format(Number(v||0))}
+function kmDiff(a,b){a=Number(a||0);b=Number(b||0);return b>a?b-a:0}
+function sortByUpdated(a,b){return new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0)}
+function tripStamp(i){const t=new Date((trim(i?.date)||today())+'T'+(trim(i?.departureTime)||'00:00')+':00').getTime();return Number.isNaN(t)?0:t}
+function sortTrips(list){return list.slice().sort((a,b)=>tripStamp(b)-tripStamp(a)||new Date(b.updatedAt||b.createdAt||0)-new Date(a.updatedAt||a.createdAt||0))}
+function startOfMonth(d){return new Date(d.getFullYear(),d.getMonth(),1)}
+function addMonths(d,n){return new Date(d.getFullYear(),d.getMonth()+n,1)}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function trailerSupportsContainer(t){return CONTAINER_TYPES.includes(trim(t))}
+
+function normVehicle(x){
+  const type=VEHICLE_TYPES.includes(trim(x?.type))?trim(x.type):'Jiné vozidlo';
+  return{id:x?.id||gid('VEH'),type,brand:type==='Tahač'?trim(x?.brand):'',label:trim(x?.label),plate:trim(x?.plate).toUpperCase(),stk:trim(x?.stk),note:trim(x?.note),primaryForProfile:!!x?.primaryForProfile,createdAt:x?.createdAt||new Date().toISOString(),updatedAt:x?.updatedAt||x?.createdAt||new Date().toISOString()};
+}
+function vgroup(v){return trim(v?.type)==='Tahač'?'truck':'trailer'}
+function fixPrimaries(list){
+  const a=(Array.isArray(list)?list:[]).map(normVehicle);
+  ['truck','trailer'].forEach(g=>{
+    let seen=false;
+    a.forEach(v=>{
+      if(vgroup(v)!==g)return;
+      if(v.primaryForProfile&&!seen){seen=true;return}
+      if(v.primaryForProfile&&seen)v.primaryForProfile=false;
+    });
+  });
+  if(!a.some(v=>vgroup(v)==='truck'&&v.primaryForProfile)){
+    const t=a.find(v=>vgroup(v)==='truck');
+    if(t)t.primaryForProfile=true;
+  }
+  return a;
+}
+function normProfile(x){
+  const vehicles=fixPrimaries(Array.isArray(x?.vehicles)?x.vehicles:[]);
+  const trucks=vehicles.filter(v=>vgroup(v)==='truck');
+  const trailers=vehicles.filter(v=>vgroup(v)==='trailer');
+  let currentTruckId=trim(x?.currentTruckId);
+  let currentTrailerId=Object.prototype.hasOwnProperty.call(x||{},'currentTrailerId')?trim(x?.currentTrailerId):null;
+  if(currentTruckId&&!trucks.some(v=>v.id===currentTruckId))currentTruckId='';
+  if(currentTrailerId&&!trailers.some(v=>v.id===currentTrailerId))currentTrailerId='';
+  if(!currentTruckId&&trucks.length)currentTruckId=(trucks.find(v=>v.primaryForProfile)||trucks[0]).id;
+  if(currentTrailerId===null)currentTrailerId=trailers.length?(trailers.find(v=>v.primaryForProfile)||trailers[0]).id:'';
+  return{id:x?.id||gid('PROFILE'),driverName:trim(x?.driverName),note:trim(x?.note),vehicles,currentTruckId,currentTrailerId,createdAt:x?.createdAt||new Date().toISOString(),updatedAt:x?.updatedAt||x?.createdAt||new Date().toISOString()};
+}
+function normTrip(x){
+  const trailerType=trim(x?.trailerType);
+  return{id:x?.id||gid('TRIP'),profileId:trim(x?.profileId),date:trim(x?.date)||today(),departureTime:trim(x?.departureTime),arrivalTime:trim(x?.arrivalTime),emptyDrive:!!x?.emptyDrive,kmStart:digits(x?.kmStart),kmEnd:digits(x?.kmEnd),fromPlace:trim(x?.fromPlace),fromAddress:trim(x?.fromAddress),toPlace:trim(x?.toPlace),toAddress:trim(x?.toAddress),commodity:trim(x?.commodity),quantityKg:digits(x?.quantityKg),trailerType,trailerPlate:trim(x?.trailerPlate).toUpperCase(),containerNumber:trailerSupportsContainer(trailerType)?trim(x?.containerNumber).toUpperCase():'',note:trim(x?.note),createdAt:x?.createdAt||new Date().toISOString(),updatedAt:x?.updatedAt||x?.createdAt||new Date().toISOString()};
+}
+function normFuel(x){
+  const energyType=trim(x?.energyType||'Nafta')||'Nafta';
+  return{id:x?.id||gid('FUEL'),profileId:trim(x?.profileId),date:trim(x?.date)||today(),odometer:digits(x?.odometer),energyType,quantity:dec(x?.quantity),station:trim(x?.station),durationMinutes:digits(x?.durationMinutes),note:trim(x?.note),createdAt:x?.createdAt||new Date().toISOString(),updatedAt:x?.updatedAt||x?.createdAt||new Date().toISOString()};
+}
+function normPlace(x){return{id:x?.id||gid('PLACE'),name:trim(x?.name),address:trim(x?.address),usageCount:Number(x?.usageCount||0),lastUsed:x?.lastUsed||new Date().toISOString()}}
+function shape(){
+  state.profiles=state.profiles.map(normProfile);
+  state.trips=sortTrips(state.trips.map(normTrip));
+  state.fuelings=state.fuelings.map(normFuel).sort(sortByUpdated);
+  state.places=Array.isArray(state.places)?state.places.map(normPlace):[];
+  PLACES.forEach(p=>upsertPlace(p.name,p.address,false));
+  if(state.activeProfileId&&!state.profiles.some(p=>p.id===state.activeProfileId))state.activeProfileId='';
+  if(!state.activeProfileId&&state.profiles.length)state.activeProfileId=state.profiles[0].id;
+  if(!state.historySelectedDate||!state.historySelectedDate.startsWith(iso(state.historyMonthStart).slice(0,7)))state.historySelectedDate=iso(state.historyMonthStart);
+}
+
+function activeProfile(){return state.profiles.find(p=>p.id===state.activeProfileId)||null}
+function activeVehicles(p=activeProfile()){return Array.isArray(p?.vehicles)?fixPrimaries(p.vehicles):[]}
+function defaultTruck(p=activeProfile()){const l=activeVehicles(p);return l.find(v=>vgroup(v)==='truck'&&v.primaryForProfile)||l.find(v=>vgroup(v)==='truck')||null}
+function defaultTrailer(p=activeProfile()){return activeVehicles(p).find(v=>vgroup(v)==='trailer'&&v.primaryForProfile)||null}
+function currentTruck(p=activeProfile()){if(!p)return null;const trucks=activeVehicles(p).filter(v=>vgroup(v)==='truck');return trucks.find(v=>v.id===trim(p.currentTruckId))||defaultTruck(p)||trucks[0]||null}
+function currentTrailer(p=activeProfile()){if(!p)return null;const trailers=activeVehicles(p).filter(v=>vgroup(v)==='trailer');return trailers.find(v=>v.id===trim(p.currentTrailerId))||null}
+function profileLabel(p){if(!p)return'Bez profilu';return[p.driverName,currentTruck(p)?.plate].filter(Boolean).join(' • ')||'Profil'}
+function currentOdometer(profileId=state.activeProfileId){const t=state.trips.filter(x=>x.profileId===profileId).reduce((m,x)=>Math.max(m,Number(x.kmEnd||0)),0);const f=state.fuelings.filter(x=>x.profileId===profileId).reduce((m,x)=>Math.max(m,Number(x.odometer||0)),0);return Math.max(t,f)}
+function monthlyStats(profileId,date=new Date()){
+  const y=date.getFullYear();
+  const m=date.getMonth();
+  const trips=state.trips.filter(i=>{
+    if(i.profileId!==profileId||!i.date)return false;
+    const d=new Date(i.date+'T00:00:00');
+    return !Number.isNaN(d.getTime())&&d.getFullYear()===y&&d.getMonth()===m;
+  });
+  const fuels=state.fuelings.filter(i=>{
+    if(i.profileId!==profileId||!i.date)return false;
+    const d=new Date(i.date+'T00:00:00');
+    return !Number.isNaN(d.getTime())&&d.getFullYear()===y&&d.getMonth()===m;
+  });
+  const tripKm=trips.reduce((s,i)=>s+kmDiff(i.kmStart,i.kmEnd),0);
+  const diesel=fuels.filter(i=>i.energyType==='Nafta').reduce((s,i)=>s+Number(dec(i.quantity)||0),0);
+  const adblue=fuels.filter(i=>i.energyType==='AdBlue').reduce((s,i)=>s+Number(dec(i.quantity)||0),0);
+  const loadTrips=trips.filter(i=>!i.emptyDrive).length;
+  const emptyTrips=trips.filter(i=>i.emptyDrive).length;
+  const avg=tripKm>0&&diesel>0?(diesel/tripKm)*100:null;
+  const util=trips.length?(loadTrips/trips.length)*100:0;
+  return{trips:trips.length,fuelings:fuels.length,tripKm,dieselLiters:diesel,adblueLiters:adblue,avgConsumption:avg,loadTrips,emptyTrips,utilization:util};
+}
+
+function findPlace(name){const n=ntext(name);return state.places.find(p=>ntext(p.name)===n)||null}
+function upsertPlace(name,address,count=true){
+  const n=trim(name),a=trim(address);
+  if(!n||!a)return;
+  const e=findPlace(n);
+  if(e){e.address=a;if(count)e.usageCount=(e.usageCount||0)+1;e.lastUsed=new Date().toISOString()}
+  else state.places.unshift({id:gid('PLACE'),name:n,address:a,usageCount:count?1:0,lastUsed:new Date().toISOString()});
+  state.places.sort((x,y)=>(y.usageCount||0)-(x.usageCount||0)||new Date(y.lastUsed||0)-new Date(x.lastUsed||0));
+}
+
+function resetProfileForm(){state.editingProfileId=null;$('profileForm').reset();$('profileFormTitle').textContent='Nový profil';$('profileSubmitBtn').textContent='Uložit profil'}
+function resetVehicleForm(){state.editingVehicleId=null;$('vehicleForm').reset();$('vehicleType').value='Tahač';$('vehiclePrimary').checked=false;$('vehicleFormTitle').textContent='Nové vozidlo';$('vehicleSubmitBtn').textContent='Uložit vozidlo';updateVehiclePrimaryLabel()}
+function resetTripForm(){state.editingTripId=null;$('tripForm').reset();$('tripDate').value=today();$('tripDepartureTime').value=timeNow(5);$('tripKmStart').value=currentOdometer()||'';$('tripEmptyDrive').checked=false;$('tripFormTitle').textContent='Nová jízda';$('tripSubmitBtn').textContent='Uložit jízdu';$('tripContainerNumber').value='';setCommodity('');toggleEmptyDrive();syncTripTrailer();updateTripKm()}
+function resetFuelForm(){state.editingFuelId=null;$('fuelForm').reset();$('fuelType').value='Nafta';$('fuelDate').value=today();$('fuelOdometer').value=currentOdometer()||'';$('fuelFormTitle').textContent='Tankování';$('fuelSubmitBtn').textContent='Uložit záznam';updateFuelFields()}
+function updateVehiclePrimaryLabel(){const truck=$('vehicleType').value==='Tahač';$('vehiclePrimaryText').textContent='Použít jako výchozí';$('vehicleBrandWrap').classList.toggle('hidden',!truck);if(!truck)$('vehicleBrand').value=''}
+function updateFuelFields(){const c=ENERGY[$('fuelType').value]||ENERGY.Nafta;$('fuelQuantityLabel').textContent=c.q;$('fuelStationLabel').textContent=c.s;$('fuelDurationWrap').classList.toggle('hidden',$('fuelType').value!=='Nabíjení');if($('fuelType').value!=='Nabíjení')$('fuelDurationMinutes').value=''}
+function toggleCommodityCustom(){const on=$('tripCommodityPreset').value==='Jiná';$('tripCommodityCustomWrap').classList.toggle('hidden',!on);if(!on)$('tripCommodityCustom').value=''}
+function toggleEmptyDrive(){const on=$('tripEmptyDrive').checked;$('tripCommodityField').classList.toggle('hidden',on);$('tripCommodityCustomWrap').classList.add('hidden');$('tripQuantityField').classList.toggle('hidden',on);if(on){$('tripCommodityPreset').value='';$('tripCommodityCustom').value='';$('tripQuantityKg').value='0'}else if($('tripQuantityKg').value==='0')$('tripQuantityKg').value=''}
+function setCommodity(v){const c=trim(v);if(!c){$('tripCommodityPreset').value='';$('tripCommodityCustom').value='';toggleCommodityCustom();return}if(COMMODITIES.includes(c)){$('tripCommodityPreset').value=c;$('tripCommodityCustom').value=''}else{$('tripCommodityPreset').value='Jiná';$('tripCommodityCustom').value=c}toggleCommodityCustom()}
+function getCommodity(){return $('tripEmptyDrive').checked?'':($('tripCommodityPreset').value==='Jiná'?trim($('tripCommodityCustom').value):trim($('tripCommodityPreset').value))}
+function updateTripKm(){$('tripDistancePreview').value=kmDiff($('tripKmStart').value,$('tripKmEnd').value)||''}
+function updateContainerField(type){const on=trailerSupportsContainer(type);$('tripContainerWrap').classList.toggle('hidden',!on);if(!on)$('tripContainerNumber').value=''}
+
+function renderPlaces(){$('placesList').innerHTML=state.places.map(p=>'<option value="'+esc(p.name)+'"></option>').join('')}
+function fillAddress(a,b){const p=findPlace($(a).value);if(p)$(b).value=p.address||''}
+function trailerSnap(){const o=$('tripTrailerSelect')?.selectedOptions?.[0];return{type:trim(o?.dataset?.type),plate:trim(o?.dataset?.plate).toUpperCase()}}
+function populateTripTrailer(type='',plate=''){
+  const s=$('tripTrailerSelect');
+  const p=activeProfile();
+  if(!s)return;
+  const trailers=activeVehicles(p).filter(v=>vgroup(v)==='trailer');
+  const cur=currentTrailer(p);
+  const ct=trim(type);
+  const cp=trim(plate).toUpperCase();
+  let sel='';
+  const opts=['<option value="" data-type="" data-plate="">Bez přípojného vozidla</option>'];
+  trailers.forEach(v=>{
+    const vp=trim(v.plate).toUpperCase();
+    const vt=trim(v.type);
+    const ok=cp?vp===cp:(ct?vt===ct:(!!cur&&v.id===cur.id));
+    if(ok)sel=v.id;
+    opts.push('<option value="'+esc(v.id)+'" data-type="'+esc(vt)+'" data-plate="'+esc(vp)+'">'+esc([v.label||v.type,v.plate].filter(Boolean).join(' • '))+'</option>');
+  });
+  if((ct||cp)&&!sel){
+    sel='history-trailer';
+    opts.push('<option value="history-trailer" data-type="'+esc(ct)+'" data-plate="'+esc(cp)+'">'+esc('Historický záznam • '+([ct,cp].filter(Boolean).join(' • ')))+'</option>');
+  }
+  s.innerHTML=opts.join('');
+  s.value=sel;
+  updateContainerField(trailerSnap().type);
+}
+function syncTripTrailer(){
+  const e=state.trips.find(i=>i.id===state.editingTripId);
+  if(e){
+    populateTripTrailer(e.trailerType,e.trailerPlate);
+    $('tripContainerNumber').value=e.containerNumber||'';
+    updateContainerField(e.trailerType);
+  }else{
+    const keep=$('tripContainerNumber').value;
+    populateTripTrailer();
+    if(trailerSupportsContainer(trailerSnap().type))$('tripContainerNumber').value=keep;
+  }
+}
+
+function setCurrentVehicle(profileId,group,vehicleId){
+  state.profiles=state.profiles.map(p=>{
+    if(p.id!==profileId)return p;
+    const vehicles=activeVehicles(p);
+    if(group==='truck'){
+      if(!vehicles.some(v=>v.id===vehicleId&&vgroup(v)==='truck'))return p;
+      return normProfile({...p,currentTruckId:vehicleId,updatedAt:new Date().toISOString()});
+    }
+    if(group==='trailer'){
+      if(!vehicleId)return normProfile({...p,currentTrailerId:'',updatedAt:new Date().toISOString()});
+      if(!vehicles.some(v=>v.id===vehicleId&&vgroup(v)==='trailer'))return p;
+      return normProfile({...p,currentTrailerId:vehicleId,updatedAt:new Date().toISOString()});
+    }
+    return p;
+  });
+  save();
+  if(group==='trailer'&&!state.editingTripId)populateTripTrailer();
+  renderAll();
+}
+
+function renderProfileSwitcher(){
+  const root=$('profileSwitcher');
+  if(!state.profiles.length){root.innerHTML='<button type="button" class="active">Bez profilu</button>';return}
+  root.innerHTML=state.profiles.map(p=>'<button type="button" class="'+(p.id===state.activeProfileId?'active':'')+'" data-profile="'+esc(p.id)+'">'+esc(p.driverName||'Profil')+'</button>').join('');
+  root.querySelectorAll('[data-profile]').forEach(b=>b.onclick=()=>{state.activeProfileId=b.dataset.profile||'';save();resetTripForm();resetFuelForm();renderAll()});
+}
+function renderVehicleSwitchers(){
+  const p=activeProfile();
+  const truckRoot=$('truckSwitcher');
+  const trailerRoot=$('trailerSwitcher');
+  if(!truckRoot||!trail
