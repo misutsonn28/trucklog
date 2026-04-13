@@ -2024,6 +2024,7 @@
   getDoc,
   onSnapshot
 } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
+ import {    
       getAuth,
       onAuthStateChanged,
       signInWithEmailAndPassword,
@@ -2335,20 +2336,309 @@ function startCloudSubscription(user){
       };
     }
 
-    startCloudSubscription(user);
-  }else{
+   <script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js';
+  import {
+    initializeFirestore,
+    persistentLocalCache,
+    persistentMultipleTabManager,
+    doc,
+    setDoc,
+    getDoc,
+    onSnapshot
+  } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
+  import {
+    getAuth,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut
+  } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3vdgHphyimE4916E-uIQrGx-IwAsmjws",
+    authDomain: "trucklog-e8e69.firebaseapp.com",
+    projectId: "trucklog-e8e69",
+    storageBucket: "trucklog-e8e69.firebasestorage.app",
+    messagingSenderId: "471621022674",
+    appId: "1:471621022674:web:361f0fb5fbaf5e529b4e0b"
+  };
+
+  const firebaseApp = initializeApp(firebaseConfig);
+
+  const db = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager()
+    })
+  });
+
+  const auth = getAuth(firebaseApp);
+
+  const cloudState = {
+    ready: true,
+    online: navigator.onLine,
+    level: '',
+    message: 'Firebase vrstva je připravená.'
+  };
+
+  const cloudSync = {
+    loading: false,
+    saveTimer: null,
+    unsubscribe: null,
+    initialized: false
+  };
+
+  function setSync(message, level = ''){
+    cloudState.message = message;
+    cloudState.level = level;
+
+    const banner = document.getElementById('syncBanner');
+    const status = document.getElementById('syncStatus');
+    const net = document.getElementById('syncNet');
+
+    if(banner) banner.className = 'banner' + (level ? ' ' + level : '');
+    if(status) status.textContent = message;
+    if(net) net.textContent = cloudState.online ? 'Online' : 'Offline';
+  }
+
+  function authErrorMessage(error){
+    const code = error?.code || '';
+    if(code.includes('invalid-email')) return 'Neplatný e-mail.';
+    if(code.includes('missing-password')) return 'Zadej heslo.';
+    if(code.includes('weak-password')) return 'Heslo je moc slabé. Použij alespoň 6 znaků.';
+    if(code.includes('email-already-in-use')) return 'Tento e-mail už existuje.';
+    if(code.includes('invalid-credential')) return 'Špatný e-mail nebo heslo.';
+    if(code.includes('user-not-found')) return 'Uživatel neexistuje.';
+    if(code.includes('wrong-password')) return 'Špatné heslo.';
+    if(code.includes('too-many-requests')) return 'Příliš mnoho pokusů. Zkus to později.';
+    return 'Došlo k chybě: ' + (error?.message || 'neznámá chyba');
+  }
+
+  function getAppBridge(){
+    return window.TruckLogApp || null;
+  }
+
+  function buildCloudPayload(){
+    const app = getAppBridge();
+    const s = app?.state;
+    return {
+      activeProfileId: s?.activeProfileId || '',
+      profiles: Array.isArray(s?.profiles) ? s.profiles : [],
+      trips: Array.isArray(s?.trips) ? s.trips : [],
+      fuelings: Array.isArray(s?.fuelings) ? s.fuelings : [],
+      places: Array.isArray(s?.places) ? s.places : [],
+      activeTrip: s?.activeTrip || null
+    };
+  }
+
+  async function saveCloudStateNow(force = false){
+    const user = auth.currentUser;
+    const app = getAppBridge();
+    if(!user || !app) return;
+    if(cloudSync.loading && !force) return;
+
+    clearTimeout(cloudSync.saveTimer);
+    setSync('Ukládám data do Firestore...');
+
+    try{
+      const ref = doc(db, 'users', user.uid, 'meta', 'appState');
+      await setDoc(ref, {
+        updatedAt: new Date().toISOString(),
+        updatedBy: user.email || '',
+        data: buildCloudPayload()
+      }, { merge: true });
+
+      setSync('Cloud synchronizace běží. Data jsou uložená ve Firestore.');
+    }catch(error){
+      console.error(error);
+      setSync('Chyba ukládání do Firestore: ' + (error?.message || error), 'warn');
+    }
+  }
+
+  function scheduleCloudSave(delay = 800){
+    if(!auth.currentUser || cloudSync.loading) return;
+    clearTimeout(cloudSync.saveTimer);
+    cloudSync.saveTimer = setTimeout(() => saveCloudStateNow(), delay);
+  }
+
+  function stopCloudSubscription(){
+    if(typeof cloudSync.unsubscribe === 'function'){
+      try{
+        cloudSync.unsubscribe();
+      }catch(error){
+        console.error(error);
+      }
+    }
+    cloudSync.unsubscribe = null;
+    cloudSync.initialized = false;
+  }
+
+  function applyRemoteState(remote){
+    const app = getAppBridge();
+    if(!app) return;
+
+    const s = app.state;
+    s.activeProfileId = String(remote.activeProfileId || '');
+    s.profiles = Array.isArray(remote.profiles) ? remote.profiles : [];
+    s.trips = Array.isArray(remote.trips) ? remote.trips : [];
+    s.fuelings = Array.isArray(remote.fuelings) ? remote.fuelings : [];
+    s.places = Array.isArray(remote.places) ? remote.places : [];
+    s.activeTrip = remote.activeTrip || null;
+
+    app.ensureDataShape();
+    app.saveState();
+    app.resetProfileForm();
+    app.resetTripForm();
+    app.resetFuelForm();
+    app.resetVehicleForm();
+    app.renderAll();
+  }
+
+  function startCloudSubscription(user){
+    const app = getAppBridge();
+    if(!user || !app) return;
+
     stopCloudSubscription();
-    window.authControlsGuest?.('Použij účet, který jsi vytvořil ve Firebase Authentication.');
-    bindGuestAuthButtons();
-    setSync('Nejsi přihlášený. Appka běží jen lokálně.', 'warn');
+
+    const ref = doc(db, 'users', user.uid, 'meta', 'appState');
+
+    setSync('Spouštím live synchronizaci s Firestore...');
+
+    cloudSync.unsubscribe = onSnapshot(ref, async (snap) => {
+      try{
+        cloudSync.loading = true;
+
+        if(snap.exists() && snap.data()?.data){
+          applyRemoteState(snap.data().data);
+          cloudSync.initialized = true;
+          setSync('Live synchronizace běží. Změny se propisují automaticky.');
+        }else{
+          if(!cloudSync.initialized){
+            await saveCloudStateNow(true);
+            cloudSync.initialized = true;
+            setSync('Firestore byl prázdný. Nahrál jsem do něj aktuální lokální data.');
+          }
+        }
+      }catch(error){
+        console.error(error);
+        setSync('Chyba live synchronizace: ' + (error?.message || error), 'warn');
+      }finally{
+        cloudSync.loading = false;
+      }
+    }, (error) => {
+      console.error(error);
+      setSync('Live synchronizace selhala: ' + (error?.message || error), 'warn');
+    });
   }
 
-  if(typeof window.renderAll === 'function'){
-    try{ window.renderAll(); }catch(error){ console.error(error); }
-  }
-});
+  function bindGuestAuthButtons(){
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const emailInput = document.getElementById('authEmail');
+    const passwordInput = document.getElementById('authPassword');
 
-    setSync('Firebase vrstva je připravená.');
-  </script>
+    async function loginNow(){
+      const email = (emailInput?.value || '').trim();
+      const password = passwordInput?.value || '';
+      if(!email || !password){
+        window.authControlsGuest?.('Vyplň e-mail i heslo.');
+        bindGuestAuthButtons();
+        return;
+      }
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+      }catch(error){
+        window.authControlsGuest?.(authErrorMessage(error));
+        bindGuestAuthButtons();
+      }
+    }
+
+    async function registerNow(){
+      const email = (emailInput?.value || '').trim();
+      const password = passwordInput?.value || '';
+      if(!email || !password){
+        window.authControlsGuest?.('Vyplň e-mail i heslo.');
+        bindGuestAuthButtons();
+        return;
+      }
+      try{
+        await createUserWithEmailAndPassword(auth, email, password);
+      }catch(error){
+        window.authControlsGuest?.(authErrorMessage(error));
+        bindGuestAuthButtons();
+      }
+    }
+
+    if(loginBtn) loginBtn.onclick = loginNow;
+    if(registerBtn) registerBtn.onclick = registerNow;
+    if(passwordInput){
+      passwordInput.onkeydown = (event) => {
+        if(event.key === 'Enter'){
+          event.preventDefault();
+          loginNow();
+        }
+      };
+    }
+  }
+
+  window.TruckLogCloud = {
+    app: firebaseApp,
+    db,
+    auth,
+    ready: true,
+    online: navigator.onLine,
+    user: null,
+    scheduleSave: scheduleCloudSave,
+    saveNow: () => saveCloudStateNow(true)
+  };
+
+  window.addEventListener('online', () => {
+    cloudState.online = true;
+    window.TruckLogCloud.online = true;
+    setSync('Zařízení je online. Firebase vrstva je připravená.');
+  });
+
+  window.addEventListener('offline', () => {
+    cloudState.online = false;
+    window.TruckLogCloud.online = false;
+    setSync('Zařízení je offline. Lokální vrstva běží dál.', 'warn');
+  });
+
+  onAuthStateChanged(auth, async (user) => {
+    window.TruckLogCloud.user = user || null;
+
+    if(user){
+      window.authControlsUser?.(user, 'Firebase Authentication funguje správně.');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if(logoutBtn){
+        logoutBtn.onclick = async () => {
+          try{
+            stopCloudSubscription();
+            await signOut(auth);
+          }catch(error){
+            console.error(error);
+          }
+        };
+      }
+
+      startCloudSubscription(user);
+    }else{
+      stopCloudSubscription();
+      window.authControlsGuest?.('Použij účet, který jsi vytvořil ve Firebase Authentication.');
+      bindGuestAuthButtons();
+      setSync('Nejsi přihlášený. Appka běží jen lokálně.', 'warn');
+    }
+
+    if(typeof window.renderAll === 'function'){
+      try{
+        window.renderAll();
+      }catch(error){
+        console.error(error);
+      }
+    }
+  });
+
+  setSync('Firebase vrstva je připravená.');
+</script>
 </body>
 </html>
