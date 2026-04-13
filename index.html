@@ -2365,13 +2365,11 @@ function startCloudSubscription(user){
   };
 
   const firebaseApp = initializeApp(firebaseConfig);
-
   const db = initializeFirestore(firebaseApp, {
     localCache: persistentLocalCache({
       tabManager: persistentMultipleTabManager()
     })
   });
-
   const auth = getAuth(firebaseApp);
 
   const cloudState = {
@@ -2396,21 +2394,21 @@ function startCloudSubscription(user){
     const status = document.getElementById('syncStatus');
     const net = document.getElementById('syncNet');
 
-    if(banner) banner.className = 'banner' + (level ? ' ' + level : '');
-    if(status) status.textContent = message;
-    if(net) net.textContent = cloudState.online ? 'Online' : 'Offline';
+    if (banner) banner.className = 'banner' + (level ? ' ' + level : '');
+    if (status) status.textContent = message;
+    if (net) net.textContent = cloudState.online ? 'Online' : 'Offline';
   }
 
   function authErrorMessage(error){
     const code = error?.code || '';
-    if(code.includes('invalid-email')) return 'Neplatný e-mail.';
-    if(code.includes('missing-password')) return 'Zadej heslo.';
-    if(code.includes('weak-password')) return 'Heslo je moc slabé. Použij alespoň 6 znaků.';
-    if(code.includes('email-already-in-use')) return 'Tento e-mail už existuje.';
-    if(code.includes('invalid-credential')) return 'Špatný e-mail nebo heslo.';
-    if(code.includes('user-not-found')) return 'Uživatel neexistuje.';
-    if(code.includes('wrong-password')) return 'Špatné heslo.';
-    if(code.includes('too-many-requests')) return 'Příliš mnoho pokusů. Zkus to později.';
+    if (code.includes('invalid-email')) return 'Neplatný e-mail.';
+    if (code.includes('missing-password')) return 'Zadej heslo.';
+    if (code.includes('weak-password')) return 'Heslo je moc slabé. Použij alespoň 6 znaků.';
+    if (code.includes('email-already-in-use')) return 'Tento e-mail už existuje.';
+    if (code.includes('invalid-credential')) return 'Špatný e-mail nebo heslo.';
+    if (code.includes('user-not-found')) return 'Uživatel neexistuje.';
+    if (code.includes('wrong-password')) return 'Špatné heslo.';
+    if (code.includes('too-many-requests')) return 'Příliš mnoho pokusů. Zkus to později.';
     return 'Došlo k chybě: ' + (error?.message || 'neznámá chyba');
   }
 
@@ -2434,8 +2432,8 @@ function startCloudSubscription(user){
   async function saveCloudStateNow(force = false){
     const user = auth.currentUser;
     const app = getAppBridge();
-    if(!user || !app) return;
-    if(cloudSync.loading && !force) return;
+    if (!user || !app) return;
+    if (cloudSync.loading && !force) return;
 
     clearTimeout(cloudSync.saveTimer);
     setSync('Ukládám data do Firestore...');
@@ -2456,13 +2454,13 @@ function startCloudSubscription(user){
   }
 
   function scheduleCloudSave(delay = 800){
-    if(!auth.currentUser || cloudSync.loading) return;
+    if (!auth.currentUser || cloudSync.loading) return;
     clearTimeout(cloudSync.saveTimer);
     cloudSync.saveTimer = setTimeout(() => saveCloudStateNow(), delay);
   }
 
   function stopCloudSubscription(){
-    if(typeof cloudSync.unsubscribe === 'function'){
+    if (typeof cloudSync.unsubscribe === 'function'){
       try{
         cloudSync.unsubscribe();
       }catch(error){
@@ -2475,7 +2473,7 @@ function startCloudSubscription(user){
 
   function applyRemoteState(remote){
     const app = getAppBridge();
-    if(!app) return;
+    if (!app) return;
 
     const s = app.state;
     s.activeProfileId = String(remote.activeProfileId || '');
@@ -2494,31 +2492,44 @@ function startCloudSubscription(user){
     app.renderAll();
   }
 
+  async function loadCloudStateOnce(user){
+    const app = getAppBridge();
+    if (!user || !app) return;
+
+    try{
+      const ref = doc(db, 'users', user.uid, 'meta', 'appState');
+      const snap = await getDoc(ref);
+
+      if (snap.exists() && snap.data()?.data){
+        applyRemoteState(snap.data().data);
+        cloudSync.initialized = true;
+        setSync('Cloud data byla načtena z Firestore.');
+      }else{
+        await saveCloudStateNow(true);
+        cloudSync.initialized = true;
+        setSync('Firestore byl prázdný. Nahrál jsem do něj aktuální lokální data.');
+      }
+    }catch(error){
+      console.error(error);
+      setSync('Chyba načtení z Firestore: ' + (error?.message || error), 'warn');
+    }
+  }
+
   function startCloudSubscription(user){
     const app = getAppBridge();
-    if(!user || !app) return;
+    if (!user || !app) return;
 
     stopCloudSubscription();
 
     const ref = doc(db, 'users', user.uid, 'meta', 'appState');
 
-    setSync('Spouštím live synchronizaci s Firestore...');
-
-    cloudSync.unsubscribe = onSnapshot(ref, async (snap) => {
+    cloudSync.unsubscribe = onSnapshot(ref, (snap) => {
       try{
-        cloudSync.loading = true;
+        if (!snap.exists() || !snap.data()?.data) return;
 
-        if(snap.exists() && snap.data()?.data){
-          applyRemoteState(snap.data().data);
-          cloudSync.initialized = true;
-          setSync('Live synchronizace běží. Změny se propisují automaticky.');
-        }else{
-          if(!cloudSync.initialized){
-            await saveCloudStateNow(true);
-            cloudSync.initialized = true;
-            setSync('Firestore byl prázdný. Nahrál jsem do něj aktuální lokální data.');
-          }
-        }
+        cloudSync.loading = true;
+        applyRemoteState(snap.data().data);
+        setSync('Live synchronizace běží. Změny se propisují automaticky.');
       }catch(error){
         console.error(error);
         setSync('Chyba live synchronizace: ' + (error?.message || error), 'warn');
@@ -2540,7 +2551,7 @@ function startCloudSubscription(user){
     async function loginNow(){
       const email = (emailInput?.value || '').trim();
       const password = passwordInput?.value || '';
-      if(!email || !password){
+      if (!email || !password){
         window.authControlsGuest?.('Vyplň e-mail i heslo.');
         bindGuestAuthButtons();
         return;
@@ -2556,7 +2567,7 @@ function startCloudSubscription(user){
     async function registerNow(){
       const email = (emailInput?.value || '').trim();
       const password = passwordInput?.value || '';
-      if(!email || !password){
+      if (!email || !password){
         window.authControlsGuest?.('Vyplň e-mail i heslo.');
         bindGuestAuthButtons();
         return;
@@ -2569,11 +2580,11 @@ function startCloudSubscription(user){
       }
     }
 
-    if(loginBtn) loginBtn.onclick = loginNow;
-    if(registerBtn) registerBtn.onclick = registerNow;
-    if(passwordInput){
+    if (loginBtn) loginBtn.onclick = loginNow;
+    if (registerBtn) registerBtn.onclick = registerNow;
+    if (passwordInput){
       passwordInput.onkeydown = (event) => {
-        if(event.key === 'Enter'){
+        if (event.key === 'Enter'){
           event.preventDefault();
           loginNow();
         }
@@ -2589,7 +2600,8 @@ function startCloudSubscription(user){
     online: navigator.onLine,
     user: null,
     scheduleSave: scheduleCloudSave,
-    saveNow: () => saveCloudStateNow(true)
+    saveNow: () => saveCloudStateNow(true),
+    loadNow: () => auth.currentUser ? loadCloudStateOnce(auth.currentUser) : Promise.resolve()
   };
 
   window.addEventListener('online', () => {
@@ -2607,10 +2619,11 @@ function startCloudSubscription(user){
   onAuthStateChanged(auth, async (user) => {
     window.TruckLogCloud.user = user || null;
 
-    if(user){
+    if (user){
       window.authControlsUser?.(user, 'Firebase Authentication funguje správně.');
+
       const logoutBtn = document.getElementById('logoutBtn');
-      if(logoutBtn){
+      if (logoutBtn){
         logoutBtn.onclick = async () => {
           try{
             stopCloudSubscription();
@@ -2621,6 +2634,7 @@ function startCloudSubscription(user){
         };
       }
 
+      await loadCloudStateOnce(user);
       startCloudSubscription(user);
     }else{
       stopCloudSubscription();
@@ -2629,7 +2643,7 @@ function startCloudSubscription(user){
       setSync('Nejsi přihlášený. Appka běží jen lokálně.', 'warn');
     }
 
-    if(typeof window.renderAll === 'function'){
+    if (typeof window.renderAll === 'function'){
       try{
         window.renderAll();
       }catch(error){
