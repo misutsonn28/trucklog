@@ -1495,9 +1495,11 @@ async function importBackupToCloud(data){
       };
     }
     function isContainerTrailerType(type){
-      const clean = trim(type);
-      return clean === 'Kontejnerové šasi' || clean === 'Kontejnerový návěs';
-    }
+  const clean = trim(type);
+  return clean === 'Kontejnerové šasi'
+    || clean === 'Kontejnerový návěs'
+    || clean === 'Silo šasi';
+}
     function updateTripContainerField(){
       const trailer = currentTripTrailerSnapshot();
       const visible = isContainerTrailerType(trailer.type);
