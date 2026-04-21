@@ -488,7 +488,7 @@
         <button class="btn" type="submit">Vytvořit účet</button>
       </form>
 
-      <div id="authStatus" class="auth-status">Přihlas se do TruckLog Cloud.</div>
+      <div id="authStatus" class="auth-status">Přihlaš se do TruckLog Cloud.</div>
     </div>
   </div>
 
@@ -1130,6 +1130,11 @@ const state = {
     }
     function formatDate(value){
       if(!value) return '—';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(String(value))){
+        const [y,m,d] = String(value).split('-').map(Number);
+        const localDate = new Date(y, m - 1, d);
+        return new Intl.DateTimeFormat('cs-CZ').format(localDate);
+      }
       const d = new Date(value);
       return Number.isNaN(d.getTime()) ? value : new Intl.DateTimeFormat('cs-CZ').format(d);
     }
@@ -1562,7 +1567,7 @@ async function handleAuthState(user){
     state.currentUserMeta = null;
     state.firmId = '';
     setAppVisible(false);
-    setAuthStatus('Přihlas se do TruckLog Cloud.');
+    setAuthStatus('Přihlaš se do TruckLog Cloud.');
     updateUserChip();
     setSyncLabel('Odhlášeno');
     unbindCloud();
